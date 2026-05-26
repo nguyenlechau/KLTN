@@ -52,10 +52,6 @@ const TEST_ACCOUNTS = [
     role: 'BRAND_MANAGER',
   },
 ];
-    password: 'Pass@123',
-    role: 'OPERATIONS_MANAGER',
-  },
-];
 
 async function seedTestAccounts() {
   const client = await pool.connect();
