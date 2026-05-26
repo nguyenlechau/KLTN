@@ -20,7 +20,7 @@ app.get('/health', (_req, res) => {
 // Auth routes (no authentication required)
 app.use('/api/auth', authRoutes);
 
-// Protected routes
+// Protected routes (with authentication)
 app.use('/api/v1', authenticate, masterDataRoutes);
 app.use('/api/v1', authenticate, registrationRoutes);
 

@@ -1,11 +1,15 @@
-const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:4000/api';
-
 export async function apiFetch<T>(
   path: string,
   init: RequestInit = {},
 ): Promise<T> {
   const token = localStorage.getItem('access_token');
-  const response = await fetch(`${API_BASE}${path}`, {
+  
+  // Use /api/auth for auth routes, /api/v1 for everything else
+  const baseUrl = path.startsWith('/auth')
+    ? 'http://localhost:4000/api'
+    : 'http://localhost:4000/api/v1';
+  
+  const response = await fetch(`${baseUrl}${path}`, {
     ...init,
     headers: {
       'Content-Type': 'application/json',

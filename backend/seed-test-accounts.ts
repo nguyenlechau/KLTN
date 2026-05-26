@@ -10,46 +10,40 @@ const pool = new Pool({
 
 const TEST_ACCOUNTS = [
   {
-    email: 'admin@example.com',
-    fullName: 'Administrator',
-    password: 'Admin@123',
-    role: 'ADMIN',
+    email: 'requester@example.com',
+    fullName: 'Requester User',
+    password: 'password',
+    role: 'REQUESTER',
   },
   {
-    email: 'inputter@example.com',
-    fullName: 'Inputter User',
-    password: 'Pass@123',
-    role: 'INPUTTER',
+    email: 'central_requester@example.com',
+    fullName: 'Central Requester',
+    password: 'password',
+    role: 'CENTRAL_REQUESTER',
   },
   {
-    email: 'inputter_ho@example.com',
-    fullName: 'Inputter HO',
-    password: 'Pass@123',
-    role: 'INPUTTER_HO',
+    email: 'supervisor@example.com',
+    fullName: 'Supervisor User',
+    password: 'password',
+    role: 'SUPERVISOR',
   },
   {
-    email: 'approver@example.com',
-    fullName: 'Approver / Supervisor',
-    password: 'Pass@123',
-    role: 'APPROVER',
+    email: 'central_supervisor@example.com',
+    fullName: 'Central Supervisor',
+    password: 'password',
+    role: 'CENTRAL_SUPERVISOR',
   },
   {
-    email: 'approver_ho@example.com',
-    fullName: 'Approver HO',
-    password: 'Pass@123',
-    role: 'APPROVER_HO',
+    email: 'specialist@example.com',
+    fullName: 'Operations Specialist',
+    password: 'password',
+    role: 'OPERATIONS_SPECIALIST',
   },
   {
-    email: 'brand@example.com',
-    fullName: 'Brand Manager',
-    password: 'Pass@123',
-    role: 'BRAND',
-  },
-  {
-    email: 'brand_manager@example.com',
-    fullName: 'Senior Brand Manager',
-    password: 'Pass@123',
-    role: 'BRAND_MANAGER',
+    email: 'manager@example.com',
+    fullName: 'Operations Manager',
+    password: 'password',
+    role: 'OPERATIONS_MANAGER',
   },
 ];
 
@@ -97,16 +91,21 @@ async function seedTestAccounts() {
            SELECT $1, $2, $3, r.id, 'ACTIVE'
            FROM roles r
            WHERE r.code = $4
-           ON CONFLICT (lower(email)) DO NOTHING
+           ON CONFLICT (lower(email)) DO UPDATE SET 
+             password_hash = excluded.password_hash,
+             full_name = excluded.full_name,
+             role_id = excluded.role_id,
+             status = 'ACTIVE',
+             updated_at = NOW()
            RETURNING id, email, full_name`,
           [account.email.toLowerCase(), account.fullName, passwordHash, account.role]
         );
 
         if (result.rows.length > 0) {
-          console.log(`✓ Created: ${account.email} (${account.role})`);
+          console.log(`✓ Created/Updated: ${account.email} (${account.role})`);
           createdCount++;
         } else {
-          console.log(`⊘ Already exists: ${account.email}`);
+          console.log(`⊘ Failed to process: ${account.email}`);
           skippedCount++;
         }
       } catch (err: any) {
