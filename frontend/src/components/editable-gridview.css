@@ -1,0 +1,359 @@
+/* Editable GridView Styling */
+
+.editable-gridview-container {
+  width: 100%;
+  overflow-x: auto;
+  border-radius: 0.5rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.gridview-wrapper {
+  min-width: 100%;
+  display: block;
+}
+
+.editable-gridview {
+  width: 100%;
+  border-collapse: collapse;
+  background: #fff;
+  font-size: 0.95rem;
+}
+
+.editable-gridview thead {
+  background: #f8f9fa;
+  border-bottom: 2px solid #e9ecef;
+}
+
+.editable-gridview th {
+  padding: 0.75rem;
+  text-align: left;
+  font-weight: 600;
+  color: #495057;
+  user-select: none;
+  position: relative;
+}
+
+.editable-gridview th.sortable {
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.editable-gridview th.sortable:hover {
+  background-color: #e9ecef;
+}
+
+.header-content {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.sort-indicator {
+  font-size: 0.7rem;
+  color: #6c757d;
+  display: inline-block;
+  width: 1rem;
+  text-align: center;
+}
+
+.sort-indicator.sort-asc {
+  color: #0066cc;
+}
+
+.sort-indicator.sort-desc {
+  color: #0066cc;
+}
+
+/* Table Body */
+
+.editable-gridview tbody tr {
+  border-bottom: 1px solid #e9ecef;
+  transition: background-color 0.15s;
+}
+
+.editable-gridview tbody tr:hover {
+  background-color: #f8f9fa;
+}
+
+.editable-gridview tbody tr.gridview-row td {
+  padding: 0.75rem;
+  vertical-align: middle;
+}
+
+/* Grid Cells */
+
+.gridview-cell {
+  position: relative;
+  transition: background-color 0.15s;
+}
+
+.gridview-cell.editable {
+  cursor: pointer;
+  user-select: none;
+}
+
+.gridview-cell.editable:hover {
+  background-color: #e7f3ff;
+}
+
+.edit-hint {
+  position: absolute;
+  right: 0.5rem;
+  top: 50%;
+  transform: translateY(-50%);
+  opacity: 0;
+  font-size: 0.9rem;
+  color: #0066cc;
+  pointer-events: none;
+  transition: opacity 0.15s;
+}
+
+.gridview-cell.editable:hover .edit-hint {
+  opacity: 1;
+}
+
+/* Editable Cell Editor */
+
+.editable-cell-editor {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  min-width: 200px;
+  z-index: 10;
+}
+
+.cell-input {
+  flex: 1;
+  padding: 0.5rem;
+  border: 2px solid #0066cc;
+  border-radius: 0.25rem;
+  font-size: 0.95rem;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.cell-input:focus {
+  border-color: #0052a3;
+  box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.1);
+}
+
+.cell-select {
+  cursor: pointer;
+}
+
+.cell-checkbox {
+  width: 1.2rem;
+  height: 1.2rem;
+  cursor: pointer;
+  accent-color: #0066cc;
+}
+
+/* Cell Controls */
+
+.cell-controls {
+  display: flex;
+  gap: 0.25rem;
+  margin-top: 0.25rem;
+}
+
+.cell-btn {
+  flex: 1;
+  padding: 0.4rem 0.5rem;
+  border: 1px solid #dee2e6;
+  border-radius: 0.25rem;
+  background: #fff;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 600;
+  transition: all 0.2s;
+  min-width: 2rem;
+}
+
+.cell-btn:hover:not(:disabled) {
+  transform: scale(1.05);
+}
+
+.cell-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.cell-btn-save {
+  background: #28a745;
+  color: #fff;
+  border-color: #28a745;
+}
+
+.cell-btn-save:hover:not(:disabled) {
+  background: #218838;
+  border-color: #1e7e34;
+}
+
+.cell-btn-cancel {
+  background: #dc3545;
+  color: #fff;
+  border-color: #dc3545;
+}
+
+.cell-btn-cancel:hover:not(:disabled) {
+  background: #c82333;
+  border-color: #bd2130;
+}
+
+/* Cell Error */
+
+.cell-error {
+  background: #fee;
+  color: #c00;
+  padding: 0.35rem 0.5rem;
+  border-radius: 0.25rem;
+  font-size: 0.8rem;
+  font-weight: 500;
+  border-left: 3px solid #dc3545;
+}
+
+/* Actions Column */
+
+.actions-column {
+  text-align: center;
+  background: #f0f0f0;
+}
+
+.gridview-actions {
+  text-align: center;
+  display: flex;
+  gap: 0.5rem;
+  justify-content: center;
+}
+
+.action-btn {
+  padding: 0.4rem 0.6rem;
+  background: #f0f0f0;
+  border: 1px solid #dee2e6;
+  border-radius: 0.25rem;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: all 0.2s;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.action-btn:hover:not(:disabled) {
+  background: #e9ecef;
+  transform: scale(1.1);
+}
+
+.action-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.action-delete {
+  color: #dc3545;
+}
+
+.action-delete:hover:not(:disabled) {
+  background: #ffebee;
+}
+
+/* Empty State */
+
+.gridview-empty {
+  text-align: center;
+  padding: 2rem !important;
+  color: #999;
+  font-style: italic;
+}
+
+/* Badges */
+
+.badge {
+  display: inline-block;
+  padding: 0.35rem 0.65rem;
+  border-radius: 0.25rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.badge-success {
+  background: #d4edda;
+  color: #155724;
+}
+
+.badge-danger {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+.badge-warning {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.badge-info {
+  background: #d1ecf1;
+  color: #0c5460;
+}
+
+.badge-active {
+  background: #d4edda;
+  color: #155724;
+}
+
+.badge-inactive {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+/* Responsive */
+
+@media (max-width: 768px) {
+  .editable-gridview-container {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .editable-gridview th,
+  .editable-gridview td {
+    padding: 0.6rem 0.4rem;
+    font-size: 0.85rem;
+  }
+
+  .editable-cell-editor {
+    min-width: 150px;
+  }
+
+  .cell-input,
+  .cell-select {
+    font-size: 0.85rem;
+    padding: 0.4rem;
+  }
+}
+
+/* Loading State */
+
+.gridview-loading {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+/* Animation */
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.editable-cell-editor {
+  animation: fadeIn 0.15s ease-out;
+}

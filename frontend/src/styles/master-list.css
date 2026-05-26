@@ -1,0 +1,395 @@
+/* Master Data List Screens */
+
+.screen-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 20px;
+  background: #f5f5f5;
+}
+
+.screen-header {
+  margin-bottom: 30px;
+  padding-bottom: 20px;
+  border-bottom: 2px solid #ddd;
+}
+
+.screen-header h1 {
+  margin: 0 0 8px 0;
+  font-size: 28px;
+  font-weight: 600;
+  color: #333;
+}
+
+.screen-subtitle {
+  margin: 0;
+  font-size: 14px;
+  color: #666;
+}
+
+.filter-bar {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 20px;
+  padding: 16px;
+  background: white;
+  border-radius: 6px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.filter-bar input {
+  flex: 1;
+  padding: 10px 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.filter-select {
+  padding: 10px 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+  background: white;
+  cursor: pointer;
+  min-width: 150px;
+}
+
+.empty-state {
+  padding: 60px 20px;
+  text-align: center;
+  background: white;
+  border-radius: 6px;
+  color: #999;
+}
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  margin-top: 20px;
+  padding: 20px;
+}
+
+.pagination button {
+  padding: 8px 16px;
+}
+
+.pagination span {
+  padding: 8px 12px;
+  color: #666;
+  font-size: 14px;
+}
+
+/* Detail Content Modal */
+.detail-content {
+  padding: 20px 0;
+}
+
+.detail-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 12px 0;
+  border-bottom: 1px solid #eee;
+}
+
+.detail-row label {
+  font-weight: 600;
+  color: #333;
+  width: 30%;
+}
+
+.detail-row span {
+  color: #666;
+  word-break: break-word;
+  text-align: right;
+  width: 70%;
+}
+
+/* Gallery Section */
+.gallery-section {
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 2px solid #eee;
+}
+
+.gallery-section h3 {
+  margin: 0 0 12px 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+}
+
+.image-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 12px;
+}
+
+.image-item {
+  aspect-ratio: 1;
+  border-radius: 6px;
+  overflow: hidden;
+  background: #f0f0f0;
+  border: 1px solid #ddd;
+}
+
+.image-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Form Content */
+.form-content {
+  padding: 20px 0;
+}
+
+.form-group {
+  margin-bottom: 16px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 6px;
+  font-weight: 600;
+  color: #333;
+  font-size: 14px;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+  font-family: inherit;
+  box-sizing: border-box;
+}
+
+.form-group input:disabled {
+  background: #f5f5f5;
+  color: #999;
+  cursor: not-allowed;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.1);
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.form-select {
+  padding: 10px 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+  background: white;
+  cursor: pointer;
+}
+
+.form-select:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.1);
+}
+
+/* Modal Actions */
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid #eee;
+}
+
+.modal-actions button {
+  padding: 10px 20px;
+  min-width: 100px;
+}
+
+/* Confirm Content */
+.confirm-content {
+  padding: 20px 0;
+  text-align: center;
+}
+
+.confirm-content p {
+  margin-bottom: 24px;
+  font-size: 16px;
+  color: #333;
+}
+
+/* Status Badges */
+.status-badge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.status-active {
+  background: #d4edda;
+  color: #155724;
+}
+
+.status-inactive {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+.status-còn-hạn {
+  background: #d4edda;
+  color: #155724;
+}
+
+.status-hết-hạn {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+/* Workflow Status Badges */
+.workflow-draft {
+  background: #e2e3e5;
+  color: #383d41;
+}
+
+.workflow-supervisor-review {
+  background: #cce5ff;
+  color: #004085;
+}
+
+.workflow-cbnv-revision {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.workflow-brand-acceptance {
+  background: #d1ecf1;
+  color: #0c5460;
+}
+
+.workflow-brand-manager-approval {
+  background: #cce5ff;
+  color: #004085;
+}
+
+.workflow-approved {
+  background: #d4edda;
+  color: #155724;
+}
+
+.workflow-deployment-prep {
+  background: #d1ecf1;
+  color: #0c5460;
+}
+
+.workflow-final-acceptance {
+  background: #d1ecf1;
+  color: #0c5460;
+}
+
+.workflow-completed {
+  background: #d4edda;
+  color: #155724;
+}
+
+.workflow-cancelled {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+/* Batch Items */
+.batch-items {
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 2px solid #eee;
+}
+
+.batch-items h4 {
+  margin: 0 0 16px 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+}
+
+.batch-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-height: 300px;
+  overflow-y: auto;
+  padding: 10px;
+  background: #f9f9f9;
+  border-radius: 6px;
+  border: 1px solid #eee;
+}
+
+.batch-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.batch-number {
+  display: inline-block;
+  min-width: 40px;
+  font-weight: 600;
+  color: #999;
+  font-size: 12px;
+}
+
+.batch-input {
+  flex: 1;
+  padding: 8px 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 13px;
+  font-family: inherit;
+}
+
+.batch-input:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.1);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .filter-bar {
+    flex-direction: column;
+  }
+
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+
+  .modal-actions {
+    flex-direction: column-reverse;
+  }
+
+  .modal-actions button {
+    width: 100%;
+  }
+
+  .screen-header h1 {
+    font-size: 22px;
+  }
+
+  .image-grid {
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  }
+}

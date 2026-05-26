@@ -1,0 +1,1635 @@
+{
+  "assessment_metadata": {
+    "date": "2026-05-26",
+    "workspace": "d:\\JN\\KLTN",
+    "specification_version": "1.0 - Implementation Ready",
+    "assessment_scope": "Backend (Node.js/Express/PostgreSQL) + Frontend (React/TypeScript)",
+    "methodology": "Specification-to-implementation gap analysis with completion percentages"
+  },
+  "executive_summary": {
+    "overall_completion": "42%",
+    "backend_completion": "55%",
+    "frontend_completion": "25%",
+    "database_completion": "80%",
+    "workflow_completion": "45%",
+    "critical_path_status": "ON TRACK - Core infrastructure in place, workflow engine needs completion"
+  },
+  "1_database_schema_analysis": {
+    "completion": "80%",
+    "status": "MOSTLY IMPLEMENTED",
+    "tables_found": {
+      "core_tables": {
+        "departments": {
+          "status": "✅ IMPLEMENTED",
+          "fields": "id, code, name, description, parent_department_id, status, created_at, updated_at",
+          "spec_match": "Complete - supports hierarchical structure"
+        },
+        "users": {
+          "status": "✅ IMPLEMENTED",
+          "fields": "id, username, email, full_name, password_hash, role, department_id, status, last_login, deleted_at",
+          "spec_match": "Complete - includes all auth fields"
+        },
+        "channels": {
+          "status": "✅ IMPLEMENTED",
+          "fields": "id, code, name, description, status, created_by, created_at, updated_at, deleted_at",
+          "spec_match": "Complete - top-level master data"
+        },
+        "categories": {
+          "status": "✅ IMPLEMENTED",
+          "fields": "id, code, name, format, description, unit_price, unit_of_measure, status, created_by, created_at, updated_at, deleted_at",
+          "spec_match": "Complete - includes pricing and UOM"
+        },
+        "locations": {
+          "status": "✅ IMPLEMENTED",
+          "fields": "id, position_code, channel_id, position_name, province_city, zone, address, classification, longitude, latitude, representative_1/2_name/email/phone, status, note, created_by, created_at, updated_at, deleted_at",
+          "spec_match": "Complete - hierarchical + contact info + geo-coordinates"
+        },
+        "physical_items": {
+          "status": "✅ IMPLEMENTED",
+          "fields": "id, item_code, item_name, location_id, category_id, channel_id, width_m, length_m, description, image_url, image_key, status, created_by, created_at, updated_at, deleted_at",
+          "spec_match": "Complete - includes dimensions and image keys"
+        },
+        "advertising_content": {
+          "status": "✅ IMPLEMENTED",
+          "fields": "id, content_code, content_name, description, category, unit, start_date, end_date, status, created_by, created_at, updated_at, deleted_at",
+          "spec_match": "Complete - includes validity period for auto-status calculation"
+        },
+        "content_images": {
+          "status": "✅ IMPLEMENTED",
+          "fields": "id, content_id, image_url, image_key, sequence, created_at",
+          "spec_match": "Complete - supports image gallery"
+        },
+        "registrations": {
+          "status": "✅ IMPLEMENTED",
+          "fields": "id, registration_code, program_name, budget_estimate, total_amount, io_code, start_date, end_date, submission_document_url, submission_document_key, unit_id, creator_id, current_approver_id, workflow_state, prices_locked_at, approved_at, completed_at, created_at, updated_at, deleted_at",
+          "spec_match": "Complete - includes workflow state, price lock timestamp, approval timestamps"
+        },
+        "registration_content": {
+          "status": "✅ IMPLEMENTED",
+          "fields": "id, registration_id, advertising_content_id, is_new_content, created_at",
+          "spec_match": "Complete - supports content reuse or inline creation"
+        },
+        "registration_items": {
+          "status": "✅ IMPLEMENTED",
+          "fields": "id, registration_id, physical_item_id, quantity, unit_price, total_amount, deployment_status, deployment_image_url, deployment_image_key, deployment_note, created_at, updated_at",
+          "spec_match": "Complete - includes deployment acceptance fields"
+        },
+        "registration_approvals": {
+          "status": "✅ IMPLEMENTED",
+          "fields": "id, registration_id, approval_step, from_state, to_state, action, actor_id, actor_role, decision, reason, created_at",
+          "spec_match": "Complete - full audit trail per transition"
+        },
+        "deployment_acceptance": {
+          "status": "✅ IMPLEMENTED",
+          "fields": "id, registration_id, registration_item_id, old_item_status, new_item_status, deployment_image_url, deployment_image_key, acceptance_note, submitted_by, submitted_at, reviewed_by, reviewed_at, review_status, review_note, created_at, updated_at",
+          "spec_match": "Complete - deployment validation tracking"
+        },
+        "audit_log": {
+          "status": "✅ IMPLEMENTED",
+          "fields": "id, entity_type, entity_id, entity_code, action_type, old_value, new_value, changed_by, changed_at, reason, ip_address",
+          "spec_match": "Complete - comprehensive audit trail"
+        }
+      }
+    },
+    "schema_gaps": {
+      "minor_gaps": [
+        {
+          "gap": "No organization_hierarchy table for approval chain setup",
+          "impact": "LOW - Can use role hierarchy as workaround (current implementation)",
+          "workaround": "Use RBAC roles to determine approval chain"
+        },
+        {
+          "gap": "No notification_log table",
+          "impact": "LOW - Phase 2 feature",
+          "workaround": "Can add in future when notifications needed"
+        }
+      ]
+    },
+    "database_status": {
+      "migrations_applied": "6 migration files present (001-006)",
+      "latest_migration": "006_add_category_columns_up.sql",
+      "schema_version": "Current (005_create_real_schema_up.sql is master)",
+      "seed_data": "Partial - basic seed data in migrations, sample data available in backend/seed-*.json files",
+      "indexes": "Performance indexes created for common queries (creator_id, workflow_state, status, foreign keys)"
+    }
+  },
+  "2_api_endpoints_analysis": {
+    "completion": "55%",
+    "status": "PARTIALLY IMPLEMENTED - Core endpoints exist, some details missing",
+    "endpoints_by_module": {
+      "authentication": {
+        "completion": "30%",
+        "endpoints": [
+          {
+            "method": "POST",
+            "path": "/api/auth/login",
+            "status": "✅ IMPLEMENTED",
+            "description": "Login with email/password",
+            "spec_match": "Basic implementation exists"
+          },
+          {
+            "method": "POST",
+            "path": "/api/auth/signup",
+            "status": "❌ MISSING",
+            "description": "User registration",
+            "spec_match": "Not in specification but needed"
+          },
+          {
+            "method": "POST",
+            "path": "/api/auth/logout",
+            "status": "❌ MISSING",
+            "description": "Logout",
+            "spec_match": "Token-based auth, client-side logout"
+          },
+          {
+            "method": "POST",
+            "path": "/api/auth/refresh",
+            "status": "❌ MISSING",
+            "description": "Refresh access token",
+            "spec_match": "JWT refresh flow not implemented"
+          }
+        ]
+      },
+      "master_data_content": {
+        "completion": "85%",
+        "endpoints": [
+          {
+            "method": "GET",
+            "path": "/api/v1/content",
+            "status": "✅ IMPLEMENTED",
+            "description": "List advertising content with pagination/search",
+            "spec_match": "Complete"
+          },
+          {
+            "method": "GET",
+            "path": "/api/v1/content/:id",
+            "status": "✅ IMPLEMENTED",
+            "description": "Get single content with images",
+            "spec_match": "Complete"
+          },
+          {
+            "method": "POST",
+            "path": "/api/v1/content",
+            "status": "✅ IMPLEMENTED",
+            "description": "Create content",
+            "spec_match": "Complete - auto-generates code"
+          },
+          {
+            "method": "PUT",
+            "path": "/api/v1/content/:id",
+            "status": "✅ IMPLEMENTED",
+            "description": "Update content",
+            "spec_match": "Complete"
+          },
+          {
+            "method": "DELETE",
+            "path": "/api/v1/content/:id",
+            "status": "✅ IMPLEMENTED",
+            "description": "Delete content (soft delete)",
+            "spec_match": "Complete"
+          },
+          {
+            "method": "POST",
+            "path": "/api/v1/content/:id/clone",
+            "status": "✅ IMPLEMENTED",
+            "description": "Clone content with new code",
+            "spec_match": "Complete"
+          },
+          {
+            "method": "POST",
+            "path": "/api/v1/content/:id/images",
+            "status": "✅ IMPLEMENTED",
+            "description": "Add image to content gallery",
+            "spec_match": "Complete"
+          }
+        ]
+      },
+      "master_data_locations": {
+        "completion": "90%",
+        "endpoints": [
+          {
+            "method": "GET",
+            "path": "/api/v1/locations",
+            "status": "✅ IMPLEMENTED",
+            "description": "List locations with filtering by channel/status",
+            "spec_match": "Complete"
+          },
+          {
+            "method": "GET",
+            "path": "/api/v1/locations/:id",
+            "status": "✅ IMPLEMENTED",
+            "description": "Get single location",
+            "spec_match": "Complete"
+          },
+          {
+            "method": "POST",
+            "path": "/api/v1/locations",
+            "status": "✅ IMPLEMENTED",
+            "description": "Create location with position code + channel",
+            "spec_match": "Complete - includes position code validation"
+          },
+          {
+            "method": "PUT",
+            "path": "/api/v1/locations/:id",
+            "status": "✅ IMPLEMENTED",
+            "description": "Update location with deactivation cascade",
+            "spec_match": "Complete - includes item deactivation logic"
+          },
+          {
+            "method": "DELETE",
+            "path": "/api/v1/locations/:id",
+            "status": "✅ IMPLEMENTED",
+            "description": "Delete location",
+            "spec_match": "Soft delete implemented"
+          }
+        ]
+      },
+      "master_data_categories": {
+        "completion": "90%",
+        "endpoints": [
+          {
+            "method": "GET",
+            "path": "/api/v1/categories",
+            "status": "✅ IMPLEMENTED",
+            "description": "List categories",
+            "spec_match": "Complete"
+          },
+          {
+            "method": "POST",
+            "path": "/api/v1/categories",
+            "status": "✅ IMPLEMENTED",
+            "description": "Create category with unit price",
+            "spec_match": "Complete"
+          },
+          {
+            "method": "PATCH",
+            "path": "/api/v1/categories/:id",
+            "status": "✅ IMPLEMENTED",
+            "description": "Update category (including unit price changes)",
+            "spec_match": "PARTIAL - Updates available but impact analysis on registrations needs verification"
+          },
+          {
+            "method": "DELETE",
+            "path": "/api/v1/categories/:id",
+            "status": "✅ IMPLEMENTED",
+            "description": "Delete category",
+            "spec_match": "Soft delete implemented"
+          }
+        ]
+      },
+      "master_data_physical_items": {
+        "completion": "80%",
+        "endpoints": [
+          {
+            "method": "GET",
+            "path": "/api/v1/physical-items",
+            "status": "✅ IMPLEMENTED",
+            "description": "List items with filtering",
+            "spec_match": "Complete"
+          },
+          {
+            "method": "POST",
+            "path": "/api/v1/physical-items",
+            "status": "✅ IMPLEMENTED",
+            "description": "Create single item",
+            "spec_match": "Complete - auto-generates item_code"
+          },
+          {
+            "method": "POST",
+            "path": "/api/v1/physical-items/batch",
+            "status": "✅ IMPLEMENTED",
+            "description": "Batch create items for location + category",
+            "spec_match": "Complete - bulk operation"
+          },
+          {
+            "method": "PUT",
+            "path": "/api/v1/physical-items/:id",
+            "status": "✅ IMPLEMENTED",
+            "description": "Update item",
+            "spec_match": "Complete"
+          },
+          {
+            "method": "DELETE",
+            "path": "/api/v1/physical-items/:id",
+            "status": "✅ IMPLEMENTED",
+            "description": "Delete item",
+            "spec_match": "Soft delete implemented"
+          }
+        ]
+      },
+      "registrations": {
+        "completion": "50%",
+        "endpoints": [
+          {
+            "method": "GET",
+            "path": "/api/v1/registrations",
+            "status": "✅ IMPLEMENTED",
+            "description": "List registrations with pagination/search/state filter",
+            "spec_match": "Complete"
+          },
+          {
+            "method": "GET",
+            "path": "/api/v1/registrations/:id",
+            "status": "✅ IMPLEMENTED",
+            "description": "Get registration with all details",
+            "spec_match": "Complete"
+          },
+          {
+            "method": "POST",
+            "path": "/api/v1/registrations",
+            "status": "✅ IMPLEMENTED",
+            "description": "Create registration (draft)",
+            "spec_match": "PARTIAL - Basic creation works, complex validation needs testing"
+          },
+          {
+            "method": "PUT",
+            "path": "/api/v1/registrations/:id",
+            "status": "✅ IMPLEMENTED",
+            "description": "Update registration",
+            "spec_match": "PARTIAL - State-based edit restrictions not fully enforced"
+          },
+          {
+            "method": "DELETE",
+            "path": "/api/v1/registrations/:id",
+            "status": "✅ IMPLEMENTED",
+            "description": "Delete registration (soft)",
+            "spec_match": "Complete"
+          },
+          {
+            "method": "POST",
+            "path": "/api/v1/registrations/:id/content",
+            "status": "🟡 PARTIAL",
+            "description": "Add content to registration",
+            "spec_match": "Implementation exists but not fully tested"
+          },
+          {
+            "method": "POST",
+            "path": "/api/v1/registrations/:id/items",
+            "status": "🟡 PARTIAL",
+            "description": "Add items to registration",
+            "spec_match": "Implementation exists but validation incomplete"
+          },
+          {
+            "method": "POST",
+            "path": "/api/v1/registrations/:id/clone",
+            "status": "❌ MISSING",
+            "description": "Clone registration",
+            "spec_match": "Specified in spec but not implemented"
+          },
+          {
+            "method": "GET",
+            "path": "/api/v1/registrations/:id/export",
+            "status": "❌ MISSING",
+            "description": "Export as Excel/PDF",
+            "spec_match": "Phase 2 feature"
+          }
+        ]
+      },
+      "workflow": {
+        "completion": "45%",
+        "endpoints": [
+          {
+            "method": "GET",
+            "path": "/api/v1/workflow/states",
+            "status": "✅ IMPLEMENTED",
+            "description": "Get all workflow states info",
+            "spec_match": "Complete"
+          },
+          {
+            "method": "GET",
+            "path": "/api/v1/registrations/:id/workflow",
+            "status": "✅ IMPLEMENTED",
+            "description": "Get current state and available transitions",
+            "spec_match": "Complete"
+          },
+          {
+            "method": "POST",
+            "path": "/api/v1/registrations/:id/transition",
+            "status": "✅ IMPLEMENTED",
+            "description": "Execute state transition with guards",
+            "spec_match": "PARTIAL - Core transition works, some guards may be incomplete"
+          },
+          {
+            "method": "GET",
+            "path": "/api/v1/registrations/:id/available-transitions",
+            "status": "✅ IMPLEMENTED",
+            "description": "Get possible next states",
+            "spec_match": "Complete"
+          },
+          {
+            "method": "POST",
+            "path": "/api/v1/registrations/:id/workflow-action",
+            "status": "🟡 PARTIAL",
+            "description": "Execute specific workflow action (SUBMIT, APPROVE, etc.)",
+            "spec_match": "Defined in spec, partially implemented in code"
+          }
+        ]
+      },
+      "deployment_acceptance": {
+        "completion": "30%",
+        "endpoints": [
+          {
+            "method": "POST",
+            "path": "/api/v1/registrations/:id/acceptance/submit",
+            "status": "🟡 PARTIAL",
+            "description": "Submit deployment acceptance",
+            "spec_match": "Spec defines this, implementation incomplete"
+          },
+          {
+            "method": "POST",
+            "path": "/api/v1/registrations/:id/acceptance/approve",
+            "status": "❌ MISSING",
+            "description": "Approve deployment acceptance",
+            "spec_match": "Not implemented"
+          },
+          {
+            "method": "GET",
+            "path": "/api/v1/registrations/:id/acceptance",
+            "status": "❌ MISSING",
+            "description": "Get acceptance records for registration",
+            "spec_match": "Not implemented"
+          }
+        ]
+      },
+      "audit": {
+        "completion": "40%",
+        "endpoints": [
+          {
+            "method": "GET",
+            "path": "/api/v1/audit-log",
+            "status": "🟡 PARTIAL",
+            "description": "List audit log with filters",
+            "spec_match": "Endpoint may exist but not fully tested"
+          },
+          {
+            "method": "GET",
+            "path": "/api/v1/audit-log/entity/:type/:id",
+            "status": "❌ MISSING",
+            "description": "Get audit history for specific entity",
+            "spec_match": "Spec defines this pattern"
+          }
+        ]
+      }
+    },
+    "endpoint_summary": {
+      "total_endpoints_specified": 45,
+      "endpoints_implemented": 25,
+      "endpoints_partially_implemented": 8,
+      "endpoints_missing": 12,
+      "implementation_rate": "55%"
+    }
+  },
+  "3_workflow_implementation_analysis": {
+    "completion": "45%",
+    "status": "PARTIALLY IMPLEMENTED - State machine skeleton exists, rules incomplete",
+    "workflow_states": {
+      "defined_in_code": [
+        "DRAFT",
+        "SUPERVISOR_REVIEW",
+        "CENTRAL_OPS_REVIEW",
+        "MANAGER_APPROVAL",
+        "APPROVED",
+        "DEPLOYMENT_PREP",
+        "FINAL_ACCEPTANCE",
+        "COMPLETED",
+        "REVISION_REQUIRED"
+      ],
+      "vs_specification": {
+        "spec_states": [
+          "DRAFT (Bản nháp)",
+          "SUPERVISOR_REVIEW (CBQL Phê duyệt)",
+          "BRAND_ACCEPTANCE (P.Thương hiệu tiếp nhận)",
+          "BRAND_MANAGER_APPROVAL (Trưởng phòng thương hiệu phê duyệt)",
+          "APPROVED (Đã duyệt)",
+          "DEPLOYMENT_PREP (Chuẩn bị triển khai)",
+          "FINAL_ACCEPTANCE (Xác nhận cuối cùng)",
+          "COMPLETED (Đã nghiệm thu)"
+        ],
+        "status": "⚠️ MISMATCH - Implementation has CENTRAL_OPS_REVIEW instead of BRAND_ACCEPTANCE. Missing BRAND role workflow."
+      }
+    },
+    "workflow_transitions": {
+      "implemented": {
+        "SAVE_DRAFT": {
+          "from": ["DRAFT", "REVISION_REQUIRED"],
+          "to": "DRAFT",
+          "guards": ["REGISTRATION_TOTAL_WITHIN_BUDGET", "LOCK_PRICE_AFTER_MANAGER_APPROVAL"],
+          "status": "✅ IMPLEMENTED"
+        },
+        "SUBMIT": {
+          "from": ["DRAFT", "REVISION_REQUIRED"],
+          "to": "SUPERVISOR_REVIEW",
+          "guards": ["ALL_ITEMS_ACTIONABLE", "REGISTRATION_TOTAL_WITHIN_BUDGET"],
+          "status": "✅ IMPLEMENTED"
+        },
+        "REQUEST_REVISION": {
+          "from": ["SUPERVISOR_REVIEW", "CENTRAL_OPS_REVIEW"],
+          "to": "REVISION_REQUIRED",
+          "guards": [],
+          "status": "✅ IMPLEMENTED"
+        },
+        "REVIEW_PASS": {
+          "from": ["SUPERVISOR_REVIEW", "CENTRAL_OPS_REVIEW"],
+          "to": "CENTRAL_OPS_REVIEW / MANAGER_APPROVAL",
+          "guards": ["ALL_ITEMS_ACTIONABLE"],
+          "status": "✅ IMPLEMENTED"
+        },
+        "APPROVE": {
+          "from": ["MANAGER_APPROVAL"],
+          "to": "APPROVED",
+          "guards": ["ALL_ITEMS_ACTIONABLE"],
+          "sideEffects": ["LOCK_UNIT_PRICE_AND_TOTAL", "SET_APPROVED_AT"],
+          "status": "✅ IMPLEMENTED"
+        },
+        "PREPARE_DEPLOYMENT": {
+          "from": ["APPROVED"],
+          "to": "DEPLOYMENT_PREP",
+          "guards": ["ALL_ACTIVE_ITEMS_HAVE_DEPLOYMENT_IMAGE", "ALL_INACTIVE_ITEMS_HAVE_NOTE", "ALL_ITEMS_ACTIONABLE"],
+          "status": "✅ IMPLEMENTED"
+        },
+        "SUBMIT_FINAL_ACCEPTANCE": {
+          "from": ["DEPLOYMENT_PREP"],
+          "to": "FINAL_ACCEPTANCE",
+          "guards": ["ALL_ITEMS_ACTIONABLE"],
+          "status": "✅ IMPLEMENTED"
+        },
+        "COMPLETE": {
+          "from": ["FINAL_ACCEPTANCE"],
+          "to": "COMPLETED",
+          "guards": ["ALL_ITEMS_ACTIONABLE"],
+          "status": "✅ IMPLEMENTED"
+        }
+      },
+      "missing_transitions": [
+        {
+          "transition": "BRAND role intake and decision",
+          "from": "SUPERVISOR_REVIEW",
+          "to": "BRAND_ACCEPTANCE",
+          "reason": "Workflow missing BRAND_ACCEPTANCE step entirely - implementation uses CENTRAL_OPS_REVIEW instead"
+        },
+        {
+          "transition": "BRAND_MANAGER_APPROVAL",
+          "from": "BRAND_ACCEPTANCE",
+          "to": "APPROVED",
+          "reason": "BRAND_MANAGER approval step missing"
+        }
+      ]
+    },
+    "workflow_guards": {
+      "implemented": {
+        "ALL_ITEMS_ACTIONABLE": {
+          "check": "No item in PENDING/ON_HOLD/IN_PROGRESS status",
+          "status": "✅ IMPLEMENTED",
+          "code_location": "backend/src/workflow/guards.ts"
+        },
+        "ALL_ACTIVE_ITEMS_HAVE_DEPLOYMENT_IMAGE": {
+          "check": "All active items have deployment image uploaded",
+          "status": "✅ IMPLEMENTED",
+          "code_location": "backend/src/workflow/guards.ts"
+        },
+        "ALL_INACTIVE_ITEMS_HAVE_NOTE": {
+          "check": "All inactive items have note",
+          "status": "✅ IMPLEMENTED",
+          "code_location": "backend/src/workflow/guards.ts"
+        },
+        "REGISTRATION_TOTAL_WITHIN_BUDGET": {
+          "check": "Total amount ≤ budget estimate",
+          "status": "✅ IMPLEMENTED",
+          "code_location": "backend/src/workflow/guards.ts"
+        },
+        "LOCK_PRICE_AFTER_MANAGER_APPROVAL": {
+          "check": "Cannot modify unit prices after manager approval",
+          "status": "✅ IMPLEMENTED",
+          "code_location": "backend/src/workflow/guards.ts"
+        }
+      },
+      "missing_guards": [
+        {
+          "guard": "APPROVER_IS_SUPERIOR",
+          "description": "Approver must be direct superior of creator",
+          "spec_location": "Section C.2",
+          "implementation": "❌ NOT IMPLEMENTED - No organizational hierarchy check"
+        },
+        {
+          "guard": "CANNOT_MODIFY_ITEMS_AFTER_BRAND_APPROVAL",
+          "description": "Item list locked after BRAND approval",
+          "spec_location": "Spec Section B.2",
+          "implementation": "❌ NOT IMPLEMENTED"
+        },
+        {
+          "guard": "CATEGORY_PRICING_CONSISTENCY",
+          "description": "Unit prices must match current category prices",
+          "spec_location": "Spec Section I",
+          "implementation": "🟡 PARTIAL - May be enforced at API level but not in state machine"
+        }
+      ]
+    },
+    "workflow_side_effects": {
+      "implemented": {
+        "LOCK_UNIT_PRICE_AND_TOTAL": {
+          "effect": "After BRAND_MANAGER_APPROVAL, unit prices become immutable",
+          "status": "✅ IMPLEMENTED",
+          "code_location": "backend/src/workflow/machine.ts"
+        },
+        "SET_APPROVED_AT": {
+          "effect": "Set approved_at timestamp when transitioning to APPROVED",
+          "status": "✅ IMPLEMENTED",
+          "code_location": "backend/src/workflow/machine.ts"
+        },
+        "CREATE_AUDIT_LOG": {
+          "effect": "Log all workflow transitions",
+          "status": "✅ IMPLEMENTED",
+          "code_location": "backend/src/workflow/machine.ts"
+        }
+      },
+      "missing_side_effects": [
+        {
+          "effect": "NOTIFY_APPROVER",
+          "reason": "Phase 2 feature - notification system not implemented"
+        },
+        {
+          "effect": "SEND_EMAIL_ON_STATE_CHANGE",
+          "reason": "Phase 2 feature"
+        }
+      ]
+    },
+    "workflow_issues": {
+      "critical_issues": [
+        {
+          "issue": "BRAND role workflow step missing",
+          "description": "Specification defines BRAND_ACCEPTANCE step (P.Thương hiệu tiếp nhận) but implementation skips directly from SUPERVISOR_REVIEW to MANAGER_APPROVAL via CENTRAL_OPS_REVIEW",
+          "impact": "HIGH - Spec requires BRAND team intake and category proposals before manager approval",
+          "status": "❌ NOT FIXED",
+          "spec_reference": "PRODUCT_SPECIFICATION.md Section C.1"
+        },
+        {
+          "issue": "Open question Q1: BRAND role skip logic unclear",
+          "description": "Spec ambiguous about whether BRAND creators should bypass supervisor review",
+          "impact": "MEDIUM - Need stakeholder clarification",
+          "status": "⚠️ AMBIGUOUS"
+        }
+      ],
+      "moderate_issues": [
+        {
+          "issue": "Approval chain validation missing",
+          "description": "No enforcement that approver is direct superior of creator",
+          "impact": "MEDIUM - Any user with SUPERVISOR role can approve any registration",
+          "status": "❌ NOT IMPLEMENTED",
+          "spec_reference": "SYSTEM_SPECIFICATION.md Section C.2"
+        },
+        {
+          "issue": "Item list lock not enforced after BRAND approval",
+          "description": "Cannot add/remove items after BRAND_ACCEPTANCE step",
+          "impact": "MEDIUM - Users could modify items when they shouldn't",
+          "status": "⚠️ PARTIALLY IMPLEMENTED"
+        }
+      ]
+    }
+  },
+  "4_validation_and_business_rules_analysis": {
+    "completion": "60%",
+    "status": "PARTIALLY IMPLEMENTED - Core rules present, some edge cases missing",
+    "validation_categories": {
+      "budget_validation": {
+        "rules": [
+          {
+            "rule": "Total registration amount ≤ budget estimate",
+            "implementation": "✅ IMPLEMENTED - checked in guard REGISTRATION_TOTAL_WITHIN_BUDGET",
+            "location": "backend/src/workflow/guards.ts"
+          },
+          {
+            "rule": "Budget must be positive number",
+            "implementation": "✅ IMPLEMENTED - isBudgetWithinLimit validator",
+            "location": "backend/src/utils/validation.ts"
+          },
+          {
+            "rule": "Item prices auto-populate from category unit price at selection time",
+            "implementation": "✅ IMPLEMENTED",
+            "location": "backend/src/services/registrationService.ts"
+          }
+        ]
+      },
+      "date_validation": {
+        "rules": [
+          {
+            "rule": "End date must be after start date",
+            "implementation": "✅ IMPLEMENTED - isEndDateAfterStartDate validator",
+            "location": "backend/src/utils/validation.ts"
+          },
+          {
+            "rule": "Content validity period controls computed status (Còn hạn / Hết hạn)",
+            "implementation": "✅ IMPLEMENTED - auto-calculated based on current date vs end_date",
+            "location": "backend/src/services/contentService.ts"
+          }
+        ]
+      },
+      "item_status_validation": {
+        "rules": [
+          {
+            "rule": "Item status depends on parent category and location status",
+            "implementation": "🟡 PARTIAL - Propagation logic exists but not fully tested",
+            "location": "backend/src/services/itemService.ts"
+          },
+          {
+            "rule": "Cannot use TREO (in-progress) items in new registrations",
+            "implementation": "❌ NOT IMPLEMENTED - No status validation at item selection",
+            "location": "MISSING"
+          },
+          {
+            "rule": "Item status transitions: Hoạt động ↔ Không hoạt động; Treo only during deployment",
+            "implementation": "🟡 PARTIAL - Transitions may be possible but not fully enforced",
+            "location": "backend/src/services/itemService.ts"
+          }
+        ]
+      },
+      "location_category_deactivation": {
+        "rules": [
+          {
+            "rule": "Cannot deactivate location if it has TREO items",
+            "implementation": "✅ IMPLEMENTED - canDeactivateLocation check",
+            "location": "backend/src/services/locationService.ts"
+          },
+          {
+            "rule": "Cannot deactivate category if it has TREO items",
+            "implementation": "✅ IMPLEMENTED - canDeactivateCategory check",
+            "location": "backend/src/services/categoryService.ts"
+          },
+          {
+            "rule": "Deactivating category/location cascades to all child items",
+            "implementation": "✅ IMPLEMENTED - deactivateLocationItems / deactivateCategoryItems",
+            "location": "backend/src/services/locationService.ts, categoryService.ts"
+          }
+        ]
+      },
+      "approval_workflow_validation": {
+        "rules": [
+          {
+            "rule": "Draft items must be editable",
+            "implementation": "✅ IMPLEMENTED - state check in canEditRegistrationState",
+            "location": "backend/src/middleware/auth.ts"
+          },
+          {
+            "rule": "Items locked (cannot add/remove) after BRAND approval",
+            "implementation": "🟡 PARTIAL - Logic may exist but not fully enforced at API level",
+            "location": "backend/src/services/registrationService.ts"
+          },
+          {
+            "rule": "Unit prices immutable after BRAND_MANAGER approval",
+            "implementation": "✅ IMPLEMENTED - LOCK_PRICE_AFTER_MANAGER_APPROVAL guard",
+            "location": "backend/src/workflow/guards.ts"
+          },
+          {
+            "rule": "Cannot submit registration with actionable (pending) items",
+            "implementation": "✅ IMPLEMENTED - ALL_ITEMS_ACTIONABLE guard on SUBMIT",
+            "location": "backend/src/workflow/machine.ts"
+          }
+        ]
+      },
+      "deployment_acceptance_validation": {
+        "rules": [
+          {
+            "rule": "Active items must have deployment image",
+            "implementation": "✅ IMPLEMENTED - ALL_ACTIVE_ITEMS_HAVE_DEPLOYMENT_IMAGE guard",
+            "location": "backend/src/workflow/guards.ts"
+          },
+          {
+            "rule": "Inactive items must have note",
+            "implementation": "✅ IMPLEMENTED - ALL_INACTIVE_ITEMS_HAVE_NOTE guard",
+            "location": "backend/src/workflow/guards.ts"
+          },
+          {
+            "rule": "Deployment images replace original item images",
+            "implementation": "✅ IMPLEMENTED - deployment_image fields in registration_items",
+            "location": "backend/migrations/005_create_real_schema_up.sql"
+          }
+        ]
+      },
+      "field_format_validation": {
+        "rules": [
+          {
+            "rule": "Position code must be 3 characters",
+            "implementation": "✅ IMPLEMENTED - isThreeCharCode validator",
+            "location": "backend/src/utils/validation.ts"
+          },
+          {
+            "rule": "Category code must be 2 characters",
+            "implementation": "✅ IMPLEMENTED - isTwoCharCode validator",
+            "location": "backend/src/utils/validation.ts"
+          },
+          {
+            "rule": "Phone number must be 10 digits",
+            "implementation": "✅ IMPLEMENTED - isValidPhone10Digits validator",
+            "location": "backend/src/utils/validation.ts"
+          },
+          {
+            "rule": "Coordinates must be valid lat/lng",
+            "implementation": "✅ IMPLEMENTED - isValidLatLng validator",
+            "location": "backend/src/utils/validation.ts"
+          },
+          {
+            "rule": "Text fields must be non-empty/non-whitespace",
+            "implementation": "✅ IMPLEMENTED - isNonWhitespaceText validator",
+            "location": "backend/src/utils/validation.ts"
+          }
+        ]
+      },
+      "price_update_validation": {
+        "rules": [
+          {
+            "rule": "Updating category unit price applies only to registrations not yet past BRAND_MANAGER approval",
+            "implementation": "🟡 PARTIAL - Logic exists but scope unclear (Q2 in spec)",
+            "location": "backend/src/services/categoryService.ts",
+            "spec_reference": "PRODUCT_SPECIFICATION.md Section C.2"
+          }
+        ]
+      }
+    },
+    "validation_gaps": {
+      "missing_validations": [
+        {
+          "validation": "Organizational hierarchy / approval chain",
+          "description": "Cannot verify approver is direct superior of creator",
+          "impact": "HIGH",
+          "workaround": "Use role-based approval (current implementation)"
+        },
+        {
+          "validation": "Unique registration identifiers per time period",
+          "description": "registration_code generation may have collision risk",
+          "impact": "LOW - Collision unlikely but could happen in high-volume"
+        },
+        {
+          "validation": "Content expiry auto-locking",
+          "description": "No automatic prevention of using expired content in new registrations",
+          "impact": "MEDIUM - Users could select expired content"
+        },
+        {
+          "validation": "Concurrent edit handling",
+          "description": "No optimistic concurrency control (last-write-wins issue)",
+          "impact": "MEDIUM - Could lose updates if multiple users edit simultaneously",
+          "spec_reference": "PRODUCT_SPECIFICATION.md Section O"
+        }
+      ]
+    }
+  },
+  "5_frontend_screens_analysis": {
+    "completion": "25%",
+    "status": "EARLY STAGE - Basic structure exists, most screens incomplete",
+    "screens_inventory": {
+      "authentication_screens": {
+        "AuthPage": {
+          "status": "🟡 PARTIAL",
+          "implementation": "Login form exists",
+          "connected_to_backend": "🟡 PARTIAL"
+        },
+        "LoginScreen": {
+          "status": "✅ EXISTS",
+          "implementation": "Email/password login form",
+          "connected_to_backend": "✅ Connected to /api/auth/login"
+        }
+      },
+      "registration_screens": {
+        "RegistrationListScreen": {
+          "status": "🟡 PARTIAL",
+          "implementation": "List with pagination, state filter, search",
+          "connected_to_backend": "✅ Connected to /api/v1/registrations",
+          "features": {
+            "pagination": "✅",
+            "search": "✅",
+            "state_filter": "✅",
+            "workflow_status_badge": "✅",
+            "action_buttons": "🟡 View only, edit/delete incomplete"
+          }
+        },
+        "RegistrationDetailScreen": {
+          "status": "🟡 PARTIAL",
+          "implementation": "Detail view with tabs",
+          "connected_to_backend": "🟡 PARTIAL",
+          "tabs": {
+            "general_info": "✅ Display only",
+            "content": "❌ MISSING",
+            "items": "❌ MISSING",
+            "deployment": "❌ MISSING",
+            "workflow_history": "✅ Workflow state display",
+            "audit_trail": "❌ MISSING"
+          }
+        },
+        "RegistrationFormScreen": {
+          "status": "🟡 PARTIAL",
+          "implementation": "Multi-section form for creating registration",
+          "connected_to_backend": "✅ Connected to POST /api/v1/registrations",
+          "sections": {
+            "basic_info": "✅ Campaign name, budget, dates",
+            "content_selection": "✅ Existing or new content mode",
+            "item_selection": "🟡 PARTIAL - Flat list, not hierarchical",
+            "representative": "✅ Name, phone, email",
+            "submission": "✅"
+          },
+          "issues": [
+            "No hierarchical channel → category → location → item selector as per spec",
+            "Item selection is flat list instead of grouped by category"
+          ]
+        },
+        "DeploymentAcceptanceScreen": {
+          "status": "❌ MISSING",
+          "description": "Screen for uploading deployment images and marking items",
+          "spec_location": "Mockup 2 (implied)"
+        },
+        "CampaignsScreen": {
+          "status": "❌ INCOMPLETE",
+          "implementation": "May be duplicate of RegistrationListScreen"
+        }
+      },
+      "master_data_screens": {
+        "AdvertisingContentListScreen": {
+          "status": "✅ IMPLEMENTED",
+          "implementation": "Content list with search, filter, status badges",
+          "connected_to_backend": "✅ Connected to /api/v1/content",
+          "features": {
+            "list": "✅",
+            "search": "✅",
+            "pagination": "✅",
+            "status_indicator": "✅ Valid/Expired",
+            "clone_action": "✅",
+            "edit_action": "✅",
+            "delete_action": "✅"
+          }
+        },
+        "CategoriesScreen": {
+          "status": "🟡 PARTIAL",
+          "implementation": "Category management",
+          "connected_to_backend": "🟡 PARTIAL"
+        },
+        "CategoryManagementScreen": {
+          "status": "🟡 PARTIAL",
+          "implementation": "Category CRUD operations",
+          "connected_to_backend": "🟡 PARTIAL"
+        },
+        "ChannelsScreen": {
+          "status": "🟡 PARTIAL",
+          "implementation": "Channel list and management",
+          "connected_to_backend": "🟡 PARTIAL"
+        },
+        "LocationsScreen": {
+          "status": "🟡 PARTIAL",
+          "implementation": "Location list",
+          "connected_to_backend": "🟡 PARTIAL"
+        },
+        "LocationManagementScreen": {
+          "status": "🟡 PARTIAL",
+          "implementation": "Location CRUD",
+          "connected_to_backend": "🟡 PARTIAL"
+        },
+        "PhysicalItemsScreen": {
+          "status": "🟡 PARTIAL",
+          "implementation": "Physical items management",
+          "connected_to_backend": "🟡 PARTIAL"
+        },
+        "MenuScreen": {
+          "status": "❌ MISSING",
+          "description": "Main navigation/menu - status unclear"
+        }
+      },
+      "user_management": {
+        "UsersScreen": {
+          "status": "✅ EXISTS",
+          "implementation": "User list",
+          "connected_to_backend": "❌ No user management API"
+        }
+      }
+    },
+    "component_library": {
+      "status": "✅ BASIC LIBRARY EXISTS",
+      "components": [
+        "Alert (error/success messages)",
+        "Button (basic button)",
+        "Card (container)",
+        "EditableGridView (table with inline edit)",
+        "Input (text input)",
+        "Modal (dialog)",
+        "Spinner (loading indicator)",
+        "Table (data table)",
+        "Layout (page layout)"
+      ],
+      "assessment": "Basic component set is functional; needs table enhancements for complex data displays"
+    },
+    "frontend_gaps": {
+      "critical_missing_screens": [
+        "Deployment Acceptance form (upload images, mark items, enter notes)",
+        "Workflow transition UI (approval, revision request, acceptance decisions)",
+        "Audit trail viewer",
+        "Export/Report screens"
+      ],
+      "incomplete_features_on_existing_screens": [
+        {
+          "screen": "RegistrationFormScreen",
+          "issue": "Item selector is flat list instead of hierarchical channel→category→location→item",
+          "impact": "HIGH - Usability issue, users cannot easily navigate master data"
+        },
+        {
+          "screen": "RegistrationDetailScreen",
+          "issue": "Content, items, deployment, audit tabs are not fully implemented",
+          "impact": "HIGH - Cannot view complete registration details"
+        },
+        {
+          "screen": "Master data screens",
+          "issue": "Many screens are partial/incomplete",
+          "impact": "MEDIUM - Master data management screens have limited functionality"
+        }
+      ],
+      "ui_ux_issues": [
+        "No inline editing for registration items (must delete and recreate)",
+        "No status change confirmations or warnings",
+        "No role-based UI visibility (all screens show all fields regardless of user role)"
+      ]
+    }
+  },
+  "6_implementation_summary": {
+    "already_implemented": {
+      "fully_implemented_features": [
+        {
+          "feature": "Database schema - 13 core tables",
+          "modules": "All master data entities (channels, categories, locations, items, content, registrations, audit logs)"
+        },
+        {
+          "feature": "Master data CRUD APIs (90+% complete)",
+          "modules": "Content (7 endpoints), Locations (5 endpoints), Categories (4 endpoints), Physical Items (5 endpoints)"
+        },
+        {
+          "feature": "Authentication middleware",
+          "modules": "JWT-based auth with role permission checks"
+        },
+        {
+          "feature": "RBAC system with 7 roles",
+          "modules": "ADMIN, REQUESTER, CENTRAL_REQUESTER, SUPERVISOR, CENTRAL_SUPERVISOR, OPERATIONS_SPECIALIST, OPERATIONS_MANAGER"
+        },
+        {
+          "feature": "Core workflow state machine",
+          "modules": "8 transitions with role-based routing and guard conditions"
+        },
+        {
+          "feature": "Workflow guard validators",
+          "modules": "5 guards: item status, budget, deployment images/notes, price locking"
+        },
+        {
+          "feature": "Registration basic CRUD",
+          "modules": "Create, read, update, delete registrations"
+        },
+        {
+          "feature": "Content list with search/filter",
+          "modules": "Frontend AdvertisingContentListScreen + backend API"
+        },
+        {
+          "feature": "Registration list with pagination and state filter",
+          "modules": "Frontend RegistrationListScreen + backend API"
+        },
+        {
+          "feature": "Audit log schema",
+          "modules": "Complete schema with entity tracking, old/new values, user tracking"
+        }
+      ],
+      "estimated_completion_by_module": {
+        "Database": "80%",
+        "Authentication": "70%",
+        "Master Data APIs": "85%",
+        "Registration APIs": "50%",
+        "Workflow Engine": "45%",
+        "Frontend - Content": "80%",
+        "Frontend - Registration": "25%",
+        "Frontend - Master Data": "30%"
+      }
+    },
+    "partially_implemented": {
+      "features_needing_completion": [
+        {
+          "feature": "Workflow transitions and guards",
+          "status": "PARTIAL",
+          "what_exists": "State machine and guard validators for core transitions",
+          "what_is_missing": "Proper enforcement of item-locked state after BRAND approval, organizational approval chain validation, role-based approval routing",
+          "impact": "MEDIUM - Core workflow works but edge cases not handled",
+          "effort_to_complete": "2-3 days"
+        },
+        {
+          "feature": "Registration detail view",
+          "status": "PARTIAL",
+          "what_exists": "Basic detail screen with workflow state display",
+          "what_is_missing": "Content tab, items tab, deployment tab, audit trail tab, inline edit capabilities",
+          "impact": "HIGH - Users cannot see complete registration information",
+          "effort_to_complete": "3-4 days"
+        },
+        {
+          "feature": "Item selection in registration form",
+          "status": "PARTIAL",
+          "what_exists": "Flat list of all items",
+          "what_is_missing": "Hierarchical selector (Channel → Category → Location → Item), per-category pricing display, quantity selector",
+          "impact": "HIGH - Current UX is poor for large datasets",
+          "effort_to_complete": "2-3 days"
+        },
+        {
+          "feature": "Category price update logic",
+          "status": "PARTIAL",
+          "what_exists": "Price update endpoint exists",
+          "what_is_missing": "Impact analysis on registrations (spec Q2 ambiguity about scope)",
+          "impact": "MEDIUM - Price changes may not propagate correctly",
+          "effort_to_complete": "1 day"
+        },
+        {
+          "feature": "Workflow action API",
+          "status": "PARTIAL",
+          "what_exists": "POST /registrations/:id/workflow-action endpoint defined",
+          "what_is_missing": "Full implementation and testing of action handlers",
+          "impact": "MEDIUM - Workflow transitions may not work correctly",
+          "effort_to_complete": "2 days"
+        },
+        {
+          "feature": "Role-based UI visibility",
+          "status": "PARTIAL",
+          "what_exists": "RBAC middleware on backend",
+          "what_is_missing": "Frontend role checks for conditional rendering",
+          "impact": "MEDIUM - All users see all fields regardless of role",
+          "effort_to_complete": "2 days"
+        }
+      ]
+    },
+    "missing": {
+      "features_from_spec_not_in_code": [
+        {
+          "feature": "BRAND role workflow step",
+          "spec_location": "PRODUCT_SPECIFICATION.md, all workflow sections",
+          "description": "P.Thương hiệu tiếp nhận (Brand Acceptance) step missing - implementation uses CENTRAL_OPS_REVIEW instead",
+          "impact": "CRITICAL - Changes fundamental workflow structure",
+          "effort_to_add": "3-4 days"
+        },
+        {
+          "feature": "Deployment Acceptance UI screen",
+          "spec_location": "Specification mentions deployment photos and acceptance workflow",
+          "description": "Screen for uploading deployment images and marking items as accepted",
+          "impact": "HIGH - Cannot complete deployment phase in UI",
+          "effort_to_add": "2-3 days"
+        },
+        {
+          "feature": "Registration cloning",
+          "spec_location": "PRODUCT_SPECIFICATION.md Section L.1",
+          "description": "POST /registrations/:id/clone endpoint",
+          "impact": "MEDIUM - Convenience feature for similar registrations",
+          "effort_to_add": "1 day"
+        },
+        {
+          "feature": "Export functionality",
+          "spec_location": "PRODUCT_SPECIFICATION.md Section K",
+          "description": "Export registrations/content as Excel/PDF",
+          "impact": "MEDIUM - Reporting capability",
+          "effort_to_add": "2-3 days"
+        },
+        {
+          "feature": "Audit log viewer UI",
+          "spec_location": "PRODUCT_SPECIFICATION.md Section J",
+          "description": "Screen to view audit trail with filtering",
+          "impact": "MEDIUM - Compliance feature",
+          "effort_to_add": "2 days"
+        },
+        {
+          "feature": "Notification system",
+          "spec_location": "PRODUCT_SPECIFICATION.md Section N (Phase 2)",
+          "description": "Email/in-app notifications on workflow state changes",
+          "impact": "LOW - Phase 2 feature",
+          "effort_to_add": "3-5 days"
+        },
+        {
+          "feature": "Organizational hierarchy approval chain",
+          "spec_location": "PRODUCT_SPECIFICATION.md Section C.2",
+          "description": "Validate approver is direct superior of registration creator",
+          "impact": "MEDIUM - Currently uses role-based approval only",
+          "effort_to_add": "2 days (requires org hierarchy table + logic)"
+        },
+        {
+          "feature": "Batch operations",
+          "spec_location": "PRODUCT_SPECIFICATION.md Section K",
+          "description": "Bulk update item statuses, bulk upload images",
+          "impact": "LOW - Enhancement for large-scale operations",
+          "effort_to_add": "2-3 days"
+        },
+        {
+          "feature": "Concurrent edit handling",
+          "spec_location": "PRODUCT_SPECIFICATION.md Section O",
+          "description": "Optimistic concurrency control for multi-user editing",
+          "impact": "LOW - Low-risk in current usage patterns",
+          "effort_to_add": "2 days"
+        }
+      ]
+    },
+    "misaligned_code": {
+      "critical_misalignments": [
+        {
+          "aspect": "Workflow structure",
+          "specification": "8-step workflow with BRAND_ACCEPTANCE as step 3: Draft → Supervisor Review → Brand Acceptance → Brand Manager Approval → Approved → Deployment Prep → Final Acceptance → Completed",
+          "implementation": "9-state workflow with CENTRAL_OPS_REVIEW instead of BRAND_ACCEPTANCE: Draft → Supervisor Review → Central OPS Review → Manager Approval → Approved → Deployment Prep → Final Acceptance → Completed (+ Revision Required)",
+          "reason": "Design decision to use operations team review instead of brand team; spec section C.1 open question about BRAND role"
+        },
+        {
+          "aspect": "Role structure",
+          "specification": "6 roles: INPUTTER, INPUTTER_HO, APPROVER, APPROVER_HO, BRAND, BRAND_MANAGER + OPERATIONS roles",
+          "implementation": "7 roles: ADMIN, REQUESTER, CENTRAL_REQUESTER, SUPERVISOR, CENTRAL_SUPERVISOR, OPERATIONS_SPECIALIST, OPERATIONS_MANAGER",
+          "reason": "Implementation uses generic requester/supervisor terminology instead of spec's INPUTTER/APPROVER names; BRAND role missing"
+        }
+      ],
+      "moderate_misalignments": [
+        {
+          "aspect": "Status terminology for registrations",
+          "specification": "Vietnamese status names: Bản nháp, CBQL Phê duyệt, P.Thương hiệu tiếp nhận, Trưởng phòng thương hiệu phê duyệt, Đã duyệt, etc.",
+          "implementation": "English state names: DRAFT, SUPERVISOR_REVIEW, BRAND_ACCEPTANCE (in code schema but not used), APPROVED, etc.",
+          "reason": "English state machine is better for database/code; UI should localize to Vietnamese"
+        },
+        {
+          "aspect": "Item status values",
+          "specification": "Hoạt động (Active), Không hoạt động (Inactive), Treo (On Hold/Suspended)",
+          "implementation": "ACTIVE, INACTIVE, PENDING, ON_HOLD, IN_PROGRESS (5 values vs. 3 in spec)",
+          "reason": "Implementation added intermediate states for workflow clarity"
+        }
+      ],
+      "minor_misalignments": [
+        {
+          "aspect": "Channel model",
+          "specification": "Channel as parent organizing dimension with no location_id",
+          "implementation": "Some code shows channels with location_id reference",
+          "reason": "Schema may have conflicting versions; check migration 004"
+        }
+      ]
+    },
+    "gap_analysis_by_module": {
+      "module_completion_matrix": [
+        {
+          "module": "Authentication & RBAC",
+          "specification": "Complete",
+          "implementation": "70%",
+          "gaps": [
+            "Signup endpoint missing",
+            "Token refresh missing",
+            "No org hierarchy-based approval routing"
+          ]
+        },
+        {
+          "module": "Master Data - Content",
+          "specification": "Complete",
+          "implementation": "85%",
+          "gaps": [
+            "Content expiry auto-lock missing",
+            "Clone operation complete but needs testing"
+          ]
+        },
+        {
+          "module": "Master Data - Locations",
+          "specification": "Complete",
+          "implementation": "85%",
+          "gaps": [
+            "Minor: Geo-coordinates optional but should validate lat/lng format"
+          ]
+        },
+        {
+          "module": "Master Data - Categories",
+          "specification": "Complete",
+          "implementation": "80%",
+          "gaps": [
+            "Price update impact analysis scope unclear (spec Q2)"
+          ]
+        },
+        {
+          "module": "Master Data - Physical Items",
+          "specification": "Complete",
+          "implementation": "80%",
+          "gaps": [
+            "Item status from parents not fully validated at selection time"
+          ]
+        },
+        {
+          "module": "Registrations - CRUD",
+          "specification": "Complete",
+          "implementation": "60%",
+          "gaps": [
+            "Clone endpoint missing",
+            "Edit state restrictions not fully enforced",
+            "Item locking after brand approval incomplete"
+          ]
+        },
+        {
+          "module": "Registrations - Content Selection",
+          "specification": "Complete",
+          "implementation": "70%",
+          "gaps": [
+            "Expired content should auto-exclude from selection"
+          ]
+        },
+        {
+          "module": "Registrations - Item Selection",
+          "specification": "Complete",
+          "implementation": "40%",
+          "gaps": [
+            "Hierarchical selector missing (Channel→Category→Location→Item)",
+            "Quantity selector incomplete",
+            "Per-category pricing display missing"
+          ]
+        },
+        {
+          "module": "Workflow - State Machine",
+          "specification": "8 states + transitions",
+          "implementation": "45%",
+          "gaps": [
+            "BRAND_ACCEPTANCE step completely missing",
+            "State structure fundamentally different"
+          ]
+        },
+        {
+          "module": "Workflow - Guards",
+          "specification": "Complete",
+          "implementation": "80%",
+          "gaps": [
+            "Approval chain validation missing",
+            "Item lock enforcement after brand approval incomplete"
+          ]
+        },
+        {
+          "module": "Deployment Acceptance",
+          "specification": "Complete",
+          "implementation": "30%",
+          "gaps": [
+            "API endpoints incomplete",
+            "UI screen missing entirely"
+          ]
+        },
+        {
+          "module": "Audit Trail",
+          "specification": "Complete",
+          "implementation": "60%",
+          "gaps": [
+            "Schema complete but UI viewer missing",
+            "Not all operations logging to audit_log table"
+          ]
+        },
+        {
+          "module": "Frontend - Content Management",
+          "specification": "Complete",
+          "implementation": "80%",
+          "gaps": [
+            "Edit/clone image gallery incomplete"
+          ]
+        },
+        {
+          "module": "Frontend - Registration List",
+          "specification": "Complete",
+          "implementation": "60%",
+          "gaps": [
+            "Bulk actions missing",
+            "Advanced filters incomplete"
+          ]
+        },
+        {
+          "module": "Frontend - Registration Form",
+          "specification": "Multi-section form with hierarchical item selector",
+          "implementation": "40%",
+          "gaps": [
+            "Hierarchical selector missing",
+            "Multi-step form UI not implemented",
+            "Only basic single-page form exists"
+          ]
+        },
+        {
+          "module": "Frontend - Registration Detail",
+          "specification": "Multi-tab view with all details",
+          "implementation": "25%",
+          "gaps": [
+            "Most tabs missing",
+            "Inline editing not implemented"
+          ]
+        },
+        {
+          "module": "Frontend - Deployment Acceptance",
+          "specification": "Image upload + status change form",
+          "implementation": "0%",
+          "gaps": [
+            "Screen completely missing"
+          ]
+        }
+      ]
+    }
+  },
+  "7_completion_percentages_by_module": {
+    "backend_modules": {
+      "database_and_schema": {
+        "completion": "80%",
+        "details": "All 13 core tables present and indexed; minor gaps in org hierarchy"
+      },
+      "authentication": {
+        "completion": "70%",
+        "details": "JWT auth + RBAC working; missing signup, refresh, org-based routing"
+      },
+      "master_data_apis": {
+        "completion": "83%",
+        "details": "Content: 85%, Locations: 85%, Categories: 80%, Items: 80%"
+      },
+      "registration_apis": {
+        "completion": "55%",
+        "details": "CRUD: 70%, Content selection: 70%, Item selection: 40%, Workflow: 45%"
+      },
+      "workflow_engine": {
+        "completion": "45%",
+        "details": "States/transitions: 45%, Guards: 80%, Side effects: 70%, BRAND role: 0%"
+      },
+      "deployment_acceptance": {
+        "completion": "30%",
+        "details": "Schema: 100%, API: 40%, Logic: 20%"
+      },
+      "audit_trail": {
+        "completion": "60%",
+        "details": "Schema: 100%, Logging: 40%, Query API: 30%"
+      },
+      "backend_total": "60%"
+    },
+    "frontend_modules": {
+      "authentication_ui": {
+        "completion": "70%",
+        "details": "Login screen works; signup missing"
+      },
+      "content_management_ui": {
+        "completion": "80%",
+        "details": "List with full CRUD mostly working; image gallery partial"
+      },
+      "registration_list_ui": {
+        "completion": "60%",
+        "details": "List with pagination/filters works; bulk actions missing"
+      },
+      "registration_form_ui": {
+        "completion": "40%",
+        "details": "Basic form exists; hierarchical item selector missing, multi-step form incomplete"
+      },
+      "registration_detail_ui": {
+        "completion": "25%",
+        "details": "Detail view shell exists; most tabs missing, inline edit missing"
+      },
+      "master_data_ui": {
+        "completion": "30%",
+        "details": "Multiple screens present but mostly incomplete"
+      },
+      "deployment_acceptance_ui": {
+        "completion": "0%",
+        "details": "Screen completely missing"
+      },
+      "audit_ui": {
+        "completion": "0%",
+        "details": "Screen missing; no UI for audit log viewing"
+      },
+      "frontend_total": "32%"
+    },
+    "overall_completion": {
+      "database": "80%",
+      "backend_logic": "50%",
+      "frontend": "32%",
+      "integration": "35%",
+      "total_project": "45%"
+    }
+  },
+  "8_critical_path_and_recommendations": {
+    "blockers_to_remove": [
+      {
+        "blocker": "BRAND role workflow step missing",
+        "description": "Spec requires BRAND_ACCEPTANCE step but implementation uses CENTRAL_OPS_REVIEW",
+        "impact": "CRITICAL - Fundamentally changes workflow",
+        "recommendation": "URGENT: Clarify with stakeholders whether to: A) Implement BRAND_ACCEPTANCE as specified, or B) Update spec to match current CENTRAL_OPS_REVIEW design",
+        "effort": "3-4 days if implementing spec as-is"
+      },
+      {
+        "blocker": "Item selector UI not hierarchical",
+        "description": "Current flat list UX breaks usability with large datasets",
+        "impact": "HIGH - Poor UX for users",
+        "recommendation": "Implement hierarchical Channel → Category → Location → Item selector component (2-3 days)"
+      },
+      {
+        "blocker": "Deployment Acceptance screen missing",
+        "description": "Cannot complete deployment phase workflow",
+        "impact": "HIGH - Core feature incomplete",
+        "recommendation": "Build DeploymentAcceptanceScreen component (2-3 days)"
+      }
+    ],
+    "high_impact_quick_wins": [
+      {
+        "task": "Complete Workflow guards enforcement",
+        "scope": "Add item lock validation after brand approval, add approval chain validation",
+        "effort": "2 days",
+        "impact": "HIGH - Prevents invalid workflow transitions"
+      },
+      {
+        "task": "Implement Registration Detail tabs",
+        "scope": "Add content, items, deployment, audit tabs to detail view",
+        "effort": "3 days",
+        "impact": "HIGH - Users can see complete registration"
+      },
+      {
+        "task": "Add role-based UI visibility",
+        "scope": "Frontend role checks for conditional field/button rendering",
+        "effort": "2 days",
+        "impact": "MEDIUM - Cleaner UI for different roles"
+      }
+    ],
+    "phased_roadmap": {
+      "phase_1_critical_fixes": {
+        "duration": "3-4 days",
+        "tasks": [
+          "Clarify BRAND workflow question with stakeholders",
+          "Implement hierarchical item selector",
+          "Build Deployment Acceptance screen",
+          "Fix workflow guard enforcement"
+        ]
+      },
+      "phase_2_complete_workflow": {
+        "duration": "3-4 days",
+        "tasks": [
+          "Add BRAND_ACCEPTANCE workflow step (if spec-compliant version chosen)",
+          "Implement approval chain validation",
+          "Complete Workflow transition API testing",
+          "Add workflow history/audit log viewer"
+        ]
+      },
+      "phase_3_ui_polish": {
+        "duration": "3-4 days",
+        "tasks": [
+          "Complete Registration Detail screen tabs",
+          "Add role-based UI visibility",
+          "Implement bulk operations UI",
+          "Add export functionality"
+        ]
+      },
+      "phase_4_phase2_features": {
+        "duration": "3-5 days",
+        "tasks": [
+          "Add notification system",
+          "Implement concurrent edit handling",
+          "Add org hierarchy support for approval chain",
+          "Advanced reporting"
+        ]
+      }
+    }
+  },
+  "9_technical_debt_and_quality_issues": {
+    "code_quality_issues": [
+      {
+        "issue": "Multiple state machine definitions",
+        "locations": [
+          "backend/src/workflow/machine.ts",
+          "backend/src/middleware/auth.ts",
+          "backend/src/services/workflowService.ts"
+        ],
+        "impact": "MEDIUM - Potential inconsistency, maintenance burden",
+        "recommendation": "Consolidate to single source of truth"
+      },
+      {
+        "issue": "Error messages may not be localized to Vietnamese",
+        "locations": "Various API responses",
+        "impact": "MEDIUM - Mixed English/Vietnamese confusion",
+        "recommendation": "Create centralized error message catalog with i18n support"
+      },
+      {
+        "issue": "No type definitions for API responses",
+        "locations": "Frontend API calls",
+        "impact": "MEDIUM - Potential runtime errors",
+        "recommendation": "Generate TypeScript types from API schema"
+      }
+    ],
+    "testing_gaps": [
+      "No unit tests for workflow guards",
+      "No integration tests for workflow transitions",
+      "No e2e tests for registration workflow",
+      "Frontend components not tested"
+    ],
+    "documentation_gaps": [
+      "Workflow state diagram not documented",
+      "API documentation incomplete",
+      "Role permissions matrix not fully documented"
+    ]
+  },
+  "10_success_metrics_and_next_steps": {
+    "current_health": {
+      "database": "✅ HEALTHY - Schema complete, indexes present",
+      "backend_logic": "⚠️ NEEDS WORK - 50% complete, core features present but gaps in workflow/validation",
+      "frontend": "⚠️ INCOMPLETE - 32% complete, basic structure exists but most features missing",
+      "integration": "⚠️ PARTIAL - Backend-frontend connection incomplete"
+    },
+    "immediate_next_steps": [
+      "1. Clarify BRAND workflow requirement with stakeholders",
+      "2. Build hierarchical item selector component",
+      "3. Implement Deployment Acceptance screen",
+      "4. Complete workflow guard enforcement",
+      "5. Add missing Registration Detail tabs"
+    ],
+    "success_criteria": [
+      "✅ All workflow states functioning with proper guard enforcement",
+      "✅ Registration complete flow working end-to-end",
+      "✅ All master data CRUD operations working",
+      "✅ Frontend screens 70%+ complete",
+      "✅ No critical bugs in core workflow"
+    ],
+    "estimated_remaining_effort": {
+      "backend_completion": "10-12 days",
+      "frontend_completion": "12-15 days",
+      "integration_and_testing": "5-7 days",
+      "total_remaining": "27-34 days (4-5 weeks with 1-person team)"
+    }
+  }
+}

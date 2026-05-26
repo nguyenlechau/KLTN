@@ -1,0 +1,8 @@
+{
+    "chat.tools.terminal.autoApprove": {
+        "/^Set-Location d:\\\\JN\\\\KLTN\\\\backend; npm run dev$/": {
+            "approve": true,
+            "matchCommandLine": true
+        }
+    }
+}

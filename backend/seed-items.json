@@ -1,0 +1,33 @@
+{
+  "items": [
+    { "code": "PMH.DL.01", "name": "Decal lưới PGD Phú Mỹ Hưng 01", "width": 3.9, "length": 3.07, "description": "sau cái cây", "category": "DL", "location": "PMH" },
+    { "code": "PMH.DL.02", "name": "Decal lưới PGD Phú Mỹ Hưng 02", "width": 3.9, "length": 3.07, "description": "sau xe nước", "category": "DL", "location": "PMH" },
+    { "code": "PMH.DL.03", "name": "Decal lưới PGD Phú Mỹ Hưng 03", "width": 2.33, "length": 3.24, "description": "tầng lửng", "category": "DL", "location": "PMH" },
+    { "code": "PMH.DL.04", "name": "Decal lưới PGD Phú Mỹ Hưng 04", "width": 2.33, "length": 3.7, "description": "tầng lửng", "category": "DL", "location": "PMH" },
+    { "code": "PMH.HL.01", "name": "Hilex PGD Phú Mỹ Hưng 01", "width": 5.15, "length": 3.07, "description": "sau booth express", "category": "HL", "location": "PMH" },
+    { "code": "PMH.HL.02", "name": "Hilex PGD Phú Mỹ Hưng 02", "description": "tầng lửng", "category": "HL", "location": "PMH" },
+    { "code": "PMH.DC.01", "name": "Decal PGD Phú Mỹ Hưng 01", "description": "dưới cầu thang", "category": "DC", "location": "PMH" },
+    { "code": "PMH.BP.01", "name": "Backdrop Prime PGD Phú Mỹ Hưng 01", "description": "vách gần quầy GD", "category": "BP", "location": "PMH" },
+    { "code": "PMH.OL.01", "name": "Ốp lưng PGD Phú Mỹ Hưng 01", "width": 1, "length": 6, "description": "6 cái", "category": "OL", "location": "PMH" },
+    { "code": "PMH.PF.01", "name": "Poster frame PGD Phú Mỹ Hưng 01", "category": "PF", "location": "PMH" },
+    { "code": "TML.DL.01", "name": "Decal lưới PGD Nguyễn Duy Trinh 01", "width": 1.9, "length": 3, "category": "DL", "location": "TML" },
+    { "code": "TML.PF.01", "name": "Poster frame PGD Nguyễn Duy Trinh 01", "category": "PF", "location": "TML" },
+    { "code": "TML.BP.01", "name": "Backdrop Prime PGD Nguyễn Duy Trinh 01", "description": "vách gần quầy GD", "category": "BP", "location": "TML" },
+    { "code": "QN2.DL.01", "name": "Decal lưới CN Trần Não 01", "width": 1.6, "length": 4.7, "category": "DL", "location": "QN2" },
+    { "code": "QN2.DL.02", "name": "Decal lưới CN Trần Não 02", "width": 3.14, "length": 5.06, "description": "trên nóc hầm", "category": "DL", "location": "QN2" },
+    { "code": "QN2.BP.01", "name": "Backdrop Prime CN Trần Không 01", "description": "vách gần quầy GD", "category": "BP", "location": "QN2" },
+    { "code": "PVH.DL.01", "name": "Decal lưới PGD Phạm Văn Hai 01", "width": 2.92, "length": 2.87, "category": "DL", "location": "PVH" },
+    { "code": "PVH.BP.01", "name": "Backdrop Prime PGD Phạm Văn Hai 01", "description": "kiểm tra kt", "category": "BP", "location": "PVH" },
+    { "code": "TDC.LB.01", "name": "Light box PGD Thủ Đức 01", "width": 1.3, "length": 2.38, "description": "trên nóc hầm", "category": "LB", "location": "TDC" },
+    { "code": "TDC.BP.01", "name": "Backdrop Prime PGD Thủ Đức 01", "category": "BP", "location": "TDC" },
+    { "code": "HGD.DL.01", "name": "CN Hoàng Diệu Decal lưới 01", "width": 7.08, "length": 4.35, "description": "phía sau ATM", "category": "DL", "location": "HGD" },
+    { "code": "HGD.DL.02", "name": "CN Hoàng Diệu Decal lưới 02", "width": 2.42, "length": 4.35, "description": "bên phải cửa ra vào", "category": "DL", "location": "HGD" },
+    { "code": "HGD.LB.01", "name": "Light box CN Hoàng Diệu 01", "width": 1.6, "length": 2.5, "description": "kiểm tra kt", "category": "LB", "location": "HGD" },
+    { "code": "SG2.MQ.01", "name": "Màn hình QC CN Sở giao dịch 2 01", "description": "màn hình cong", "category": "MQ", "location": "SG2" },
+    { "code": "SG2.MQ.02", "name": "Màn hình QC CN Sở giao dịch 2 02", "width": 1.08, "length": 1.92, "description": "tivi LG trong suốt", "category": "MQ", "location": "SG2" },
+    { "code": "HCM.DL.01", "name": "Decal lưới CN TP Hồ Chí Minh 01", "description": "lầu 1", "category": "DL", "location": "HCM" },
+    { "code": "HCM.DL.02", "name": "Decal lưới CN TP Hồ Chí Minh 02", "description": "lầu 1", "category": "DL", "location": "HCM" },
+    { "code": "HCM.PF.01", "name": "Poster frame CN TP Hồ Chí Minh 01", "category": "PF", "location": "HCM" },
+    { "code": "DNG.DL.01", "name": "Decal lưới CN Đà Nẵng 01", "category": "DL", "location": "DNG" }
+  ]
+}

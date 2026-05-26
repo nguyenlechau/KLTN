@@ -1,0 +1,490 @@
+/**
+ * RegistrationDetailTabs.css
+ * Styling for registration detail tabs component
+ */
+
+.registration-detail-tabs {
+  background: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+/* Tab header and navigation */
+.tabs-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 2px solid #f0f0f0;
+  background: #fafafa;
+}
+
+.tabs-navigation {
+  display: flex;
+  flex: 1;
+}
+
+.tab-button {
+  padding: 16px 20px;
+  background: none;
+  border: none;
+  border-bottom: 3px solid transparent;
+  color: #666;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s;
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.tab-button:hover {
+  color: #0066cc;
+  background: rgba(0, 102, 204, 0.02);
+}
+
+.tab-button.active {
+  color: #0066cc;
+  border-bottom-color: #0066cc;
+  background: #f5f9ff;
+}
+
+.tab-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  background: #ff4444;
+  color: white;
+  border-radius: 50%;
+  font-size: 11px;
+  font-weight: bold;
+}
+
+.status-badge {
+  padding: 0 20px;
+  border-left: 1px solid #e0e0e0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.status-label {
+  font-size: 12px;
+  color: #666;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.status-value {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 12px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  background: #e8f4f8;
+  color: #0066cc;
+}
+
+/* Status variants */
+.status-value.status-draft {
+  background: #f5f5f5;
+  color: #666;
+}
+
+.status-value.status-đã-duyệt {
+  background: #d4edda;
+  color: #155724;
+}
+
+.status-value.status-p.thương-hiệu-tiếp-nhận {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.status-value.status-đã-nghiệm-thu {
+  background: #d1ecf1;
+  color: #0c5460;
+}
+
+/* Tab content */
+.tabs-content {
+  padding: 24px;
+  min-height: 400px;
+}
+
+.tab-pane {
+  animation: fadeIn 0.2s;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Info Tab */
+.info-tab {
+  padding: 16px 0;
+}
+
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 20px;
+}
+
+.info-field {
+  display: flex;
+  flex-direction: column;
+}
+
+.info-field label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #666;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+
+.info-value {
+  font-size: 16px;
+  color: #333;
+  font-weight: 500;
+}
+
+.info-value.info-number {
+  font-family: 'Courier New', monospace;
+  color: #0066cc;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.badge-warning {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.badge-info {
+  background: #d1ecf1;
+  color: #0c5460;
+}
+
+/* Content Tab */
+.content-tab {
+  padding: 16px 0;
+}
+
+.mode-tabs {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 24px;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.mode-tab {
+  padding: 12px 16px;
+  background: none;
+  border: none;
+  border-bottom: 3px solid transparent;
+  color: #666;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.mode-tab:hover:not(:disabled) {
+  color: #0066cc;
+}
+
+.mode-tab.active {
+  color: #0066cc;
+  border-bottom-color: #0066cc;
+}
+
+.mode-tab:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.mode-content {
+  padding: 16px 0;
+}
+
+.no-data {
+  text-align: center;
+  color: #999;
+  padding: 40px 20px;
+  font-style: italic;
+}
+
+/* Form groups */
+.form-group {
+  margin-bottom: 16px;
+  display: flex;
+  flex-direction: column;
+}
+
+.form-group label {
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 6px;
+  font-size: 14px;
+}
+
+.form-group input[type='text'],
+.form-group input[type='file'],
+.form-group select,
+.form-group textarea {
+  padding: 10px 12px;
+  border: 1px solid #d0d0d0;
+  border-radius: 4px;
+  font-size: 14px;
+  font-family: inherit;
+  transition: border-color 0.2s;
+}
+
+.form-group input[type='text']:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: #0066cc;
+  box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.1);
+}
+
+.form-group textarea {
+  min-height: 100px;
+  resize: vertical;
+}
+
+/* Contents list */
+.contents-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.content-item {
+  display: flex;
+  gap: 12px;
+  padding: 12px;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  background: #f9f9f9;
+}
+
+.content-item input[type='checkbox'] {
+  width: 18px;
+  height: 18px;
+  margin-top: 2px;
+  cursor: pointer;
+  accent-color: #0066cc;
+}
+
+.content-item label {
+  flex: 1;
+  cursor: pointer;
+}
+
+.content-item label strong {
+  display: block;
+  margin-bottom: 4px;
+  color: #0066cc;
+}
+
+.content-item label p {
+  margin: 0;
+  font-size: 12px;
+  color: #666;
+}
+
+/* Items tab */
+.items-tab {
+  padding: 0;
+}
+
+/* Brand Intake Tab */
+.brand-intake-tab {
+  padding: 16px 0;
+}
+
+.alert {
+  padding: 12px 16px;
+  border-radius: 4px;
+  margin-bottom: 16px;
+  border-left: 4px solid;
+}
+
+.alert-info {
+  background: #d1ecf1;
+  color: #0c5460;
+  border-left-color: #0c5460;
+}
+
+.proposals-section {
+  margin: 24px 0;
+}
+
+.proposals-section h3 {
+  margin: 0 0 16px 0;
+  color: #333;
+  font-size: 16px;
+}
+
+.proposal-fields {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+/* Acceptance Tab */
+.acceptance-tab {
+  padding: 16px 0;
+}
+
+.items-acceptance-list {
+  margin: 24px 0;
+}
+
+.items-acceptance-list h3 {
+  margin: 0 0 16px 0;
+  color: #333;
+  font-size: 16px;
+}
+
+.acceptance-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 16px;
+  border: 1px solid #e0e0e0;
+}
+
+.acceptance-table thead {
+  background: #f5f5f5;
+}
+
+.acceptance-table th {
+  padding: 12px;
+  text-align: left;
+  font-weight: 600;
+  color: #333;
+  border-bottom: 2px solid #e0e0e0;
+}
+
+.acceptance-table td {
+  padding: 12px;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.acceptance-table td input,
+.acceptance-table td select {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #d0d0d0;
+  border-radius: 4px;
+}
+
+.thumbnail {
+  max-width: 60px;
+  max-height: 60px;
+  border-radius: 4px;
+}
+
+/* Action buttons */
+.action-buttons {
+  display: flex;
+  gap: 12px;
+  margin-top: 24px;
+  flex-wrap: wrap;
+}
+
+.action-buttons .btn {
+  flex: 1;
+  min-width: 150px;
+}
+
+/* Loading state */
+.loading {
+  padding: 40px 20px;
+  text-align: center;
+  color: #666;
+}
+
+.error {
+  padding: 20px;
+  background: #fff3cd;
+  color: #856404;
+  border-radius: 4px;
+  border: 1px solid #ffeaa7;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .tabs-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .tabs-navigation {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .tab-button {
+    white-space: nowrap;
+  }
+
+  .status-badge {
+    border-left: none;
+    border-top: 1px solid #e0e0e0;
+    padding: 12px 20px;
+  }
+
+  .tabs-content {
+    padding: 16px;
+  }
+
+  .info-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .proposal-fields {
+    grid-template-columns: 1fr;
+  }
+
+  .acceptance-table {
+    font-size: 12px;
+  }
+
+  .acceptance-table th,
+  .acceptance-table td {
+    padding: 8px;
+  }
+
+  .action-buttons {
+    flex-direction: column;
+  }
+
+  .action-buttons .btn {
+    width: 100%;
+  }
+}

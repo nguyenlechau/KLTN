@@ -1,0 +1,56 @@
+version: '3.9'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: postgres-kltn
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: cms_physical_ads
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d cms_physical_ads"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - kltn-network
+
+  # Backend API
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: kltn-backend
+    environment:
+      NODE_ENV: production
+      PORT: 4000
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: cms_physical_ads
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/cms_physical_ads
+      JWT_SECRET: your-secret-key-change-in-production
+    ports:
+      - "4000:4000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./backend/migrations:/app/migrations
+    networks:
+      - kltn-network
+    command: sh -c "npm run build && npm start"
+
+volumes:
+  postgres_data:
+
+networks:
+  kltn-network:
+    driver: bridge

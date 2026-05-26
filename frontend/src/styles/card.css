@@ -1,0 +1,12 @@
+.card {
+  background: white;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--gray-200);
+  padding: 1.5rem;
+  box-shadow: var(--shadow-sm);
+}
+
+.card-title {
+  margin-bottom: 1.5rem;
+  color: var(--gray-900);
+}

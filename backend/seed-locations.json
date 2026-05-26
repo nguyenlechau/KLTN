@@ -1,0 +1,24 @@
+{
+  "locations": [
+    { "code": "HGM", "classification": "CN", "name": "CN Sở Giao Dịch", "province": "Hà Nội", "subDistrict": "Nội thành", "address": "Tầng 1 và tầng 3, tòa nhà số 34, phố Hai Bà Trưng, Phường Cửa Nam", "channels": ["CN", "AF", "SME", "HO"] },
+    { "code": "VHG", "classification": "PGD", "name": "PGD Đông Hà Nội", "province": "Hà Nội", "subDistrict": "Nội thành", "address": "Diện tích sàn thương mại tại Tầng 1 và tầng 2 thuộc SH-18, Tòa nhà Century Tower", "channels": ["CN"] },
+    { "code": "THD", "classification": "PGD", "name": "PGD Thủ Đô", "province": "Hà Nội", "subDistrict": "Nội thành", "address": "Một phần diện tích tại tầng 1 tòa nhà số 34B Trần Phú", "channels": ["CN"] },
+    { "code": "YPU", "classification": "PGD", "name": "PGD Âu Cơ", "province": "Hà Nội", "subDistrict": "Nội thành", "address": "Tầng 1 và tầng 2, số 109 Nghi Tàm, Phường Tây Hồ", "channels": ["CN"] },
+    { "code": "MKI", "classification": "PGD", "name": "PGD Lạc Trung", "province": "Hà Nội", "subDistrict": "Nội thành", "address": "Số 55 Lạc Trung, phường Vĩnh Tuy", "channels": ["CN"] },
+    { "code": "NQH", "classification": "CN", "name": "CN Ngô Quyền", "province": "Hà Nội", "subDistrict": "Nội thành", "address": "Toà nhà Vinaplat, 39A Ngô Quyền, Phường Cửa Nam", "channels": ["CN"] },
+    { "code": "HKM", "classification": "PGD", "name": "PGD Hoàn Kiếm", "province": "Hà Nội", "subDistrict": "Nội thành", "address": "Toàn bộ diện tích Tầng 1,Tầng Lửng và Tầng 2 của ngôi nhà Số 160 Phố Bà Triệu", "channels": ["CN"] },
+    { "code": "HGY", "classification": "PGD", "name": "PGD Đông Thủ Đô", "province": "Hà Nội", "subDistrict": "Nội thành", "address": "Sàn thương mại dịch vụ số H4-TM1 Khu nhà ở xã hội", "channels": ["CN"] },
+    { "code": "NHH", "classification": "PGD", "name": "PGD Nguyễn Hữu Huân", "province": "Hà Nội", "subDistrict": "Nội thành", "address": "Số 52 Nguyễn Hữu Huân, Phường Hoàn Kiếm", "channels": ["CN"] },
+    { "code": "SGD", "classification": "PGD", "name": "PGD Thái Hà", "province": "Hà Nội", "subDistrict": "Nội thành", "address": "Tầng 1 và Tầng 2 ngôi nhà số 78A, tổ 4A, Phường Đống Đa", "channels": ["CN"] },
+    { "code": "PMH", "classification": "PGD", "name": "PGD Phú Mỹ Hưng", "province": "Hồ Chí Minh", "subDistrict": "Nội thành", "address": "Tầng Lửng Và Một Phần Tầng Trệt, Tòa Nhà Phú Mã Dương, A4", "channels": ["CN"] },
+    { "code": "TML", "classification": "PGD", "name": "PGD Nguyễn Duy Trinh", "province": "Hồ Chí Minh", "subDistrict": "Nội thành", "address": "Số 657 Và 659 Đường Nguyễn Duy Trinh, Phường Bình Trưng", "channels": ["CN"] },
+    { "code": "QN2", "classification": "CN", "name": "CN Trần Não", "province": "Hồ Chí Minh", "subDistrict": "Nội thành", "address": "Số 188 – 190 Đường Trần Não, Phường An Khánh", "channels": ["CN"] },
+    { "code": "PVH", "classification": "PGD", "name": "PGD Phạm Văn Hai", "province": "Hồ Chí Minh", "subDistrict": "Nội thành", "address": "Tầng trệt và lầu 1, Số 77 - 79 - 85/1B Phạm Văn Hai", "channels": ["CN"] },
+    { "code": "TDC", "classification": "PGD", "name": "PGD Thủ Đức", "province": "Hồ Chí Minh", "subDistrict": "Nội thành", "address": "Số 100C Đường Đặng Văn Bi, Phường Thủ Đức", "channels": ["CN"] },
+    { "code": "HCM", "classification": "CN", "name": "CN TP. Hồ Chí Minh", "province": "Hồ Chí Minh", "subDistrict": "Nội thành", "address": "165-167-169 Đường Hàm Nghi, Phường Bến Thành", "channels": ["CN"] },
+    { "code": "DNG", "classification": "CN", "name": "CN Đà Nẵng", "province": "Đà Nẵng", "subDistrict": "Hải Châu", "address": "112 - Phan Châu Trinh, phường Hải Châu", "channels": ["CN"] },
+    { "code": "HUE", "classification": "CN", "name": "CN Huế", "province": "Huế", "subDistrict": "Thuận Hóa", "address": "35 Lý Thường Kiệt, Phường Thuận Hóa", "channels": ["CN"] },
+    { "code": "HGD", "classification": "CN", "name": "CN Hoàng Diệu", "province": "Hồ Chí Minh", "subDistrict": "Nội thành", "address": "Phía sau ATM", "channels": ["CN"] },
+    { "code": "SG2", "classification": "CN", "name": "CN Sở giao dịch 2", "province": "Hồ Chí Minh", "subDistrict": "Nội thành", "address": "Tầng 1, Tầng 2, Tầng 3, Tầng 4, Tháp 3A1", "channels": ["CN"] }
+  ]
+}
