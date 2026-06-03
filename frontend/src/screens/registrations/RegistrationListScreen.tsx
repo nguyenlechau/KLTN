@@ -1,17 +1,18 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '../../components/Button';
 import { Input } from '../../components/Input';
-import { Table } from '../../components/Table';
-import { Modal } from '../../components/Modal';
 import { Alert } from '../../components/Alert';
-import { Spinner } from '../../components/Spinner';
+import { LoadingOverlay } from '../../components/Spinner';
+import { useRole, canCreateRegistration } from '../../hooks/useRole';
 import * as api from '../../api/services';
 import '../../styles/master-list.css';
 import './registration-list.css';
 
 export function RegistrationListScreen() {
   const navigate = useNavigate();
+  const role = useRole();
+  const canCreate = canCreateRegistration(role);
   const [registrations, setRegistrations] = useState<api.Registration[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
@@ -20,7 +21,6 @@ export function RegistrationListScreen() {
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
   const [limit] = useState(10);
-  const [showCreateModal, setShowCreateModal] = useState(false);
 
   const loadRegistrations = async (pageNum = 1, searchTerm = '', state = '') => {
     setIsLoading(true);
@@ -33,65 +33,25 @@ export function RegistrationListScreen() {
         searchTerm || undefined,
         state || undefined
       );
-      if (response.ok && response.data && response.data.length > 0) {
+      if (response.ok && response.data) {
         setRegistrations(response.data);
         setTotal(response.pagination?.total || 0);
         setPage(pageNum);
         return;
       }
     } catch (err: any) {
-      // continue to mock data
+      setError(err.message || 'Failed to load registrations');
+      setRegistrations([]);
+      setTotal(0);
+      setPage(1);
+      return;
+    } finally {
+      setIsLoading(false);
     }
-    
-    // Use mock data for testing
-    const mockRegistrations: api.Registration[] = [
-      {
-        id: '1',
-        registration_code: 'REG-001',
-        campaign_name: 'Summer Campaign 2024',
-        brand_name: 'Brand A',
-        budget_total: 50000000,
-        total_amount: 50000000,
-        contact_person: 'John Doe',
-        phone: '0901234567',
-        email: 'john@brand.com',
-        workflow_state: 'APPROVED',
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      },
-      {
-        id: '2',
-        registration_code: 'REG-002',
-        campaign_name: 'Autumn Promotion',
-        brand_name: 'Brand B',
-        budget_total: 75000000,
-        total_amount: 75000000,
-        contact_person: 'Jane Smith',
-        phone: '0912345678',
-        email: 'jane@brand.com',
-        workflow_state: 'SUPERVISOR_REVIEW',
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      },
-      {
-        id: '3',
-        registration_code: 'REG-003',
-        campaign_name: 'Winter Special',
-        brand_name: 'Brand C',
-        budget_total: 100000000,
-        total_amount: 100000000,
-        contact_person: 'Mike Johnson',
-        phone: '0923456789',
-        email: 'mike@brand.com',
-        workflow_state: 'DRAFT',
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      },
-    ];
-    setRegistrations(mockRegistrations);
-    setTotal(3);
+
+    setRegistrations([]);
+    setTotal(0);
     setPage(1);
-    setIsLoading(false);
   };
 
   useEffect(() => {
@@ -111,7 +71,7 @@ export function RegistrationListScreen() {
   };
 
   const handleCreate = () => {
-    setShowCreateModal(true);
+    navigate('/registrations/new');
   };
 
   const handleViewDetails = (id: string) => {
@@ -122,7 +82,7 @@ export function RegistrationListScreen() {
     const labels: Record<string, string> = {
       DRAFT: 'Draft',
       SUPERVISOR_REVIEW: 'Supervisor Review',
-      CBNV_REVISION: 'Revision Needed',
+      CBNV_REVISION: 'Requester Revision',
       BRAND_ACCEPTANCE: 'Brand Acceptance',
       BRAND_MANAGER_APPROVAL: 'Manager Approval',
       APPROVED: 'Approved',
@@ -134,28 +94,21 @@ export function RegistrationListScreen() {
     return labels[state] || state;
   };
 
-  const columns = [
-    { label: 'Code', key: 'registration_code', width: '12%' },
-    { label: 'Campaign', key: 'campaign_name', width: '20%' },
-    { label: 'Brand', key: 'brand_name', width: '15%' },
-    { label: 'Contact', key: 'contact_person', width: '12%' },
-    { label: 'Budget', key: 'budget_total', width: '10%', render: (v: number) => `$${(v/1000).toFixed(1)}K` },
-    { label: 'Cost', key: 'total_amount', width: '10%', render: (v: number) => `$${(v/1000).toFixed(1)}K` },
-    {
-      label: 'Status',
-      key: 'workflow_state',
-      width: '15%',
-      render: (v: string) => (
-        <span className={`status-badge workflow-${v.toLowerCase().replace(/_/g, '-')}`}>
-          {getStateLabel(v)}
-        </span>
-      ),
-    },
-  ];
-
-  const actions = [
-    { label: 'View Details', onClick: (row: any) => handleViewDetails(row.id) },
-  ];
+  const getStatusClass = (state: string) => {
+    const classMap: Record<string, string> = {
+      DRAFT: 'workflow-draft',
+      SUPERVISOR_REVIEW: 'workflow-supervisor-review',
+      CBNV_REVISION: 'workflow-cbnv-revision',
+      BRAND_ACCEPTANCE: 'workflow-brand-acceptance',
+      BRAND_MANAGER_APPROVAL: 'workflow-brand-manager-approval',
+      APPROVED: 'workflow-approved',
+      DEPLOYMENT_PREP: 'workflow-deployment-prep',
+      FINAL_ACCEPTANCE: 'workflow-final-acceptance',
+      COMPLETED: 'workflow-completed',
+      CANCELLED: 'workflow-cancelled',
+    };
+    return classMap[state] || 'workflow-draft';
+  };
 
   const totalPages = Math.ceil(total / limit);
 
@@ -171,7 +124,7 @@ export function RegistrationListScreen() {
   const allStates = [
     { value: 'DRAFT', label: 'Draft' },
     { value: 'SUPERVISOR_REVIEW', label: 'Supervisor Review' },
-    { value: 'CBNV_REVISION', label: 'Revision Needed' },
+    { value: 'CBNV_REVISION', label: 'Requester Revision' },
     { value: 'BRAND_ACCEPTANCE', label: 'Brand Acceptance' },
     { value: 'BRAND_MANAGER_APPROVAL', label: 'Manager Approval' },
     { value: 'APPROVED', label: 'Approved' },
@@ -193,11 +146,50 @@ export function RegistrationListScreen() {
     }
   };
 
+  const handleExportCsv = () => {
+    if (registrations.length === 0) return;
+    const headers = [
+      'Registration Code',
+      'Campaign Name',
+      'Brand',
+      'Budget Total',
+      'Total Amount',
+      'Workflow State',
+      'Created At',
+    ];
+    const rows = registrations.map((reg) => [
+      reg.registration_code,
+      reg.campaign_name,
+      reg.brand_name,
+      String(reg.budget_total ?? 0),
+      String(reg.total_amount ?? 0),
+      reg.workflow_state,
+      reg.created_at,
+    ]);
+
+    const csv = [
+      headers.join(','),
+      ...rows.map((row) => row.map((cell) => `"${String(cell ?? '').replace(/"/g, '""')}"`).join(',')),
+    ].join('\n');
+
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `registrations-${new Date().toISOString().slice(0, 10)}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <div className="screen-container">
       <div className="screen-header">
-        <h1>POSM Registration Management</h1>
-        <p className="screen-subtitle">Outdoor Advertising Campaign Registration</p>
+        <div className="screen-header-text">
+          <h1>POSM Registration Management</h1>
+          <p className="screen-subtitle">Outdoor Advertising Campaign Registration</p>
+        </div>
       </div>
 
       {error && <Alert type="error" message={error} />}
@@ -222,16 +214,23 @@ export function RegistrationListScreen() {
             </option>
           ))}
         </select>
-        <Button onClick={handleCreate} variant="primary">
-          + Create New
+        <Button onClick={handleExportCsv} variant="secondary" disabled={registrations.length === 0}>
+          Export CSV
         </Button>
+        {canCreate && (
+          <Button onClick={handleCreate} variant="primary">
+            + Create New
+          </Button>
+        )}
       </div>
 
       {isLoading ? (
-        <Spinner />
+        <LoadingOverlay text="Loading registrations…" />
       ) : registrations.length === 0 ? (
         <div className="empty-state">
-          <p>No registrations found</p>
+          <div className="empty-state-icon">📋</div>
+          <h3>No registrations found</h3>
+          <p>{search || filterState ? 'Try adjusting your search or filter.' : 'Create your first campaign registration to get started.'}</p>
         </div>
       ) : (
         <>
@@ -239,52 +238,47 @@ export function RegistrationListScreen() {
             <table className="data-table">
               <thead>
                 <tr>
-                  <th style={{width: '10%'}}>ID</th>
-                  <th style={{width: '20%'}}>Campaign Name</th>
-                  <th style={{width: '8%'}}>Key Visual</th>
-                  <th style={{width: '12%'}}>Budget</th>
-                  <th style={{width: '10%'}}>Start Date</th>
-                  <th style={{width: '10%'}}>End Date</th>
-                  <th style={{width: '10%'}}>Department</th>
-                  <th style={{width: '10%'}}>Status</th>
-                  <th style={{width: '10%'}}>Created</th>
-                  <th style={{width: '8%'}}>Actions</th>
+                  <th>ID</th>
+                  <th>Campaign Name</th>
+                  <th>Budget</th>
+                  <th>Start Date</th>
+                  <th>End Date</th>
+                  <th>Department</th>
+                  <th>Status</th>
+                  <th>Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {registrations.map((reg) => (
-                  <tr key={reg.id} className="table-row" onClick={() => handleViewDetails(reg.id)} style={{cursor: 'pointer'}}>
-                    <td><strong>{reg.registration_code}</strong></td>
+                  <tr key={reg.id} className="table-row" onClick={() => handleViewDetails(reg.id)}>
+                    <td style={{whiteSpace: 'nowrap'}}><strong>{reg.registration_code}</strong></td>
                     <td>
-                      <div style={{fontWeight: '500'}}>{reg.campaign_name}</div>
-                      <div style={{fontSize: '0.85rem', color: '#666'}}>{reg.brand_name}</div>
+                      <div className="cell-primary">{reg.campaign_name}</div>
+                      <div className="cell-secondary">{reg.brand_name}</div>
                     </td>
-                    <td style={{textAlign: 'center'}}>
-                      <div style={{width: '40px', height: '40px', backgroundColor: '#e5e7eb', borderRadius: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.25rem'}}>📷</div>
+                    <td style={{whiteSpace: 'nowrap'}}>
+                      {new Intl.NumberFormat('en-US', { maximumFractionDigits: 0 }).format(reg.budget_total || 0)} VND
                     </td>
+                    <td style={{whiteSpace: 'nowrap'}}>
+                      {reg.start_date ? new Date(reg.start_date).toLocaleDateString('en-US') : '—'}
+                    </td>
+                    <td style={{whiteSpace: 'nowrap'}}>
+                      {reg.end_date ? new Date(reg.end_date).toLocaleDateString('en-US') : '—'}
+                    </td>
+                    <td>{reg.department_id || '—'}</td>
                     <td>
-                      {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND', maximumFractionDigits: 0 }).format(reg.budget_total || 0)}
-                    </td>
-                    <td>—</td>
-                    <td>—</td>
-                    <td>—</td>
-                    <td>
-                      <span
-                        className="status-badge"
-                        style={{ backgroundColor: getStatusColor(reg.workflow_state) }}
-                      >
+                      <span className={`status-badge ${getStatusClass(reg.workflow_state)}`}>
                         {getStateLabel(reg.workflow_state || 'DRAFT')}
                       </span>
                     </td>
-                    <td>{new Date(reg.created_at).toLocaleDateString('en-US')}</td>
                     <td>
                       <Button
                         variant="secondary"
+                        className="btn-sm"
                         onClick={(e) => {
                           e.stopPropagation();
                           handleViewDetails(reg.id);
                         }}
-                        style={{fontSize: '0.875rem', padding: '0.375rem 0.75rem'}}
                       >
                         View
                       </Button>
@@ -314,18 +308,19 @@ export function RegistrationListScreen() {
           </div>
         </>
       )}
-
-      {/* Create Modal */}
-      {showCreateModal && (
-        <RegistrationCreateModal
-          onClose={() => setShowCreateModal(false)}
-          onSuccess={(id) => {
-            setShowCreateModal(false);
-            navigate(`/registrations/${id}`);
-          }}
-        />
-      )}
     </div>
+  );
+}
+
+export function RegistrationCreateScreen() {
+  const navigate = useNavigate();
+
+  return (
+    <RegistrationCreateModal
+      fullPage
+      onClose={() => navigate('/registrations')}
+      onSuccess={(id) => navigate(`/registrations/${id}`)}
+    />
   );
 }
 
@@ -336,9 +331,11 @@ export function RegistrationListScreen() {
 function RegistrationCreateModal({
   onClose,
   onSuccess,
+  fullPage = false,
 }: {
   onClose: () => void;
   onSuccess: (id: string) => void;
+  fullPage?: boolean;
 }) {
   const [form, setForm] = useState({
     registration_id: 'REG-' + Math.random().toString(36).substr(2, 9).toUpperCase(),
@@ -346,9 +343,10 @@ function RegistrationCreateModal({
     budget: '',
     start_date: '',
     end_date: '',
-    content_mode: 'new', // 'new' or 'existing'
+    content_mode: 'new',
     content_name: '',
-    key_visual: null as File | null,
+    existing_content_id: '',
+    key_visual_url: '',
     description: '',
     content_type: '',
     department: '',
@@ -357,26 +355,336 @@ function RegistrationCreateModal({
     user_area: '',
   });
   const [categories, setCategories] = useState<any[]>([]);
-  const [selectedCategories, setSelectedCategories] = useState<Record<string, boolean>>({});
+  const [contents, setContents] = useState<any[]>([]);
+  const [channels, setChannels] = useState<any[]>([]);
+  const [locations, setLocations] = useState<any[]>([]);
+  const [items, setItems] = useState<any[]>([]);
+  const [selectedChannelIds, setSelectedChannelIds] = useState<string[]>([]);
+  const [pendingChannelId, setPendingChannelId] = useState('');
+  const [selectedCategoryId, setSelectedCategoryId] = useState('');
+  const [selectedLocationId, setSelectedLocationId] = useState('');
+  const [selectedItemId, setSelectedItemId] = useState('');
+  const [selectedItemQty, setSelectedItemQty] = useState('');
+
+  const [selectedPosmItems, setSelectedPosmItems] = useState<Array<{
+    item_id: string;
+    item_name: string;
+    item_code: string;
+    channel_id: string;
+    channel_label: string;
+    category_id: string;
+    category_name: string;
+    location_id: string;
+    location_name: string;
+    quantity: number;
+    unit_price: number;
+    width: number;
+    length: number;
+    measure_unit: string;
+  }>>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
 
+  useEffect(() => {
+    api.getCategoryList(200, 0, undefined, undefined, 'ACTIVE')
+      .then((catRes) => {
+        if (catRes.ok) {
+          setCategories((catRes.data || []).filter((entry: any) => String(entry.status || '').toUpperCase() === 'ACTIVE'));
+        }
+      })
+      .catch(() => setCategories([]));
+
+    api.getContentList(200, 0)
+      .then((contentRes) => {
+        if (contentRes.ok) {
+          const allContents = contentRes.data || [];
+          const activeContents = allContents.filter((entry: any) => {
+            const status = String(entry.status || '').toLowerCase();
+            return status.includes('active');
+          });
+          setContents(activeContents.length > 0 ? activeContents : allContents);
+        }
+      })
+      .catch(() => setContents([]));
+
+    api.getChannelList()
+      .then((channelRes) => {
+        if (channelRes.ok) {
+          const activeChannels = (channelRes.data || []).filter((entry: any) => String(entry.status || '').toUpperCase() === 'ACTIVE');
+          setChannels(activeChannels);
+        }
+      })
+      .catch(() => setChannels([]));
+
+    api.getLocationList(500, 0, undefined, undefined, 'ACTIVE')
+      .then((locationRes) => {
+        if (locationRes.ok) {
+          setLocations((locationRes.data || []).filter((entry: any) => String(entry.status || '').toUpperCase() === 'ACTIVE'));
+        }
+      })
+      .catch(() => setLocations([]));
+
+    api.getItemList(500, 0)
+      .then((itemRes) => {
+        if (itemRes.ok) {
+          setItems((itemRes.data || []).filter((entry: any) => String(entry.status || '').toUpperCase() === 'ACTIVE'));
+        }
+      })
+      .catch(() => setItems([]));
+  }, []);
+
+  const locationMap = useMemo(
+    () => new Map(locations.map((entry: any) => [entry.id, entry])),
+    [locations],
+  );
+  const categoryMap = useMemo(
+    () => new Map(categories.map((entry: any) => [entry.id, entry])),
+    [categories],
+  );
+  const channelMap = useMemo(
+    () => new Map(channels.map((entry: any) => [String(entry.id), entry])),
+    [channels],
+  );
+
+  const activeItems = useMemo(
+    () => items.filter((entry: any) => String(entry.status || '').toUpperCase() === 'ACTIVE'),
+    [items],
+  );
+
+  const channelOptions = useMemo(() => {
+    const ids = Array.from(new Set(activeItems.map((entry: any) => String(entry.channel_id || '')).filter(Boolean)));
+    return ids.map((id) => {
+      const channel = channelMap.get(id);
+      if (channel) {
+        const code = String(channel.code || '').toUpperCase();
+        const friendlyName = code === 'CN'
+          ? 'Branches'
+          : code === 'HO'
+            ? 'Head Office'
+            : (channel.name || `Channel ${id}`);
+        const channelCode = channel.code ? `${channel.code} · ` : '';
+        return {
+          id,
+          label: `${channelCode}${friendlyName}`,
+        };
+      }
+      const location = locations.find((entry: any) => String(entry.channel_id || '') === id);
+      const locationCode = location?.position_code || location?.code;
+      return {
+        id,
+        label: locationCode ? `${locationCode} (${id})` : `Channel ${id}`,
+      };
+    });
+  }, [activeItems, locations, channelMap]);
+
+  const itemsByChannel = useMemo(() => {
+    if (selectedChannelIds.length === 0) {
+      return activeItems;
+    }
+    return activeItems.filter((entry: any) => selectedChannelIds.includes(String(entry.channel_id)));
+  }, [activeItems, selectedChannelIds]);
+
+  const availableCategories = useMemo(() => {
+    const categoryIds = new Set(itemsByChannel.map((entry: any) => String(entry.category_id)));
+    return categories.filter((entry: any) => categoryIds.has(String(entry.id)));
+  }, [itemsByChannel, categories]);
+
+  const itemsByCategory = useMemo(
+    () => itemsByChannel.filter((entry: any) => !selectedCategoryId || String(entry.category_id) === selectedCategoryId),
+    [itemsByChannel, selectedCategoryId],
+  );
+
+  const availableLocationIds = useMemo(
+    () => new Set(itemsByCategory.map((entry: any) => String(entry.location_id))),
+    [itemsByCategory],
+  );
+
+  const availableLocations = useMemo(
+    () => locations.filter((entry: any) => availableLocationIds.has(String(entry.id))),
+    [locations, availableLocationIds],
+  );
+
+  const availableItems = useMemo(
+    () => itemsByCategory.filter((entry: any) => !selectedLocationId || String(entry.location_id) === selectedLocationId),
+    [itemsByCategory, selectedLocationId],
+  );
+
+  useEffect(() => {
+    if (selectedChannelIds.length === 0 && channelOptions.length > 0) {
+      setSelectedChannelIds([channelOptions[0].id]);
+    }
+  }, [channelOptions, selectedChannelIds.length]);
+
+  const formatChannelDisplay = (label: string) => {
+    if (label.includes('Branches')) {
+      return 'Branch Channel';
+    }
+    if (label.includes('Head Office')) {
+      return 'Head Office Channel';
+    }
+    if (label.includes('HO')) {
+      return 'OOH Channel';
+    }
+    return label.replace('CN · ', 'Channel ').replace('HO · ', 'Channel ');
+  };
+
+  const addPosmItem = () => {
+    setError('');
+    if (selectedChannelIds.length === 0 || !selectedCategoryId || !selectedLocationId) {
+      setError('Please select channel, category, and location before choosing POSM');
+      return;
+    }
+
+    if (!selectedItemId) {
+      setError('Please select a POSM item');
+      return;
+    }
+
+    const quantity = Math.max(1, Number(selectedItemQty) || 1);
+    const selected = availableItems.find((entry: any) => String(entry.id) === selectedItemId);
+    if (!selected) {
+      setError('Selected POSM item is not available');
+      return;
+    }
+
+    const category = categoryMap.get(String(selected.category_id));
+    const location = locationMap.get(String(selected.location_id));
+    const channel = channelOptions.find((entry) => entry.id === String(selected.channel_id));
+    const unitPrice = Number(category?.unit_price ?? 0);
+    const widthValue = Number(selected.width_m ?? selected.width ?? 0);
+    const lengthValue = Number(selected.length_m ?? selected.length ?? 0);
+    const measureUnit = String(category?.unit_of_measure || 'm');
+
+    setSelectedPosmItems((prev) => {
+      const existing = prev.find((entry) => entry.item_id === selected.id);
+      if (existing) {
+        return prev.map((entry) => (
+          entry.item_id === selected.id
+            ? { ...entry, quantity: entry.quantity + quantity }
+            : entry
+        ));
+      }
+
+      return [
+        ...prev,
+        {
+          item_id: selected.id,
+          item_name: selected.item_name,
+          item_code: selected.item_code,
+          channel_id: String(selected.channel_id),
+          channel_label: channel?.label || String(selected.channel_id),
+          category_id: selected.category_id,
+          category_name: category?.name || 'Unknown Category',
+          location_id: selected.location_id,
+          location_name: location?.position_name || location?.name || String(selected.location_id),
+          quantity,
+          unit_price: unitPrice,
+          width: widthValue,
+          length: lengthValue,
+          measure_unit: measureUnit,
+        },
+      ];
+    });
+
+    setSelectedCategoryId('');
+    setSelectedLocationId('');
+    setSelectedItemId('');
+    setSelectedItemQty('');
+  };
+
+  const removePosmItem = (itemId: string) => {
+    setSelectedPosmItems((prev) => prev.filter((entry) => entry.item_id !== itemId));
+  };
+
   const handleSubmit = async () => {
     setError('');
-    if (!form.campaign_name || !form.budget || !form.content_name) {
+    if (!form.campaign_name || !form.budget) {
+      setError('Please fill in campaign and budget');
+      return;
+    }
+
+    if (form.content_mode === 'new' && !form.content_name) {
+      setError('Please enter campaign content name');
+      return;
+    }
+
+    if (form.content_mode === 'existing' && !form.existing_content_id) {
+      setError('Please select existing campaign content');
+      return;
+    }
+
+    if (selectedPosmItems.length === 0) {
+      setError('Please add at least one POSM item');
+      return;
+    }
+
+    if (Number(form.budget) <= 0) {
       setError('Please fill in all required fields');
       return;
     }
 
     setIsLoading(true);
     try {
-      // Mock submission - replace with actual API call
-      const response = await new Promise(resolve => {
-        setTimeout(() => {
-          resolve({ ok: true, data: { id: form.registration_id } });
-        }, 500);
+      const locationResponse = await api.getLocationList(1, 0, undefined, undefined, 'ACTIVE');
+      const fallbackChannelId = (locationResponse.data && locationResponse.data[0]?.channel_id) || '1';
+
+      const createdRegistration = await api.createRegistration({
+        campaign_name: form.campaign_name,
+        department_id: form.department || 'MARKETING',
+        channel_id: selectedPosmItems[0]?.channel_id || selectedChannelIds[0] || fallbackChannelId,
+        brand_name: form.title || form.campaign_name,
+        contact_person: form.account || 'User',
+        phone: '0900000000',
+        email: localStorage.getItem('user_email') || 'user@example.com',
+        budget_total: Number(form.budget),
+        start_date: form.start_date || undefined,
+        end_date: form.end_date || undefined,
       });
-      onSuccess(form.registration_id);
+
+      const registrationId = createdRegistration?.data?.id;
+      if (!registrationId) {
+        throw new Error('Failed to create registration');
+      }
+
+      let selectedContentId = form.existing_content_id;
+      if (form.content_mode === 'new') {
+        const selectedCategory = categories.find((entry: any) => entry.name === form.content_type || entry.code === form.content_type);
+        const content = await api.createContent({
+          content_name: form.content_name,
+          description: form.description || undefined,
+          category: selectedCategory?.code || form.content_type || 'GENERAL',
+          unit: 'Week',
+          start_date: form.start_date || new Date().toISOString().slice(0, 10),
+          end_date: form.end_date || new Date().toISOString().slice(0, 10),
+        });
+
+        selectedContentId = content?.data?.id || '';
+
+        if (selectedContentId && form.key_visual_url.trim()) {
+          await api.addContentImage(selectedContentId, form.key_visual_url.trim());
+        }
+      }
+
+      if (selectedContentId) {
+        await api.addRegistrationContent(
+          registrationId,
+          selectedContentId,
+          form.start_date || new Date().toISOString().slice(0, 10),
+          form.end_date || new Date().toISOString().slice(0, 10),
+          1,
+        );
+      }
+
+      for (const item of selectedPosmItems) {
+        await api.addRegistrationItem(
+          registrationId,
+          item.item_id,
+          item.category_id,
+          item.quantity,
+        );
+      }
+
+      onSuccess(registrationId);
     } catch (err: any) {
       setError(err.message || 'Failed to create registration');
     } finally {
@@ -385,73 +693,83 @@ function RegistrationCreateModal({
   };
 
   return (
-    <div className="modal-overlay">
-      <div className="modal registration-form-modal" style={{ maxWidth: '900px', maxHeight: '90vh', overflow: 'auto' }}>
+    <div className={fullPage ? 'screen-container' : 'modal-overlay'}>
+      <div
+        className={fullPage ? 'registration-create-page' : 'modal registration-form-modal'}
+        style={fullPage
+          ? {
+              maxWidth: '1280px',
+              margin: '0 auto',
+              backgroundColor: '#ffffff',
+              borderRadius: '0.75rem',
+              padding: '1.25rem',
+              boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
+            }
+          : { maxWidth: '900px', maxHeight: '90vh', overflow: 'auto' }}
+      >
         {/* Header */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', paddingBottom: '1rem', borderBottom: '1px solid #e5e7eb' }}>
           <div>
             <h2 className="modal-title" style={{ margin: '0 0 0.5rem 0' }}>POSM Registration</h2>
             <p style={{ margin: 0, color: '#666', fontSize: '0.875rem' }}>Registration ID: {form.registration_id}</p>
           </div>
-          <button onClick={onClose} style={{ background: 'none', border: 'none', fontSize: '1.5rem', cursor: 'pointer' }}>×</button>
+          <button
+            onClick={onClose}
+            style={{
+              background: 'none',
+              border: 'none',
+              fontSize: fullPage ? '0.95rem' : '1.5rem',
+              fontWeight: fullPage ? 600 : 400,
+              color: '#334155',
+              cursor: 'pointer',
+            }}
+          >
+            {fullPage ? '← Back to registrations' : '×'}
+          </button>
         </div>
 
         {error && <Alert type="error" message={error} />}
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '2rem' }}>
-          {/* Left Sidebar */}
-          <div style={{ borderRight: '1px solid #e5e7eb', paddingRight: '1rem' }}>
-            <div style={{ marginBottom: '1.5rem' }}>
-              <h3 style={{ fontSize: '0.875rem', fontWeight: '600', color: '#065f46', margin: '0 0 0.5rem 0', textTransform: 'uppercase', letterSpacing: '0.05em' }}>POSM Registration</h3>
-              <button style={{ width: '100%', padding: '0.5rem', backgroundColor: '#065f46', color: 'white', border: 'none', borderRadius: '0.375rem', cursor: 'pointer', fontWeight: '500' }}>
-                ← Back
-              </button>
-            </div>
-            <div>
-              <h3 style={{ fontSize: '0.875rem', fontWeight: '600', color: '#1f2937', margin: '0 0 0.5rem 0' }}>Campaign's Content</h3>
-              <button style={{ width: '100%', padding: '0.5rem', backgroundColor: '#f3f4f6', border: '1px solid #d1d5db', borderRadius: '0.375rem', cursor: 'pointer' }}>
-                Campaign's Content
-              </button>
-            </div>
-          </div>
-
-          {/* Right Content */}
-          <div>
+        <div>
             {/* Campaign Info */}
             <div style={{ marginBottom: '2rem' }}>
               <h3 style={{ fontSize: '1rem', fontWeight: '600', color: '#1f2937', marginBottom: '1rem' }}>Campaign Information</h3>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
-                <Input
-                  label="Campaign Name"
-                  value={form.campaign_name}
-                  onChange={(val) => setForm({ ...form, campaign_name: val })}
-                  placeholder="Placeholder"
-                  required
-                />
-                <Input
-                  label="Budget"
-                  value={form.budget}
-                  onChange={(val) => setForm({ ...form, budget: val })}
-                  placeholder="Placeholder"
-                  type="number"
-                  required
-                />
-              </div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-                <Input
-                  label="Start date"
-                  value={form.start_date}
-                  onChange={(val) => setForm({ ...form, start_date: val })}
-                  placeholder="Placeholder"
-                  type="date"
-                />
-                <Input
-                  label="End date"
-                  value={form.end_date}
-                  onChange={(val) => setForm({ ...form, end_date: val })}
-                  placeholder="Placeholder"
-                  type="date"
-                />
+              <div>
+                <div>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
+                    <Input
+                      label="Campaign Name"
+                      value={form.campaign_name}
+                      onChange={(val) => setForm({ ...form, campaign_name: val })}
+                      placeholder="Placeholder"
+                      required
+                    />
+                    <Input
+                      label="Budget"
+                      value={form.budget}
+                      onChange={(val) => setForm({ ...form, budget: val })}
+                      placeholder="Placeholder"
+                      type="number"
+                      required
+                    />
+                  </div>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                    <Input
+                      label="Start date"
+                      value={form.start_date}
+                      onChange={(val) => setForm({ ...form, start_date: val })}
+                      placeholder="Placeholder"
+                      type="date"
+                    />
+                    <Input
+                      label="End date"
+                      value={form.end_date}
+                      onChange={(val) => setForm({ ...form, end_date: val })}
+                      placeholder="Placeholder"
+                      type="date"
+                    />
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -489,16 +807,24 @@ function RegistrationCreateModal({
 
                   <div style={{ marginTop: '1rem', marginBottom: '1rem' }}>
                     <label style={{ display: 'block', fontWeight: '500', marginBottom: '0.5rem' }}>Content's Key Visual</label>
-                    <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', padding: '1rem', border: '1px dashed #d1d5db', borderRadius: '0.5rem', backgroundColor: '#f3f4f6' }}>
-                      <div style={{ width: '60px', height: '60px', backgroundColor: '#e5e7eb', borderRadius: '0.375rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                        📷
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      {form.key_visual_url ? (
+                        <img
+                          src={form.key_visual_url}
+                          alt="Key visual preview"
+                          style={{ width: '48px', height: '48px', objectFit: 'cover', borderRadius: '0.35rem', border: '1px solid #d1d5db' }}
+                        />
+                      ) : (
+                        <div style={{ width: '48px', height: '48px', borderRadius: '0.35rem', border: '1px dashed #9ca3af', display: 'grid', placeItems: 'center', color: '#9ca3af', fontSize: '0.75rem' }}>No
+                        </div>
+                      )}
+                      <div style={{ flex: 1 }}>
+                        <Input
+                          value={form.key_visual_url}
+                          onChange={(val) => setForm({ ...form, key_visual_url: val })}
+                          placeholder="Paste key visual image URL"
+                        />
                       </div>
-                      <button style={{ padding: '0.5rem 1rem', backgroundColor: '#fff', border: '1px solid #d1d5db', borderRadius: '0.375rem', cursor: 'pointer', fontSize: '0.875rem' }}>
-                        Upload
-                      </button>
-                      <button style={{ padding: '0.5rem 1rem', backgroundColor: '#fff', border: '1px solid #d1d5db', borderRadius: '0.375rem', cursor: 'pointer', fontSize: '0.875rem' }}>
-                        Remove
-                      </button>
                     </div>
                   </div>
 
@@ -551,24 +877,274 @@ function RegistrationCreateModal({
                   />
                 </>
               ) : (
-                <div style={{ padding: '1rem', textAlign: 'center', color: '#666' }}>
-                  Select from existing content
+                <div style={{ marginTop: '0.5rem' }}>
+                  <label style={{ display: 'block', fontWeight: '500', marginBottom: '0.5rem' }}>Existing campaign content *</label>
+                  <select
+                    value={form.existing_content_id}
+                    onChange={(e) => setForm({ ...form, existing_content_id: e.target.value })}
+                    style={{ width: '100%', padding: '0.75rem', border: '1px solid #d1d5db', borderRadius: '0.375rem' }}
+                  >
+                    <option value="">-- Select active content --</option>
+                    {contents.map((entry: any) => (
+                      <option key={entry.id} value={entry.id}>
+                        {entry.content_name} ({entry.content_code})
+                      </option>
+                    ))}
+                  </select>
                 </div>
               )}
             </div>
 
             {/* POSM Registration List */}
-            <div style={{ marginBottom: '2rem' }}>
-              <h3 style={{ fontSize: '1rem', fontWeight: '600', color: '#1f2937', marginBottom: '1rem' }}>List of POSM Registrations</h3>
-              <div style={{ backgroundColor: '#f0fdf4', padding: '1rem', borderRadius: '0.5rem', marginBottom: '1rem', fontSize: '0.875rem' }}>
-                <span style={{ color: '#059669', fontWeight: '500' }}>Total cost estimation: $30,000</span>
-                <span style={{ float: 'right', color: '#059669', fontWeight: '500' }}>Budget: $70,000</span>
+            <div className="posm-builder">
+              <h3 className="posm-builder-title">List of POSM Registrations</h3>
+              <div className="posm-budget-bar">
+                {(() => {
+                  const budgetVal = form.budget ? Number(form.budget) : 0;
+                  const totalEstimate = selectedPosmItems.reduce((sum, entry) => sum + (entry.unit_price * entry.quantity), 0);
+                  const fmt = new Intl.NumberFormat('en-US', { maximumFractionDigits: 0 });
+                  return (
+                    <>
+                      <div className="posm-budget-left-wrap">
+                        <span className="posm-budget-metric">Total cost: {fmt.format(totalEstimate)} VND</span>
+                        <span className="posm-budget-note">(*) Cost excludes shipping and installation</span>
+                      </div>
+                      <span className="posm-budget-metric posm-budget-right">Estimated budget: {fmt.format(budgetVal)} VND</span>
+                    </>
+                  );
+                })()}
               </div>
-              <div style={{ padding: '1rem', backgroundColor: '#f3f4f6', borderRadius: '0.5rem', textAlign: 'center', color: '#666', fontSize: '0.875rem' }}>
-                No POSM registrations added. Click "+ Add Channels" to begin.
+
+              <div className="posm-channel-strip">
+                {selectedChannelIds.map((channelId) => {
+                  const channel = channelOptions.find((entry) => entry.id === channelId);
+                  return (
+                    <div key={channelId} className="posm-channel-pill active">
+                      <span>{formatChannelDisplay(channel?.label || channelId)}</span>
+                      <button type="button" className="posm-mini-icon" aria-label="Edit channel">✎</button>
+                      <button
+                        type="button"
+                        className="posm-mini-icon"
+                        aria-label={`Remove ${channel?.label || channelId}`}
+                        onClick={() => {
+                          setSelectedChannelIds((prev) => prev.filter((id) => id !== channelId));
+                          setSelectedCategoryId('');
+                          setSelectedLocationId('');
+                          setSelectedItemId('');
+                        }}
+                      >
+                        🗑
+                      </button>
+                    </div>
+                  );
+                })}
+
+                <div className="posm-channel-pill add">
+                  <select
+                    value={pendingChannelId}
+                    onChange={(e) => setPendingChannelId(e.target.value)}
+                    className="posm-channel-select"
+                  >
+                    <option value="">+ Add channel</option>
+                    {channelOptions
+                      .filter((entry) => !selectedChannelIds.includes(entry.id))
+                      .map((entry) => (
+                        <option key={entry.id} value={entry.id}>
+                          {formatChannelDisplay(entry.label)}
+                        </option>
+                      ))}
+                  </select>
+                  <button
+                    type="button"
+                    className="posm-mini-dot"
+                    onClick={() => {
+                      if (!pendingChannelId) {
+                        return;
+                      }
+                      setSelectedChannelIds((prev) => {
+                        if (prev.includes(pendingChannelId)) {
+                          return prev;
+                        }
+                        return [...prev, pendingChannelId];
+                      });
+                      setPendingChannelId('');
+                      setSelectedCategoryId('');
+                      setSelectedLocationId('');
+                      setSelectedItemId('');
+                    }}
+                    aria-label="Add channel"
+                  >
+                    ○
+                  </button>
+                </div>
+              </div>
+
+              <div className="posm-controls-grid">
+                <select
+                  value={selectedCategoryId}
+                  onChange={(e) => {
+                    setSelectedCategoryId(e.target.value);
+                    setSelectedLocationId('');
+                    setSelectedItemId('');
+                  }}
+                  disabled={selectedChannelIds.length === 0}
+                  className="posm-select"
+                >
+                  <option value="">-- Select category --</option>
+                  {availableCategories.map((entry: any) => (
+                    <option key={entry.id} value={entry.id}>
+                      {entry.name}
+                    </option>
+                  ))}
+                </select>
+                <select
+                  value={selectedLocationId}
+                  onChange={(e) => {
+                    setSelectedLocationId(e.target.value);
+                    setSelectedItemId('');
+                  }}
+                  className="posm-select"
+                  disabled={!selectedCategoryId}
+                >
+                  <option value="">-- Select location --</option>
+                  {availableLocations.map((entry: any) => (
+                    <option key={entry.id} value={entry.id}>
+                      {entry.position_name || entry.name || entry.position_code || entry.code}
+                    </option>
+                  ))}
+                </select>
+                <select
+                  value={selectedItemId}
+                  onChange={(e) => setSelectedItemId(e.target.value)}
+                  className="posm-select"
+                  disabled={!selectedLocationId}
+                >
+                  <option value="">-- Select POSM item --</option>
+                  {availableItems.map((entry: any) => (
+                    <option key={entry.id} value={entry.id}>
+                      {entry.item_name} ({entry.item_code})
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="posm-add-row">
+                <Input
+                  label="Quantity"
+                  value={selectedItemQty}
+                  onChange={setSelectedItemQty}
+                  type="number"
+                  min="1"
+                  placeholder="Enter quantity"
+                />
+                <Button onClick={addPosmItem} variant="secondary">+ Add item</Button>
+              </div>
+
+              {selectedPosmItems.length === 0 ? (
+                <div className="posm-empty-state">
+                  No POSM items added yet.
+                </div>
+              ) : (
+                <div className="posm-grouped-panel">
+                  {Object.entries(
+                    selectedPosmItems.reduce((acc: Record<string, Record<string, typeof selectedPosmItems>>, item) => {
+                      const categoryKey = item.category_name || 'Uncategorized';
+                      const locationKey = item.location_name || 'Unknown Location';
+                      if (!acc[categoryKey]) {
+                        acc[categoryKey] = {};
+                      }
+                      if (!acc[categoryKey][locationKey]) {
+                        acc[categoryKey][locationKey] = [];
+                      }
+                      acc[categoryKey][locationKey].push(item);
+                      return acc;
+                    }, {})
+                  ).map(([categoryName, locationMap], categoryIndex) => (
+                    <div key={categoryName} className={`posm-category-block${categoryIndex === 0 ? ' first' : ''}`}>
+                      <div className="posm-category-header">
+                        <div>
+                          <span className="posm-accordion-arrow">⌄</span>
+                          <span className="posm-category-prefix">Category:</span>
+                          <span className="posm-category-name">{categoryName}</span>
+                        </div>
+                        <span className="posm-category-actions">✎  🗑</span>
+                      </div>
+
+                      {Object.entries(locationMap).map(([locationName, products], locationIndex) => (
+                        <div key={`${categoryName}-${locationName}`} className={`posm-location-block${locationIndex === 0 ? ' first' : ''}`}>
+                          <div className="posm-location-meta">
+                            <span>Design unit price: {Number(products[0]?.unit_price || 0).toLocaleString('en-US')} VND</span>
+                          </div>
+
+                          <div className="posm-location-header">
+                            <span>
+                              Selected locations: <span className="posm-green">{products.length}</span> / {availableLocations.length || products.length}
+                              <button type="button" className="posm-inline-link">Add location</button>
+                            </span>
+                          </div>
+
+                          <div className="posm-location-title-row">
+                            <span>Hanoi, location: {locationName}</span>
+                            <span>Items added: <span className="posm-green">{products.length}</span></span>
+                          </div>
+
+                          <div className="posm-table-shell">
+                            <table className="posm-products-table">
+                              <thead>
+                                <tr>
+                                  <th>ID</th>
+                                  <th>Item</th>
+                                  <th className="right">Amount</th>
+                                  <th className="center">Current KV</th>
+                                  <th className="center"></th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {products.map((entry, productIndex) => (
+                                  <tr key={entry.item_id}>
+                                    <td>{productIndex + 1}</td>
+                                    <td>
+                                      <div className="posm-product-name">{entry.item_name}</div>
+                                      <div className="posm-product-meta">{entry.item_code} • {entry.width} x {entry.length} {entry.measure_unit}</div>
+                                    </td>
+                                    <td className="right">{entry.unit_price.toLocaleString('en-US')} VND</td>
+                                    <td className="center">
+                                      {form.key_visual_url ? (
+                                        <img
+                                          src={form.key_visual_url}
+                                          alt="Current content"
+                                          className="posm-content-thumb"
+                                        />
+                                      ) : (
+                                        <span className="posm-empty-thumb">—</span>
+                                      )}
+                                    </td>
+                                    <td className="center">
+                                      <button
+                                        onClick={() => removePosmItem(entry.item_id)}
+                                        className="posm-remove-btn"
+                                        aria-label={`Remove ${entry.item_name}`}
+                                      >
+                                        ×
+                                      </button>
+                                    </td>
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+                            <div className="posm-table-add-link">Add item</div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              <div className="posm-helper-text">
+                Only ACTIVE POSM items are available for selection.
               </div>
             </div>
-          </div>
         </div>
 
         {/* Footer */}

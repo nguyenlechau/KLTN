@@ -329,7 +329,7 @@ export function CampaignsScreen() {
     <div className="selection-panel">
       <div className="selection-panel-header">
         <div>
-              label="Start Date"
+          <h4 className="selection-panel-title">{title}</h4>
           <div className="selection-panel-description">{description}</div>
         </div>
         <div className="selection-count">{selectedIds.length} selected</div>
@@ -337,7 +337,7 @@ export function CampaignsScreen() {
       {options.length > 0 ? (
         <div className="selection-list">
           {options.map((option) => {
-              label="End Date"
+            const checked = selectedIds.includes(option.id);
             return (
               <label key={option.id} className={`selection-item ${checked ? 'is-selected' : ''}`}>
                 <input type="checkbox" checked={checked} onChange={() => onToggle(option.id)} />
@@ -523,6 +523,7 @@ export function CampaignsScreen() {
             className="btn-sm"
           >
             Create New
+          </Button>
         </div>
       </div>
 

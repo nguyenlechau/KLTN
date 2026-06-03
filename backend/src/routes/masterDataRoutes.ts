@@ -4,10 +4,12 @@
  */
 
 import { Router, Request, Response } from 'express';
+import { randomUUID } from 'crypto';
 import * as contentService from '../services/contentService.js';
 import * as locationService from '../services/locationService.js';
 import * as categoryService from '../services/categoryService.js';
 import * as itemService from '../services/itemService.js';
+import { query, queryAll, queryOne } from '../db/postgres.js';
 import { AuthenticatedRequest } from '../types.js';
 
 const router = Router();
@@ -181,22 +183,51 @@ router.get('/locations/:id', async (req: AuthenticatedRequest, res: Response) =>
  */
 router.post('/locations', async (req: AuthenticatedRequest, res: Response) => {
   try {
-    const { position_code, channel_id, position_name, province_city, zone, address, status, ...rest } = req.body;
-
-    if (!position_code || !channel_id || !position_name || !province_city || !zone || !address) {
-      return res.status(400).json({ ok: false, error: 'Missing required fields' });
-    }
-
-    const location = await locationService.createLocation({
+    const {
       position_code,
       channel_id,
       position_name,
       province_city,
       zone,
       address,
+      status,
+      classification,
+      longitude,
+      latitude,
+      representative_1_name,
+      representative_1_email,
+      representative_1_phone,
+      representative_2_name,
+      representative_2_email,
+      representative_2_phone,
+      note,
+    } = req.body;
+
+    if (!position_code || !channel_id || !position_name || !province_city || !zone || !address) {
+      return res.status(400).json({ ok: false, error: 'Missing required fields' });
+    }
+
+    const location = await locationService.createLocation({
+      code: position_code,
+      name: position_name,
+      position_code,
+      channel_id,
+      position_name,
+      province_city,
+      zone,
+      address,
+      classification,
+      longitude,
+      latitude,
+      representative_1_name,
+      representative_1_email,
+      representative_1_phone,
+      representative_2_name,
+      representative_2_email,
+      representative_2_phone,
+      note,
       status: status || 'ACTIVE',
       created_by: req.user!.id,
-      ...rest,
     });
 
     res.status(201).json({ ok: true, data: location });
@@ -290,10 +321,15 @@ router.get('/categories/:id', async (req: AuthenticatedRequest, res: Response) =
  */
 router.post('/categories', async (req: AuthenticatedRequest, res: Response) => {
   try {
-    const { code, name, format, unit_of_measure, status, ...rest } = req.body;
+    const { code, name, format, unit_of_measure, unit_price, description, status } = req.body;
 
     if (!code || !name || !format || !unit_of_measure) {
       return res.status(400).json({ ok: false, error: 'Missing required fields' });
+    }
+
+    const parsedUnitPrice = Number(unit_price);
+    if (!Number.isFinite(parsedUnitPrice)) {
+      return res.status(400).json({ ok: false, error: 'unit_price must be a valid number' });
     }
 
     const category = await categoryService.createCategory({
@@ -301,9 +337,10 @@ router.post('/categories', async (req: AuthenticatedRequest, res: Response) => {
       name,
       format,
       unit_of_measure,
+      unit_price: parsedUnitPrice,
+      description,
       status: status || 'ACTIVE',
       created_by: req.user!.id,
-      ...rest,
     });
 
     res.status(201).json({ ok: true, data: category });
@@ -463,48 +500,193 @@ router.delete('/items/:id', async (req: AuthenticatedRequest, res: Response) => 
 });
 
 // ============================================================
-// CHANNELS ROUTES (Stub - awaiting full implementation)
+// CHANNELS ROUTES
 // ============================================================
 
-/**
- * GET /api/v1/channels
- * List channels (stub - returns empty list)
- */
 router.get('/channels', async (req: AuthenticatedRequest, res: Response) => {
   try {
-    // TODO: Implement channel service
+    const limit = parseInt(req.query.limit as string) || 25;
+    const offset = parseInt(req.query.offset as string) || 0;
+
+    const countResult = await queryOne<{ count: string }>(
+      'SELECT COUNT(*) as count FROM channels WHERE deleted_at IS NULL'
+    );
+    const data = await queryAll<any>(
+      'SELECT * FROM channels WHERE deleted_at IS NULL ORDER BY created_at DESC LIMIT $1 OFFSET $2',
+      [limit, offset]
+    );
+
     res.json({
       ok: true,
-      data: [],
-      pagination: { page: 1, limit: 25, total: 0 },
+      data,
+      pagination: { page: Math.floor(offset / limit) + 1, limit, total: parseInt(countResult?.count || '0', 10) },
     });
   } catch (error) {
     res.status(500).json({ ok: false, error: (error as Error).message });
   }
 });
 
-/**
- * POST /api/v1/channels
- * Create new channel (stub - not yet implemented)
- */
 router.post('/channels', async (req: AuthenticatedRequest, res: Response) => {
-  res.status(501).json({ ok: false, error: 'Channels feature not yet implemented' });
+  try {
+    const { code, name, description, location_id, status } = req.body;
+    if (!code || !name) {
+      return res.status(400).json({ ok: false, error: 'Missing required fields' });
+    }
+
+    const channel = await queryOne<any>(
+      `INSERT INTO channels (id, code, name, description, status, location_id, created_by, updated_by, created_at, updated_at)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $7, NOW(), NOW()) RETURNING *`,
+      [
+        randomUUID(),
+        code,
+        name,
+        description || null,
+        status || 'ACTIVE',
+        location_id || null,
+        req.user?.id || 'system',
+      ]
+    );
+
+    res.status(201).json({ ok: true, data: channel });
+  } catch (error) {
+    res.status(500).json({ ok: false, error: (error as Error).message });
+  }
 });
 
-/**
- * PUT /api/v1/channels/:id
- * Update channel (stub - not yet implemented)
- */
-router.put('/channels/:id', async (req: AuthenticatedRequest, res: Response) => {
-  res.status(501).json({ ok: false, error: 'Channels feature not yet implemented' });
+router.patch('/channels/:id', async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const fields: string[] = [];
+    const values: any[] = [];
+    let index = 1;
+
+    for (const key of ['name', 'description', 'status', 'location_id']) {
+      if (req.body[key] !== undefined) {
+        fields.push(`${key} = $${index}`);
+        values.push(req.body[key]);
+        index += 1;
+      }
+    }
+
+    fields.push(`updated_by = $${index}`);
+    values.push(req.user?.id || 'system');
+    index += 1;
+    fields.push('updated_at = NOW()');
+    values.push(req.params.id);
+
+    const updated = await queryOne<any>(
+      `UPDATE channels SET ${fields.join(', ')} WHERE id = $${index} AND deleted_at IS NULL RETURNING *`,
+      values
+    );
+
+    if (!updated) {
+      return res.status(404).json({ ok: false, error: 'Channel not found' });
+    }
+
+    res.json({ ok: true, data: updated });
+  } catch (error) {
+    res.status(500).json({ ok: false, error: (error as Error).message });
+  }
 });
 
-/**
- * DELETE /api/v1/channels/:id
- * Delete channel (stub - not yet implemented)
- */
 router.delete('/channels/:id', async (req: AuthenticatedRequest, res: Response) => {
-  res.status(501).json({ ok: false, error: 'Channels feature not yet implemented' });
+  try {
+    await query('UPDATE channels SET deleted_at = NOW(), updated_at = NOW() WHERE id = $1', [req.params.id]);
+    res.json({ ok: true, message: 'Channel deleted' });
+  } catch (error) {
+    res.status(500).json({ ok: false, error: (error as Error).message });
+  }
+});
+
+// ============================================================
+// MENUS ROUTES
+// ============================================================
+
+router.get('/master/menus', async (_req: AuthenticatedRequest, res: Response) => {
+  try {
+    const rows = await queryAll(
+      `SELECT id, code, name, label, icon, order_position, parent_id, status, created_at, updated_at
+       FROM menus
+       ORDER BY order_position, code`
+    );
+    res.json(rows);
+  } catch (error) {
+    res.status(500).json({ ok: false, error: (error as Error).message });
+  }
+});
+
+router.get('/master/menus/:id', async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const row = await queryOne('SELECT * FROM menus WHERE id = $1', [req.params.id]);
+    if (!row) return res.status(404).json({ ok: false, error: 'Menu not found' });
+    res.json(row);
+  } catch (error) {
+    res.status(500).json({ ok: false, error: (error as Error).message });
+  }
+});
+
+router.post('/master/menus', async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const { code, name, label, icon, order_position, parent_id, status } = req.body;
+    if (!code || !name) return res.status(400).json({ ok: false, error: 'Code and name are required' });
+
+    const existing = await queryOne('SELECT id FROM menus WHERE code = $1', [code]);
+    if (existing) return res.status(400).json({ ok: false, error: 'Menu code already exists' });
+
+    const row = await queryOne(
+      `INSERT INTO menus (id, code, name, label, icon, order_position, parent_id, status, created_at, updated_at)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, NOW(), NOW()) RETURNING *`,
+      [randomUUID(), code, name, label || null, icon || null, order_position || 999, parent_id || null, status || 'ACTIVE']
+    );
+    res.json(row);
+  } catch (error) {
+    res.status(500).json({ ok: false, error: (error as Error).message });
+  }
+});
+
+router.patch('/master/menus/:id', async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const existing = await queryOne('SELECT * FROM menus WHERE id = $1', [req.params.id]);
+    if (!existing) return res.status(404).json({ ok: false, error: 'Menu not found' });
+
+    const { code, name, label, icon, order_position, parent_id, status } = req.body;
+    if (code && code !== existing.code) {
+      const dup = await queryOne('SELECT id FROM menus WHERE code = $1', [code]);
+      if (dup) return res.status(400).json({ ok: false, error: 'Menu code already exists' });
+    }
+
+    const updated = await queryOne(
+      `UPDATE menus SET
+         code = COALESCE($1, code),
+         name = COALESCE($2, name),
+         label = COALESCE($3, label),
+         icon = COALESCE($4, icon),
+         order_position = COALESCE($5, order_position),
+         parent_id = $6,
+         status = COALESCE($7, status),
+         updated_at = NOW()
+       WHERE id = $8 RETURNING *`,
+      [code || null, name || null, label !== undefined ? label : existing.label,
+       icon !== undefined ? icon : existing.icon, order_position || null,
+       parent_id !== undefined ? parent_id : existing.parent_id,
+       status || null, req.params.id]
+    );
+    res.json(updated);
+  } catch (error) {
+    res.status(500).json({ ok: false, error: (error as Error).message });
+  }
+});
+
+router.delete('/master/menus/:id', async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const children = await queryAll('SELECT id FROM menus WHERE parent_id = $1', [req.params.id]);
+    if (children.length > 0) {
+      return res.status(400).json({ ok: false, error: 'Cannot delete menu with children' });
+    }
+    await query('DELETE FROM menus WHERE id = $1', [req.params.id]);
+    res.json({ ok: true, message: 'Menu deleted' });
+  } catch (error) {
+    res.status(500).json({ ok: false, error: (error as Error).message });
+  }
 });
 
 export default router;

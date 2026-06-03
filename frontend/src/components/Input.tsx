@@ -1,3 +1,4 @@
+import React from 'react';
 import './input.css';
 
 interface InputProps {
@@ -13,6 +14,9 @@ interface InputProps {
   max?: string;
   step?: string;
   disabled?: boolean;
+  id?: string;
+  className?: string;
+  style?: React.CSSProperties;
 }
 
 export function Input({
@@ -28,16 +32,20 @@ export function Input({
   max,
   step,
   disabled = false,
+  id,
+  className = '',
+  style,
 }: InputProps) {
   return (
-    <div className="input-group">
+    <div className={`input-group ${className}`} style={style}>
       {label && (
-        <label className="input-label">
+        <label className="input-label" htmlFor={id}>
           {label}
           {required && <span className="required">*</span>}
         </label>
       )}
       <input
+        id={id}
         type={type}
         value={value}
         onChange={(e) => onChange(e.target.value)}

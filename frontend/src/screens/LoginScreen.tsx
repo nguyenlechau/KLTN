@@ -32,6 +32,7 @@ export function LoginScreen() {
 
       localStorage.setItem('access_token', response.token);
       localStorage.setItem('user_role', response.user.role);
+      localStorage.setItem('user_email', response.user.email);
       // Force full reload so the top-level router reads the new token
       window.location.href = '/';
     } catch (err: any) {
@@ -43,49 +44,61 @@ export function LoginScreen() {
 
   return (
     <div className="login-container">
-      <div className="login-box">
-        <h1>CMS Login</h1>
-        <p className="login-subtitle">Physical Advertising Assets</p>
-
-        {error && (
-          <Alert type="error" onClose={() => setError('')}>
-            {error}
-          </Alert>
-        )}
-
-        <div className="login-form">
-          <div className="form-group">
-            <label>Email</label>
-            <Input
-              type="email"
-              placeholder="your@email.com"
-              value={form.email}
-              onChange={(value) => setForm({ ...form, email: value })}
-            />
+      <div className="login-right">
+        <div className="login-box">
+          <div className="login-brand">
+            <div className="login-brand-icon">📊</div>
+            <div>
+              <div className="login-brand-name">POSM System</div>
+              <div className="login-brand-sub">Outdoor Advertising Assets</div>
+            </div>
           </div>
 
-          <div className="form-group">
-            <label>Password</label>
-            <Input
-              type="password"
-              placeholder="••••••••"
-              value={form.password}
-              onChange={(value) => setForm({ ...form, password: value })}
-            />
+          <h1>Welcome back</h1>
+          <p className="login-subtitle">Sign in to your account to continue</p>
+
+          {error && (
+            <Alert type="error" onClose={() => setError('')}>
+              {error}
+            </Alert>
+          )}
+
+          <div className="login-form">
+            <div className="form-group">
+              <label htmlFor="login-email">Email address</label>
+              <Input
+                id="login-email"
+                type="email"
+                placeholder="you@company.com"
+                value={form.email}
+                onChange={(value) => setForm({ ...form, email: value })}
+              />
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="login-password">Password</label>
+              <Input
+                id="login-password"
+                type="password"
+                placeholder="••••••••"
+                value={form.password}
+                onChange={(value) => setForm({ ...form, password: value })}
+              />
+            </div>
+
+            <Button
+              onClick={handleLogin}
+              loading={isLoading}
+              style={{ width: '100%', marginTop: '0.25rem' }}
+            >
+              {isLoading ? 'Signing in…' : 'Sign In'}
+            </Button>
           </div>
 
-          <Button
-            onClick={handleLogin}
-            loading={isLoading}
-            style={{ width: '100%' }}
-          >
-            Sign In
-          </Button>
-        </div>
-
-        <div className="login-footer">
-          <p>Test Accounts Available</p>
-          <small>Email: requester@example.com | Password: password</small>
+          <div className="login-footer">
+            <p>Demo credentials</p>
+            <small>brand@example.com · password (Brand) &nbsp;|&nbsp; inputter@example.com · password (Inputter)</small>
+          </div>
         </div>
       </div>
     </div>

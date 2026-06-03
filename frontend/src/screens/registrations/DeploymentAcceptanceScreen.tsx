@@ -173,11 +173,11 @@ function DeploymentForm({ registration, onSuccess, onError }: DeploymentFormProp
         <div className="form-row">
           <div className="form-group">
             <label>Deployment Date *</label>
-            <Input type="date" value={form.deployment_date} onChange={(e) => setForm({ ...form, deployment_date: e.target.value })} />
+            <Input type="date" value={form.deployment_date} onChange={(value) => setForm({ ...form, deployment_date: value })} />
           </div>
           <div className="form-group">
             <label>Deployment Location *</label>
-            <Input type="text" value={form.deployment_location} onChange={(e) => setForm({ ...form, deployment_location: e.target.value })} placeholder="e.g., 3rd floor, Trần Hưng Đạo store" />
+            <Input type="text" value={form.deployment_location} onChange={(value) => setForm({ ...form, deployment_location: value })} placeholder="e.g., 3rd floor, Trần Hưng Đạo store" />
           </div>
         </div>
 

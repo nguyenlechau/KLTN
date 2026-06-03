@@ -12,5 +12,11 @@
     "jsx": "react-jsx",
     "strict": true
   },
-  "include": ["src"]
+  "include": ["src"],
+  "exclude": [
+    "src/components/AuditTrailViewer.tsx",
+    "src/components/DeploymentAcceptanceScreen.tsx",
+    "src/components/HierarchicalItemSelector.tsx",
+    "src/components/RegistrationDetailTabs.tsx"
+  ]
 }

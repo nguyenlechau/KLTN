@@ -19,18 +19,19 @@ interface User {
   updated_at: string;
 }
 
-const ROLES = ['REQUESTER', 'CENTRAL_REQUESTER', 'SUPERVISOR', 'CENTRAL_SUPERVISOR', 'OPERATIONS_SPECIALIST', 'OPERATIONS_MANAGER'];
+const ROLES = ['INPUTTER', 'INPUTTER_HO', 'APPROVER', 'APPROVER_HO', 'BRAND', 'BRAND_MANAGER'];
 const STATUSES = ['ACTIVE', 'INACTIVE', 'LOCKED'];
 
 export function UsersScreen() {
   const currentRole = (localStorage.getItem('user_role') || '').toUpperCase();
+  const isAdmin = currentRole === 'ADMIN';
   const [users, setUsers] = useState<User[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
   const [showCreateModal, setShowCreateModal] = useState(false);
-  const [createForm, setCreateForm] = useState({ email: '', fullName: '', password: '', role: 'REQUESTER' });
+  const [createForm, setCreateForm] = useState({ email: '', fullName: '', password: '', role: 'INPUTTER' });
   const [createErrors, setCreateErrors] = useState<Record<string, string>>({});
 
   const [editId, setEditId] = useState<string | null>(null);
@@ -40,13 +41,34 @@ export function UsersScreen() {
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
 
   useEffect(() => {
-    if (currentRole === 'ADMIN') {
+    if (isAdmin) {
       loadUsers();
       return;
     }
 
     setError('You do not have permission to access the user management page.');
-  }, []);
+  }, [isAdmin]);
+
+  if (!isAdmin) {
+    return (
+      <div className="screen">
+        <div className="screen-header">
+          <h1>User Management</h1>
+          <p>Manage system accounts and roles</p>
+        </div>
+
+        <Alert type="error" onClose={() => setError('')}>
+          You must be an admin to view this page.
+        </Alert>
+
+        {error && (
+          <Alert type="error" onClose={() => setError('')}>
+            {error}
+          </Alert>
+        )}
+      </div>
+    );
+  }
 
   const loadUsers = async () => {
     setIsLoading(true);

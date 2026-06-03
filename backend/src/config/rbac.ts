@@ -3,15 +3,16 @@ import { WorkflowRole } from '../workflow/types.js';
 
 export const ROLE_CODES: WorkflowRole[] = [
   'ADMIN',
-  'REQUESTER',
-  'CENTRAL_REQUESTER',
-  'SUPERVISOR',
-  'CENTRAL_SUPERVISOR',
-  'OPERATIONS_SPECIALIST',
-  'OPERATIONS_MANAGER',
+  'INPUTTER',
+  'INPUTTER_HO',
+  'APPROVER',
+  'APPROVER_HO',
+  'BRAND',
+  'BRAND_MANAGER',
 ];
 
 export const ROLE_PERMISSION_MATRIX: Record<WorkflowRole, PermissionCode[]> = {
+  // System administrator — full access
   ADMIN: [
     'audit.view',
     'channel.view',
@@ -39,7 +40,8 @@ export const ROLE_PERMISSION_MATRIX: Record<WorkflowRole, PermissionCode[]> = {
     'registration.approve',
     'registration.complete',
   ],
-  REQUESTER: [
+  // Branch-level requester — creates and submits registrations
+  INPUTTER: [
     'channel.view',
     'category.view',
     'location.view',
@@ -53,7 +55,8 @@ export const ROLE_PERMISSION_MATRIX: Record<WorkflowRole, PermissionCode[]> = {
     'registration.update',
     'registration.submit',
   ],
-  CENTRAL_REQUESTER: [
+  // Head-office requester — same permissions as INPUTTER
+  INPUTTER_HO: [
     'channel.view',
     'category.view',
     'location.view',
@@ -67,7 +70,8 @@ export const ROLE_PERMISSION_MATRIX: Record<WorkflowRole, PermissionCode[]> = {
     'registration.update',
     'registration.submit',
   ],
-  SUPERVISOR: [
+  // Branch management — approves registrations submitted by branch inputters
+  APPROVER: [
     'channel.view',
     'category.view',
     'location.view',
@@ -77,7 +81,8 @@ export const ROLE_PERMISSION_MATRIX: Record<WorkflowRole, PermissionCode[]> = {
     'registration.review',
     'audit.view',
   ],
-  CENTRAL_SUPERVISOR: [
+  // Head-office management — approves registrations from HO inputters
+  APPROVER_HO: [
     'channel.view',
     'category.view',
     'location.view',
@@ -87,20 +92,33 @@ export const ROLE_PERMISSION_MATRIX: Record<WorkflowRole, PermissionCode[]> = {
     'registration.review',
     'audit.view',
   ],
-  OPERATIONS_SPECIALIST: [
+  // Brand team — creates/edits master data and handles brand intake step
+  BRAND: [
+    'audit.view',
     'channel.view',
+    'channel.create',
+    'channel.update',
     'category.view',
+    'category.create',
+    'category.update',
     'location.view',
+    'location.create',
+    'location.update',
     'content.view',
+    'content.create',
+    'content.update',
+    'content.clone',
     'physical_item.view',
     'physical_item.create',
     'physical_item.update',
     'registration.view',
-    'registration.review',
+    'registration.create',
+    'registration.update',
     'registration.accept',
-    'audit.view',
   ],
-  OPERATIONS_MANAGER: [
+  // Brand manager — view-only for master data, gives final registration approval
+  BRAND_MANAGER: [
+    'audit.view',
     'channel.view',
     'category.view',
     'location.view',
@@ -109,11 +127,10 @@ export const ROLE_PERMISSION_MATRIX: Record<WorkflowRole, PermissionCode[]> = {
     'registration.view',
     'registration.approve',
     'registration.complete',
-    'audit.view',
   ],
 };
 
 export const CENTRAL_ROLES = new Set<WorkflowRole>([
-  'CENTRAL_REQUESTER',
-  'CENTRAL_SUPERVISOR',
+  'INPUTTER_HO',
+  'APPROVER_HO',
 ]);

@@ -19,6 +19,8 @@ export interface Registration {
   budget_total: number;
   total_amount: number;
   workflow_state: string;
+  start_date?: string;
+  end_date?: string;
   prices_locked_at?: string;
   approved_at?: string;
   deployment_date?: string;
@@ -80,6 +82,8 @@ export async function createRegistration(
     phone: string;
     email: string;
     budget_total: number;
+    start_date?: string;
+    end_date?: string;
     deployment_date?: string;
     notes?: string;
     created_by: string;
@@ -91,12 +95,12 @@ export async function createRegistration(
 
   await query(
     `INSERT INTO registrations 
-     (id, registration_code, campaign_name, department_id, channel_id, brand_name, contact_person, phone, email, budget_total, total_amount, workflow_state, created_by, created_at, updated_at)
-     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)`,
+     (id, registration_code, campaign_name, department_id, channel_id, brand_name, contact_person, phone, email, budget_total, total_amount, workflow_state, created_by, start_date, end_date, created_at, updated_at)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17)`,
     [
       id, code, data.campaign_name, data.department_id, data.channel_id, data.brand_name,
       data.contact_person, data.phone, data.email, data.budget_total, 0, 'DRAFT',
-      data.created_by, now, now
+      data.created_by, data.start_date || null, data.end_date || null, now, now
     ]
   );
 
@@ -113,6 +117,8 @@ export async function createRegistration(
     budget_total: data.budget_total,
     total_amount: 0,
     workflow_state: 'DRAFT',
+    start_date: data.start_date || undefined,
+    end_date: data.end_date || undefined,
     created_by: data.created_by,
     created_at: now,
     updated_at: now,
@@ -263,7 +269,9 @@ export async function addRegistrationContent(
 
 export async function getRegistrationContent(registrationId: string): Promise<RegistrationContent[]> {
   return queryAll<RegistrationContent>(
-    `SELECT * FROM registration_content WHERE registration_id = $1 ORDER BY created_at ASC`,
+    `SELECT rc.*, ac.content_name FROM registration_content rc
+     LEFT JOIN advertising_content ac ON ac.id = rc.content_id
+     WHERE rc.registration_id = $1 ORDER BY rc.created_at ASC`,
     [registrationId]
   );
 }
@@ -288,21 +296,31 @@ export async function addRegistrationItem(
     const id = uuidv4();
     const now = new Date().toISOString();
 
-    // Get category pricing
-    const category = await queryOne<{ unit_price: string }>(
-      `SELECT unit_price FROM categories WHERE id = $1`,
-      [categoryId]
+    const item = await queryOne<{ id: string; category_id: string; status: string }>(
+      `SELECT id, category_id, status FROM physical_items WHERE id = $1 AND status = 'ACTIVE'`,
+      [itemId]
     );
-    if (!category) throw new Error('Category not found');
+    if (!item) throw new Error('POSM item not found or inactive');
 
-    const unitPrice = parseFloat(category.unit_price);
+    if (String(item.category_id) !== String(categoryId)) {
+      throw new Error('POSM item does not belong to the selected category');
+    }
+
+    // Get item pricing
+    const priceRow = await queryOne<{ unit_price: string }>(
+      `SELECT unit_price FROM physical_items WHERE id = $1 AND status = 'ACTIVE'`,
+      [itemId]
+    );
+    if (!priceRow) throw new Error('POSM item not found or inactive');
+
+    const unitPrice = parseFloat(priceRow.unit_price) || 0;
     const totalAmount = unitPrice * quantity;
 
     // Add item
     await query(
-      `INSERT INTO registration_items (id, registration_id, item_id, category_id, unit_price, quantity, total_amount, created_at)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
-      [id, registrationId, itemId, categoryId, unitPrice, quantity, totalAmount, now]
+      `INSERT INTO registration_items (id, registration_id, physical_item_id, category_id, unit_price, quantity, created_at)
+       VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+      [id, registrationId, itemId, categoryId, unitPrice, quantity, now]
     );
 
     // Update registration total
@@ -332,7 +350,12 @@ export async function addRegistrationItem(
 
 export async function getRegistrationItems(registrationId: string): Promise<RegistrationItem[]> {
   return queryAll<RegistrationItem>(
-    `SELECT * FROM registration_items WHERE registration_id = $1 ORDER BY created_at ASC`,
+    `SELECT ri.id, ri.registration_id, ri.physical_item_id AS item_id, ri.category_id,
+            ri.unit_price, ri.quantity, ri.total_amount, ri.created_at,
+            pi.item_name, pi.item_code
+     FROM registration_items ri
+     LEFT JOIN physical_items pi ON pi.id = ri.physical_item_id
+     WHERE ri.registration_id = $1 ORDER BY ri.created_at ASC`,
     [registrationId]
   );
 }
@@ -372,7 +395,7 @@ export async function validateBudget(registrationId: string): Promise<{ valid: b
       valid: false,
       totalAmount: registration.total_amount,
       budget: registration.budget_total,
-      message: `Tổng chi phí (${registration.total_amount}) vượt quá ngân sách (${registration.budget_total})`,
+      message: `Total cost (${registration.total_amount}) exceeds budget (${registration.budget_total})`,
     };
   }
 
@@ -389,7 +412,7 @@ export async function validateBudget(registrationId: string): Promise<{ valid: b
 export async function validateAllItemsActionable(registrationId: string): Promise<{ valid: boolean; inactiveCount: number }> {
   const result = await queryOne<{ count: string }>(
     `SELECT COUNT(*) as count FROM registration_items ri
-     JOIN physical_items pi ON pi.id = ri.item_id
+     JOIN physical_items pi ON pi.id = ri.physical_item_id
      WHERE ri.registration_id = $1 AND pi.status != 'ACTIVE'`,
     [registrationId]
   );

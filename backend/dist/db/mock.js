@@ -1,7 +1,7 @@
 // In-memory mock database for testing without PostgreSQL
 import crypto from 'crypto';
-import fs from 'fs';
-import path from 'path';
+import { existsSync, readFileSync } from 'fs';
+import { resolve } from 'path';
 function generateId() {
     return crypto.randomBytes(8).toString('hex');
 }
@@ -14,10 +14,72 @@ class MockDatabase {
     categories = new Map();
     locations = new Map();
     contents = new Map();
+    contentImages = [];
     physicalItems = new Map();
+    menus = new Map();
     registrations = new Map();
     registrationItems = new Map();
     auditLogs = [];
+    workflowApprovals = [];
+    getLegacySeedRegistrations() {
+        const now = new Date().toISOString();
+        return [
+            {
+                id: '1',
+                registration_code: 'REG-001',
+                campaign_name: 'Summer Campaign 2024',
+                department_id: 'MARKETING',
+                channel_id: Array.from(this.channels.values())[0]?.id ?? 'CH-1',
+                brand_name: 'Brand A',
+                contact_person: 'Requester User',
+                phone: '0900000001',
+                email: 'requester@example.com',
+                budget_total: 50000000,
+                total_amount: 0,
+                workflow_state: 'APPROVED',
+                created_by: Array.from(this.users.values())[0]?.id ?? 'U-1',
+                created_at: now,
+                updated_at: now,
+                deleted_at: null,
+            },
+            {
+                id: '2',
+                registration_code: 'REG-002',
+                campaign_name: 'Autumn Promotion',
+                department_id: 'MARKETING',
+                channel_id: Array.from(this.channels.values())[0]?.id ?? 'CH-1',
+                brand_name: 'Brand B',
+                contact_person: 'Requester User',
+                phone: '0900000002',
+                email: 'requester@example.com',
+                budget_total: 75000000,
+                total_amount: 0,
+                workflow_state: 'SUPERVISOR_REVIEW',
+                created_by: Array.from(this.users.values())[0]?.id ?? 'U-1',
+                created_at: now,
+                updated_at: now,
+                deleted_at: null,
+            },
+            {
+                id: '3',
+                registration_code: 'REG-003',
+                campaign_name: 'Winter Special',
+                department_id: 'MARKETING',
+                channel_id: Array.from(this.channels.values())[0]?.id ?? 'CH-1',
+                brand_name: 'Brand C',
+                contact_person: 'Requester User',
+                phone: '0900000003',
+                email: 'requester@example.com',
+                budget_total: 100000000,
+                total_amount: 0,
+                workflow_state: 'DRAFT',
+                created_by: Array.from(this.users.values())[0]?.id ?? 'U-1',
+                created_at: now,
+                updated_at: now,
+                deleted_at: null,
+            },
+        ];
+    }
     constructor() {
         const adminId = generateId();
         this.seedTestAccounts(adminId);
@@ -50,180 +112,181 @@ class MockDatabase {
         console.log('[MockDB] Seeded', this.users.size, 'test accounts');
     }
     seedMasterData(adminId) {
-        const timestamp = new Date().toISOString();
-        const channelSeedData = [
-            { code: 'CN', name: 'Kênh CN' },
-            { code: 'AF', name: 'Kênh AF' },
-            { code: 'SME', name: 'Kênh SME' },
-            { code: 'OOH', name: 'Kênh OOH' },
-            { code: 'HO', name: 'Kênh HO' },
-            { code: 'Hệ sinh thái', name: 'Kênh Hệ sinh thái' },
+        const readSeedJson = (relativePaths) => {
+            for (const relativePath of relativePaths) {
+                const absolutePath = resolve(process.cwd(), relativePath);
+                if (existsSync(absolutePath)) {
+                    return JSON.parse(readFileSync(absolutePath, 'utf8'));
+                }
+            }
+            throw new Error(`Unable to load seed file: ${relativePaths.join(', ')}`);
+        };
+        // Seed Channels
+        const channels = [
+            { code: 'CN', name: 'CN', description: 'Chi nhánh' },
+            { code: 'AF', name: 'AF', description: 'Affiliate' },
+            { code: 'SME', name: 'SME', description: 'Doanh nghiệp vừa và nhỏ' },
+            { code: 'OOH', name: 'OOH', description: 'Out-of-home' },
+            { code: 'HO', name: 'HO', description: 'Hội sở' },
+            { code: 'HS', name: 'Hệ sinh thái', description: 'Hệ sinh thái' },
         ];
-        for (const channelSeed of channelSeedData) {
+        channels.forEach((ch) => {
             const channelId = generateId();
-            this.channels.set(channelId, {
+            const channel = {
                 id: channelId,
-                code: channelSeed.code,
-                name: channelSeed.name,
-                description: `${channelSeed.name} channel`,
+                code: ch.code,
+                name: ch.name,
+                description: ch.description,
                 status: 'ACTIVE',
                 created_by: adminId,
                 updated_by: adminId,
-                created_at: timestamp,
-                updated_at: timestamp,
-            });
-        }
-        const categorySeedData = [
-            { code: 'LB', name: 'Light box', unitPrice: 350000 },
-            { code: 'DL', name: 'Decal lưới', unitPrice: 350000 },
-            { code: 'HL', name: 'Hilex', unitPrice: 250000 },
-            { code: 'DC', name: 'Decal', unitPrice: 200000 },
-            { code: 'BN', name: 'Banner khung sắt', unitPrice: 160000 },
-            { code: 'ST', name: 'Standee thường', unitPrice: 220000 },
-            { code: 'SS', name: 'Standee khung sắt', unitPrice: 300000 },
-            { code: 'PF', name: 'Poster frame', unitPrice: 500000 },
-            { code: 'OL', name: 'Ốp lưng', unitPrice: 50000 },
-            { code: 'MH', name: 'Màn hình LCD', unitPrice: 0 },
-            { code: 'MA', name: 'Màn hình ATM', unitPrice: 0 },
-            { code: 'HG', name: 'Hanger', unitPrice: 0 },
-            { code: 'DM', name: 'Decal thang máy', unitPrice: 0 },
-            { code: 'MQ', name: 'Màn hình QC', unitPrice: 0 },
-            { code: 'BO', name: 'Billboard OOH', unitPrice: 30000000 },
-            { code: 'MO', name: 'Màn hình OOH', unitPrice: 0 },
-            { code: 'BP', name: 'Backdrop Prime', unitPrice: 350000 },
+                created_at: new Date().toISOString(),
+                updated_at: new Date().toISOString(),
+            };
+            this.channels.set(channelId, channel);
+        });
+        // Seed Categories using the production-style codes from the seed items.
+        const categories = [
+            { code: 'DL', name: 'Decal lưới', unitPrice: 5000, unitOfMeasure: 'Set' },
+            { code: 'HL', name: 'Hilex', unitPrice: 5000, unitOfMeasure: 'Set' },
+            { code: 'DC', name: 'Decal', unitPrice: 4500, unitOfMeasure: 'Set' },
+            { code: 'BP', name: 'Backdrop Prime', unitPrice: 8000, unitOfMeasure: 'Set' },
+            { code: 'OL', name: 'Ốp lưng', unitPrice: 3500, unitOfMeasure: 'Unit' },
+            { code: 'PF', name: 'Poster frame', unitPrice: 4000, unitOfMeasure: 'Unit' },
+            { code: 'LB', name: 'Light box', unitPrice: 6000, unitOfMeasure: 'Unit' },
+            { code: 'MQ', name: 'Màn hình QC', unitPrice: 9000, unitOfMeasure: 'Unit' },
         ];
-        for (const categorySeed of categorySeedData) {
+        categories.forEach((cat) => {
             const categoryId = generateId();
-            this.categories.set(categoryId, {
+            const category = {
                 id: categoryId,
-                code: categorySeed.code,
-                name: categorySeed.name,
-                description: `${categorySeed.name} category`,
-                unit_price: categorySeed.unitPrice,
+                code: cat.code,
+                name: cat.name,
+                description: `${cat.name} category`,
+                unit_price: cat.unitPrice,
                 status: 'ACTIVE',
                 created_by: adminId,
                 updated_by: adminId,
-                created_at: timestamp,
-                updated_at: timestamp,
-            });
-        }
-        const locationSeedPath = path.join(process.cwd(), 'seed-locations.json');
-        const itemSeedPath = path.join(process.cwd(), 'seed-items.json');
-        let locationSeeds = [];
-        let itemSeeds = [];
-        try {
-            if (fs.existsSync(locationSeedPath)) {
-                const parsed = JSON.parse(fs.readFileSync(locationSeedPath, 'utf8'));
-                locationSeeds = Array.isArray(parsed.locations) ? parsed.locations : [];
-            }
-        }
-        catch {
-            locationSeeds = [];
-        }
-        try {
-            if (fs.existsSync(itemSeedPath)) {
-                const parsed = JSON.parse(fs.readFileSync(itemSeedPath, 'utf8'));
-                itemSeeds = Array.isArray(parsed.items) ? parsed.items : [];
-            }
-        }
-        catch {
-            itemSeeds = [];
-        }
-        if (locationSeeds.length === 0) {
-            locationSeeds = [
-                { code: 'PMH', classification: 'PGD', name: 'PGD Phú Mỹ Hưng', province: 'Hồ Chí Minh', subDistrict: 'Nội thành', address: 'Tầng Lửng Và Một Phần Tầng Trệt, Tòa Nhà Phú Mã Dương, A4', channels: ['CN'] },
-                { code: 'TML', classification: 'PGD', name: 'PGD Nguyễn Duy Trinh', province: 'Hồ Chí Minh', subDistrict: 'Nội thành', address: 'Số 657 Và 659 Đường Nguyễn Duy Trinh, Phường Bình Trưng', channels: ['CN'] },
-                { code: 'QN2', classification: 'CN', name: 'CN Trần Não', province: 'Hồ Chí Minh', subDistrict: 'Nội thành', address: 'Số 188 – 190 Đường Trần Não, Phường An Khánh', channels: ['CN'] },
-            ];
-        }
-        const channelEntries = Array.from(this.channels.values());
-        const channelIdByCode = new Map(channelEntries.map((channel) => [channel.code, channel.id]));
-        const locationIdByCode = new Map();
-        for (const locationSeed of locationSeeds) {
+                created_at: new Date().toISOString(),
+                updated_at: new Date().toISOString(),
+            };
+            this.categories.set(categoryId, category);
+        });
+        const seededLocations = readSeedJson(['seed-locations.json', 'backend/seed-locations.json']).locations;
+        seededLocations.forEach((loc) => {
             const locationId = generateId();
-            const locationChannels = Array.isArray(locationSeed.channels) ? locationSeed.channels : ['CN'];
-            this.locations.set(locationId, {
+            const location = {
                 id: locationId,
-                code: locationSeed.code,
-                name: locationSeed.name,
-                address_line: locationSeed.address,
-                latitude: locationSeed.latitude ?? null,
-                longitude: locationSeed.longitude ?? null,
-                classification: locationSeed.classification,
-                province: locationSeed.province,
-                sub_district: locationSeed.subDistrict,
-                channels: locationChannels,
+                code: loc.code,
+                name: loc.name,
+                classification: loc.classification ?? null,
+                province: loc.province ?? null,
+                sub_district: loc.subDistrict ?? null,
+                address_line: loc.address ?? null,
+                latitude: null,
+                longitude: null,
+                channels: loc.channels ?? [],
+                csm_name: null,
+                csm_email: null,
+                csm_phone: null,
+                note: null,
                 status: 'ACTIVE',
                 created_by: adminId,
                 updated_by: adminId,
-                created_at: timestamp,
-                updated_at: timestamp,
-            });
-            locationIdByCode.set(locationSeed.code, locationId);
-        }
-        const categoryIdByCode = new Map(Array.from(this.categories.values()).map((category) => [category.code, category.id]));
-        let itemCount = 0;
-        for (const itemSeed of itemSeeds) {
-            const locationId = locationIdByCode.get(itemSeed.location);
-            const categoryId = categoryIdByCode.get(itemSeed.category);
-            if (!locationId || !categoryId) {
-                continue;
+                created_at: new Date().toISOString(),
+                updated_at: new Date().toISOString(),
+            };
+            this.locations.set(locationId, location);
+        });
+        const seededItems = readSeedJson(['seed-items.json', 'backend/seed-items.json']).items;
+        const channelByCode = new Map(Array.from(this.channels.values()).map((channel) => [channel.code, channel]));
+        const categoryByCode = new Map(Array.from(this.categories.values()).map((category) => [category.code, category]));
+        const locationByCode = new Map(Array.from(this.locations.values()).map((location) => [location.code, location]));
+        const seqByKey = new Map();
+        seededItems.forEach((item) => {
+            const category = categoryByCode.get(item.category);
+            const location = locationByCode.get(item.location);
+            if (!category || !location) {
+                return;
             }
-            const location = this.locations.get(locationId);
-            const preferredChannelCode = location?.channels?.find((code) => channelIdByCode.has(code)) || 'CN';
-            const channelId = channelIdByCode.get(preferredChannelCode) || channelEntries[0]?.id;
-            const itemId = generateId();
-            this.physicalItems.set(itemId, {
-                id: itemId,
+            const channelCode = location.channels?.[0] ?? 'CN';
+            const channel = channelByCode.get(channelCode) ?? Array.from(this.channels.values())[0];
+            const key = `${category.id}:${location.id}`;
+            const nextSeq = (seqByKey.get(key) ?? 0) + 1;
+            seqByKey.set(key, nextSeq);
+            const physicalItem = {
+                id: generateId(),
+                channel_id: channel.id,
+                category_id: category.id,
+                location_id: location.id,
+                seq_no: nextSeq,
+                item_code: item.code,
+                item_name: item.name,
+                width: item.width != null ? String(item.width) : '0',
+                length: item.length != null ? String(item.length) : '0',
+                unit_price: category.unit_price ?? 0,
+                image_key: null,
+                description: item.description ?? null,
+                status: 'ACTIVE',
+                created_by: adminId,
+                updated_by: adminId,
+                created_at: new Date().toISOString(),
+                updated_at: new Date().toISOString(),
+            };
+            this.physicalItems.set(physicalItem.id, physicalItem);
+        });
+        // Seed Advertising Contents
+        const now = new Date();
+        const startDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000); // 30 days ago
+        const endDate = new Date(now.getTime() + 90 * 24 * 60 * 60 * 1000); // 90 days from now
+        const channelIds = Array.from(this.channels.keys());
+        const categoryIds = Array.from(this.categories.keys());
+        const contentNames = [
+            'Summer Campaign 2026',
+            'Spring Product Launch',
+            'Holiday Special Offer',
+            'New Year Promotion',
+            'Flash Sale Event',
+        ];
+        contentNames.forEach((name, idx) => {
+            const contentId = generateId();
+            const channelId = channelIds[idx % channelIds.length];
+            const categoryId = categoryIds[idx % categoryIds.length];
+            const content = {
+                id: contentId,
                 channel_id: channelId,
                 category_id: categoryId,
-                location_id: locationId,
-                seq_no: itemCount + 1,
-                item_code: itemSeed.code,
-                item_name: itemSeed.name,
-                width: String(itemSeed.width ?? 0),
-                length: String(itemSeed.length ?? 0),
-                image_key: null,
-                description: itemSeed.description ?? null,
-                status: 'ACTIVE',
+                name: name,
+                description: `High-impact advertising campaign: ${name}`,
+                start_date: startDate.toISOString().split('T')[0],
+                end_date: endDate.toISOString().split('T')[0],
+                image_keys: JSON.stringify([`image_${idx + 1}.jpg`]),
                 created_by: adminId,
                 updated_by: adminId,
-                created_at: timestamp,
-                updated_at: timestamp,
-            });
-            itemCount += 1;
-        }
-        const firstChannelId = channelEntries[0]?.id;
-        const firstCategoryId = Array.from(this.categories.keys())[0];
-        const firstLocationId = Array.from(this.locations.keys())[0];
-        const now = new Date();
-        const startDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
-        const endDate = new Date(now.getTime() + 90 * 24 * 60 * 60 * 1000);
-        if (firstChannelId && firstCategoryId && firstLocationId) {
-            const contentNames = [
-                'Summer Campaign 2026',
-                'Spring Product Launch',
-                'Holiday Special Offer',
-            ];
-            contentNames.forEach((name, index) => {
-                const contentId = generateId();
-                this.contents.set(contentId, {
-                    id: contentId,
-                    channel_id: firstChannelId,
-                    category_id: index === 0 ? firstCategoryId : null,
-                    name,
-                    description: `High-impact advertising campaign: ${name}`,
-                    start_date: startDate.toISOString().split('T')[0],
-                    end_date: endDate.toISOString().split('T')[0],
-                    image_keys: JSON.stringify([`image_${index + 1}.jpg`]),
-                    created_by: adminId,
-                    updated_by: adminId,
-                    created_at: timestamp,
-                    updated_at: timestamp,
-                });
-            });
-        }
+                created_at: new Date().toISOString(),
+                updated_at: new Date().toISOString(),
+            };
+            this.contents.set(contentId, content);
+        });
         console.log('[MockDB] Seeded', this.channels.size, 'channels,', this.categories.size, 'categories,', this.locations.size, 'locations,', this.physicalItems.size, 'physical items,', this.contents.size, 'contents');
+        const seededMenus = [
+            { code: 'registrations', name: 'Registrations', label: 'Registrations', icon: '📝', order_position: 10, parent_id: null, status: 'ACTIVE' },
+            { code: 'content', name: 'Advertising Content', label: 'Advertising Content', icon: '🖼️', order_position: 20, parent_id: null, status: 'ACTIVE' },
+            { code: 'items', name: 'Physical Items', label: 'Physical Items', icon: '📋', order_position: 30, parent_id: null, status: 'ACTIVE' },
+            { code: 'channels', name: 'Channels', label: 'Channels', icon: '📢', order_position: 40, parent_id: null, status: 'ACTIVE' },
+            { code: 'categories', name: 'Categories', label: 'Categories', icon: '🏷️', order_position: 50, parent_id: null, status: 'ACTIVE' },
+            { code: 'locations', name: 'Locations', label: 'Locations', icon: '📍', order_position: 60, parent_id: null, status: 'ACTIVE' },
+        ];
+        seededMenus.forEach((menu) => {
+            const id = generateId();
+            const nowIso = new Date().toISOString();
+            this.menus.set(id, {
+                id,
+                ...menu,
+                created_at: nowIso,
+                updated_at: nowIso,
+            });
+        });
     }
     async query(sql, params) {
         const normalizedSql = sql.replace(/\s+/g, ' ').trim().toLowerCase();
@@ -233,9 +296,11 @@ class MockDatabase {
         this.locations ??= new Map();
         this.contents ??= new Map();
         this.physicalItems ??= new Map();
+        this.menus ??= new Map();
         this.registrations ??= new Map();
         this.registrationItems ??= new Map();
         this.auditLogs ??= [];
+        this.workflowApprovals ??= [];
         // Log all queries for debugging
         const sqlStart = sql.substring(0, 80).replace(/\s+/g, ' ').trim();
         console.log('[MockDB Query]', sqlStart, '| Params:', params?.length || 0);
@@ -248,6 +313,27 @@ class MockDatabase {
                 u.deleted_at === null);
             console.log('[MockDB] Auth query matched, returning', users.length, 'users');
             return { rows: users, rowCount: users.length };
+        }
+        // Support current auth query shape: fetch by email then compare password hash in route.
+        if (sql.includes('SELECT u.*, r.code as role_name FROM users u') &&
+            sql.includes('LEFT JOIN roles r ON u.role_id = r.id') &&
+            sql.includes('LOWER(u.email) = LOWER($1)') &&
+            sql.includes('u.deleted_at IS NULL')) {
+            const email = String(params?.[0] ?? '').toLowerCase();
+            const user = Array.from(this.users.values()).find((u) => u.email.toLowerCase() === email && u.deleted_at === null);
+            if (!user) {
+                return { rows: [], rowCount: 0 };
+            }
+            return {
+                rows: [
+                    {
+                        ...user,
+                        role_name: user.role,
+                        role_id: null,
+                    },
+                ],
+                rowCount: 1,
+            };
         }
         if (sql.includes('INSERT INTO users')) {
             const id = generateId();
@@ -268,8 +354,211 @@ class MockDatabase {
         if (sql.includes('SELECT COUNT(*)::int AS count FROM advertising_registrations')) {
             return { rows: [{ count: this.registrations?.size ?? 0 }], rowCount: 1 };
         }
+        if (sql.includes('FROM menus') && sql.includes('ORDER BY order_position, code')) {
+            const rows = Array.from(this.menus.values()).sort((left, right) => {
+                if (left.order_position !== right.order_position) {
+                    return left.order_position - right.order_position;
+                }
+                return left.code.localeCompare(right.code);
+            });
+            return { rows, rowCount: rows.length };
+        }
+        if (sql.includes('SELECT * FROM menus WHERE id = $1')) {
+            const id = String(params?.[0] ?? '');
+            const menu = this.menus.get(id);
+            return { rows: menu ? [menu] : [], rowCount: menu ? 1 : 0 };
+        }
+        if (sql.includes('SELECT id FROM menus WHERE code = $1')) {
+            const code = String(params?.[0] ?? '');
+            const existing = Array.from(this.menus.values()).find((entry) => entry.code === code);
+            return { rows: existing ? [{ id: existing.id }] : [], rowCount: existing ? 1 : 0 };
+        }
+        if (sql.includes('INSERT INTO menus')) {
+            const id = generateId();
+            const nowIso = new Date().toISOString();
+            const menu = {
+                id,
+                code: params?.[0],
+                name: params?.[1],
+                label: params?.[2] ?? null,
+                icon: params?.[3] ?? null,
+                order_position: Number(params?.[4] ?? 999),
+                parent_id: params?.[5] ?? null,
+                status: (params?.[6] ?? 'ACTIVE'),
+                created_at: nowIso,
+                updated_at: nowIso,
+            };
+            this.menus.set(id, menu);
+            return { rows: [menu], rowCount: 1 };
+        }
+        if (sql.includes('UPDATE menus SET') && sql.includes('RETURNING *')) {
+            const id = String(params?.[params.length - 1] ?? '');
+            const existing = this.menus.get(id);
+            if (!existing) {
+                return { rows: [], rowCount: 0 };
+            }
+            const updateMatches = [...sql.matchAll(/(code|name|label|icon|order_position|parent_id|status)\s*=\s*\$(\d+)/g)];
+            for (const match of updateMatches) {
+                const field = match[1];
+                const paramIndex = Number(match[2]) - 1;
+                existing[field] = params?.[paramIndex] ?? null;
+            }
+            existing.updated_at = new Date().toISOString();
+            this.menus.set(id, existing);
+            return { rows: [existing], rowCount: 1 };
+        }
+        if (sql.includes('SELECT id FROM menus WHERE parent_id = $1')) {
+            const parentId = String(params?.[0] ?? '');
+            const rows = Array.from(this.menus.values())
+                .filter((entry) => String(entry.parent_id ?? '') === parentId)
+                .map((entry) => ({ id: entry.id }));
+            return { rows, rowCount: rows.length };
+        }
+        if (sql.includes('DELETE FROM menus WHERE id = $1')) {
+            const id = String(params?.[0] ?? '');
+            const deleted = this.menus.delete(id);
+            return { rows: [], rowCount: deleted ? 1 : 0 };
+        }
+        if (sql.includes('SELECT COUNT(*) as count FROM registrations WHERE registration_code LIKE $1')) {
+            const like = String(params?.[0] ?? '').replace(/%/g, '');
+            const registrations = this.registrations.size > 0
+                ? Array.from(this.registrations.values()).filter((r) => !r.deleted_at)
+                : this.getLegacySeedRegistrations();
+            const count = registrations.filter((r) => String(r.registration_code ?? '').includes(like)).length;
+            return { rows: [{ count: String(count) }], rowCount: 1 };
+        }
+        // Legacy registrations table compatibility (used by older services/routes)
+        if (sql.includes('SELECT COUNT(*) as count FROM registrations WHERE deleted_at IS NULL')) {
+            const registrations = this.registrations.size > 0
+                ? Array.from(this.registrations.values()).filter((r) => !r.deleted_at)
+                : this.getLegacySeedRegistrations();
+            return { rows: [{ count: String(registrations.length) }], rowCount: 1 };
+        }
+        if (sql.includes('SELECT * FROM registrations WHERE deleted_at IS NULL ORDER BY created_at DESC')) {
+            const registrations = this.registrations.size > 0
+                ? Array.from(this.registrations.values()).filter((r) => !r.deleted_at)
+                : this.getLegacySeedRegistrations();
+            return { rows: registrations, rowCount: registrations.length };
+        }
+        if (sql.includes('SELECT * FROM registrations WHERE id = $1 AND deleted_at IS NULL')) {
+            const registrationId = String(params?.[0] ?? '');
+            const existing = this.registrations.get(registrationId);
+            if (existing && !existing.deleted_at) {
+                return { rows: [existing], rowCount: 1 };
+            }
+            const seeded = this.getLegacySeedRegistrations().find((r) => r.id === registrationId);
+            if (seeded) {
+                this.registrations.set(seeded.id, seeded);
+                return { rows: [seeded], rowCount: 1 };
+            }
+            return { rows: [], rowCount: 0 };
+        }
+        if (sql.includes('INSERT INTO registrations')) {
+            const id = String(params?.[0]);
+            const registration = {
+                id,
+                registration_code: params?.[1],
+                campaign_name: params?.[2],
+                department_id: params?.[3],
+                channel_id: params?.[4],
+                brand_name: params?.[5],
+                contact_person: params?.[6],
+                phone: params?.[7],
+                email: params?.[8],
+                budget_total: Number(params?.[9] ?? 0),
+                total_amount: Number(params?.[10] ?? 0),
+                workflow_state: params?.[11] ?? 'DRAFT',
+                created_by: params?.[12],
+                start_date: params?.[13] ?? null,
+                end_date: params?.[14] ?? null,
+                created_at: params?.[15] ?? new Date().toISOString(),
+                updated_at: params?.[16] ?? new Date().toISOString(),
+                deleted_at: null,
+            };
+            this.registrations.set(id, registration);
+            return { rows: [registration], rowCount: 1 };
+        }
+        if (sql.includes('UPDATE registrations SET workflow_state = $1, updated_at = $2 WHERE id = $3')) {
+            const toState = params?.[0];
+            const updatedAt = params?.[1] ?? new Date().toISOString();
+            const registrationId = String(params?.[2]);
+            const registration = this.registrations.get(registrationId);
+            if (!registration) {
+                return { rows: [], rowCount: 0 };
+            }
+            registration.workflow_state = toState;
+            registration.updated_at = updatedAt;
+            this.registrations.set(registrationId, registration);
+            return { rows: [registration], rowCount: 1 };
+        }
+        if (sql.includes('INSERT INTO registration_approvals')) {
+            const approval = {
+                id: params?.[0],
+                registration_id: params?.[1],
+                approver_id: params?.[2],
+                state: params?.[3],
+                status: params?.[4],
+                notes: params?.[5] ?? null,
+                created_at: params?.[6] ?? new Date().toISOString(),
+                updated_at: params?.[7] ?? new Date().toISOString(),
+            };
+            this.workflowApprovals.push(approval);
+            return { rows: [approval], rowCount: 1 };
+        }
+        if (sql.includes('SELECT * FROM registration_approvals WHERE registration_id = $1 ORDER BY created_at ASC')) {
+            const registrationId = String(params?.[0]);
+            const rows = this.workflowApprovals
+                .filter((item) => String(item.registration_id) === registrationId)
+                .sort((a, b) => String(a.created_at).localeCompare(String(b.created_at)));
+            return { rows, rowCount: rows.length };
+        }
         if (sql.includes('SELECT COUNT(*)::int AS count FROM physical_items')) {
             return { rows: [{ count: this.physicalItems?.size ?? 0 }], rowCount: 1 };
+        }
+        if (sql.includes('SELECT COUNT(*) as count FROM physical_items WHERE deleted_at IS NULL')) {
+            const activeItems = Array.from(this.physicalItems.values());
+            return { rows: [{ count: String(activeItems.length) }], rowCount: 1 };
+        }
+        if (normalizedSql.includes('select count(*) as count from categories where deleted_at is null')) {
+            const active = Array.from(this.categories.values()).filter((c) => c.status && c.status !== 'INACTIVE');
+            return { rows: [{ count: String(active.length) }], rowCount: 1 };
+        }
+        if (normalizedSql.includes('select count(*) as count from locations where deleted_at is null')) {
+            const active = Array.from(this.locations.values()).filter((l) => l.status && l.status !== 'INACTIVE');
+            return { rows: [{ count: String(active.length) }], rowCount: 1 };
+        }
+        if (sql.includes('SELECT * FROM physical_items WHERE deleted_at IS NULL ORDER BY item_code ASC')) {
+            const rows = Array.from(this.physicalItems.values())
+                .sort((left, right) => String(left.item_code).localeCompare(String(right.item_code)));
+            return { rows, rowCount: rows.length };
+        }
+        if (normalizedSql.includes('select * from physical_items where id = $1 and deleted_at is null')) {
+            const itemId = params?.[0];
+            const item = this.physicalItems.get(itemId);
+            return { rows: item ? [item] : [], rowCount: item ? 1 : 0 };
+        }
+        if (sql.includes('SELECT * FROM registration_content WHERE registration_id = $1 ORDER BY created_at ASC')) {
+            const registrationId = params?.[0];
+            const rows = Array.from(this.registrationItems.values())
+                .filter((item) => item.registration_id === registrationId && item.content_id)
+                .map((item) => ({
+                id: item.id,
+                registration_id: item.registration_id,
+                content_id: item.content_id,
+                content_name: item.content_name || 'Content',
+                start_date: item.start_date || new Date().toISOString().slice(0, 10),
+                end_date: item.end_date || new Date().toISOString().slice(0, 10),
+                quantity: item.quantity || 1,
+                created_at: item.created_at,
+            }));
+            return { rows, rowCount: rows.length };
+        }
+        if (sql.includes('SELECT * FROM registration_items WHERE registration_id = $1 ORDER BY created_at ASC')) {
+            const registrationId = params?.[0];
+            const rows = Array.from(this.registrationItems.values())
+                .filter((item) => item.registration_id === registrationId)
+                .sort((a, b) => String(a.created_at).localeCompare(String(b.created_at)));
+            return { rows, rowCount: rows.length };
         }
         if (sql.includes('SELECT u.id') && sql.includes('JOIN roles r ON r.id = u.role_id') && (sql.includes('requester@example.com') || sql.includes('lower(u.email) = lower($1)'))) {
             const email = params?.[0] ?? 'requester@example.com';
@@ -283,6 +572,25 @@ class MockDatabase {
         if (sql.includes('SELECT id, unit_price FROM categories ORDER BY created_at ASC LIMIT 1')) {
             const category = Array.from(this.categories.values())[0];
             return { rows: category ? [{ id: category.id, unit_price: category.unit_price }] : [], rowCount: category ? 1 : 0 };
+        }
+        if (sql.includes("SELECT unit_price FROM categories WHERE id = $1 AND status = 'ACTIVE'")) {
+            const categoryId = params?.[0];
+            const category = this.categories.get(categoryId);
+            if (!category || category.status !== 'ACTIVE') {
+                return { rows: [], rowCount: 0 };
+            }
+            return { rows: [{ unit_price: category.unit_price }], rowCount: 1 };
+        }
+        if (sql.includes("SELECT id, category_id, status FROM physical_items WHERE id = $1 AND status = 'ACTIVE' AND deleted_at IS NULL")) {
+            const itemId = params?.[0];
+            const item = this.physicalItems.get(itemId);
+            if (!item || item.status !== 'ACTIVE') {
+                return { rows: [], rowCount: 0 };
+            }
+            return {
+                rows: [{ id: item.id, category_id: item.category_id, status: item.status }],
+                rowCount: 1,
+            };
         }
         if (sql.includes('SELECT id FROM locations ORDER BY created_at ASC LIMIT 1')) {
             const location = Array.from(this.locations.values())[0];
@@ -319,23 +627,31 @@ class MockDatabase {
             const item = this.physicalItems.get(params?.[0]);
             return { rows: item ? [{ status: item.status }] : [], rowCount: item ? 1 : 0 };
         }
+        if (sql.includes('SELECT unit_price FROM physical_items WHERE id = $1')) {
+            const item = this.physicalItems.get(params?.[0]);
+            return { rows: item ? [{ unit_price: item.unit_price ?? 0 }] : [], rowCount: item ? 1 : 0 };
+        }
         if (sql.includes('INSERT INTO physical_items(')) {
             const id = generateId();
+            // Params: $1=id(ignored), $2=channel_id, $3=category_id, $4=location_id, $5=seq_no,
+            //         $6=item_code, $7=item_name, $8=width, $9=length, $10=unit_price,
+            //         $11=image_key, $12=description, $13=status, $14=created_by, $15=now
             const item = {
                 id,
-                channel_id: params?.[0],
-                category_id: params?.[1],
-                location_id: params?.[2],
-                seq_no: params?.[3],
-                item_code: params?.[4],
-                item_name: params?.[5],
-                width: String(params?.[6]),
-                length: String(params?.[7]),
-                image_key: params?.[8] ?? null,
-                description: params?.[9] ?? null,
-                status: params?.[10] ?? 'ACTIVE',
-                created_by: params?.[11],
-                updated_by: params?.[12] ?? params?.[11] ?? null,
+                channel_id: params?.[1],
+                category_id: params?.[2],
+                location_id: params?.[3],
+                seq_no: params?.[4],
+                item_code: params?.[5],
+                item_name: params?.[6],
+                width: String(params?.[7] ?? 0),
+                length: String(params?.[8] ?? 0),
+                unit_price: Number(params?.[9] ?? 0),
+                image_key: params?.[10] ?? null,
+                description: params?.[11] ?? null,
+                status: params?.[12] ?? 'ACTIVE',
+                created_by: params?.[13],
+                updated_by: params?.[13] ?? null,
                 created_at: new Date().toISOString(),
                 updated_at: new Date().toISOString(),
             };
@@ -343,21 +659,34 @@ class MockDatabase {
             return { rows: [item], rowCount: 1 };
         }
         if (sql.includes('UPDATE physical_items')) {
-            const itemId = params?.[0];
+            const itemId = params?.[params.length - 1];
             const item = this.physicalItems.get(itemId);
             if (!item) {
                 return { rows: [], rowCount: 0 };
             }
-            if (params?.[1] !== undefined)
-                item.width = String(params[1]);
-            if (params?.[2] !== undefined)
-                item.length = String(params[2]);
-            if (params?.[3] !== undefined)
-                item.image_key = params[3];
-            if (params?.[4] !== undefined)
-                item.description = params[4];
-            if (params?.[5] !== undefined)
-                item.updated_by = params[5];
+            const updateMatches = [...sql.matchAll(/(item_name|category_id|location_id|channel_id|width|length|unit_price|description|image_key|status|updated_by)\s*=\s*\$(\d+)/g)];
+            for (const match of updateMatches) {
+                const field = match[1];
+                const paramIndex = Number(match[2]) - 1;
+                const value = params?.[paramIndex];
+                if (value !== null && value !== undefined) {
+                    if (field === 'width') {
+                        item.width = String(value);
+                    }
+                    else if (field === 'length') {
+                        item.length = String(value);
+                    }
+                    else if (field === 'unit_price') {
+                        item.unit_price = Number(value);
+                    }
+                    else if (field === 'item_name') {
+                        item.item_name = value;
+                    }
+                    else {
+                        item[field] = value;
+                    }
+                }
+            }
             item.updated_at = new Date().toISOString();
             return { rows: [item], rowCount: 1 };
         }
@@ -453,18 +782,40 @@ class MockDatabase {
             }
             return { rows: [], rowCount: 0 };
         }
+        if (sql.includes('INSERT INTO registration_content')) {
+            const entry = {
+                id: params?.[0] ?? generateId(),
+                registration_id: params?.[1],
+                content_id: params?.[2],
+                start_date: params?.[3],
+                end_date: params?.[4],
+                quantity: params?.[5] ?? 1,
+                created_at: params?.[6] ?? new Date().toISOString(),
+            };
+            this.registrationItems.set(entry.id, entry);
+            return { rows: [entry], rowCount: 1 };
+        }
+        if (sql.includes('DELETE FROM registration_content WHERE id = $1')) {
+            const contentId = params?.[0];
+            this.registrationItems.delete(contentId);
+            return { rows: [], rowCount: 0 };
+        }
         if (sql.includes('INSERT INTO registration_items')) {
+            // INSERT INTO registration_items (id, registration_id, item_id, category_id, unit_price, quantity, total_amount, created_at)
+            // VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+            const id = String(params?.[0] ?? generateId());
             const registrationItem = {
-                id: generateId(),
-                registration_id: params?.[0],
-                physical_item_id: params?.[1],
-                unit_price: String(params?.[2]),
-                quantity: params?.[3] ?? 1,
-                note: params?.[4] ?? null,
-                created_at: new Date().toISOString(),
+                id,
+                registration_id: params?.[1],
+                item_id: params?.[2],
+                category_id: params?.[3],
+                unit_price: Number(params?.[4] ?? 0),
+                quantity: Number(params?.[5] ?? 1),
+                total_amount: Number(params?.[6] ?? 0),
+                created_at: params?.[7] ?? new Date().toISOString(),
                 updated_at: new Date().toISOString(),
             };
-            this.registrationItems.set(registrationItem.id, registrationItem);
+            this.registrationItems.set(id, registrationItem);
             return { rows: [registrationItem], rowCount: 1 };
         }
         if (sql.includes('SELECT physical_item_id FROM registration_items WHERE registration_id = $1')) {
@@ -472,14 +823,14 @@ class MockDatabase {
             const rows = Array.from(this.registrationItems.values())
                 .filter((item) => item.registration_id === registrationId)
                 .sort((left, right) => left.created_at.localeCompare(right.created_at))
-                .map((item) => ({ physical_item_id: item.physical_item_id }));
+                .map((item) => ({ physical_item_id: item.item_id || item.physical_item_id }));
             return { rows, rowCount: rows.length };
         }
         if (sql.includes('SELECT COALESCE(SUM(total_amount),0)::numeric AS total FROM registration_items WHERE registration_id = $1')) {
             const registrationId = params?.[0];
             const total = Array.from(this.registrationItems.values())
                 .filter((item) => item.registration_id === registrationId)
-                .reduce((sum, item) => sum + Number(item.unit_price) * item.quantity, 0);
+                .reduce((sum, item) => sum + (Number(item.total_amount) || Number(item.unit_price) * Number(item.quantity) || 0), 0);
             return { rows: [{ total }], rowCount: 1 };
         }
         // Channels queries
@@ -520,21 +871,20 @@ class MockDatabase {
             return { rows: [channel], rowCount: 1 };
         }
         if (sql.includes('UPDATE channels')) {
-            const channelId = params?.[0];
+            const channelId = params?.[params.length - 1];
             const channel = this.channels.get(channelId);
             if (!channel) {
                 return { rows: [], rowCount: 0 };
             }
-            if (params?.[1] !== null && params?.[1] !== undefined)
-                channel.name = params[1];
-            if (params?.[2] !== null && params?.[2] !== undefined)
-                channel.description = params[2];
-            if (params?.[3] !== null && params?.[3] !== undefined)
-                channel.status = params[3];
-            if (params?.[4] !== null && params?.[4] !== undefined)
-                channel.location_id = params[4];
-            if (params?.[5] !== null && params?.[5] !== undefined)
-                channel.updated_by = params[5];
+            const updateMatches = [...sql.matchAll(/(name|description|status|location_id|updated_by)\s*=\s*\$(\d+)/g)];
+            for (const match of updateMatches) {
+                const field = match[1];
+                const paramIndex = Number(match[2]) - 1;
+                const value = params?.[paramIndex];
+                if (value !== null && value !== undefined) {
+                    channel[field] = value;
+                }
+            }
             channel.updated_at = new Date().toISOString();
             this.channels.set(channelId, channel);
             return { rows: [channel], rowCount: 1 };
@@ -586,21 +936,20 @@ class MockDatabase {
             };
         }
         if (sql.includes('UPDATE categories')) {
-            const categoryId = params?.[0];
+            const categoryId = params?.[params.length - 1];
             const category = this.categories.get(categoryId);
             if (!category) {
                 return { rows: [], rowCount: 0 };
             }
-            if (params?.[1] !== null && params?.[1] !== undefined)
-                category.name = params[1];
-            if (params?.[2] !== null && params?.[2] !== undefined)
-                category.description = params[2];
-            if (params?.[3] !== null && params?.[3] !== undefined)
-                category.status = params[3];
-            if (params?.[4] !== null && params?.[4] !== undefined)
-                category.unit_price = params[4];
-            if (params?.[5] !== null && params?.[5] !== undefined)
-                category.updated_by = params[5];
+            const updateMatches = [...sql.matchAll(/(name|description|status|unit_price|format|unit_of_measure|updated_by)\s*=\s*\$(\d+)/g)];
+            for (const match of updateMatches) {
+                const field = match[1];
+                const paramIndex = Number(match[2]) - 1;
+                const value = params?.[paramIndex];
+                if (value !== null && value !== undefined) {
+                    category[field] = value;
+                }
+            }
             category.updated_at = new Date().toISOString();
             this.categories.set(categoryId, category);
             return { rows: [category], rowCount: 1 };
@@ -662,32 +1011,143 @@ class MockDatabase {
             return { rows: [location], rowCount: 1 };
         }
         if (sql.includes('UPDATE locations')) {
-            const locationId = params?.[0];
+            const locationId = params?.[params.length - 1];
             const location = this.locations.get(locationId);
             if (!location) {
                 return { rows: [], rowCount: 0 };
             }
-            if (params?.[1] !== null && params?.[1] !== undefined)
-                location.name = params[1];
-            if (params?.[2] !== null && params?.[2] !== undefined)
-                location.address_line = params[2];
-            if (params?.[3] !== null && params?.[3] !== undefined)
-                location.latitude = params[3];
-            if (params?.[4] !== null && params?.[4] !== undefined)
-                location.longitude = params[4];
-            if (params?.[5] !== null && params?.[5] !== undefined)
-                location.status = params[5];
-            if (params?.[6] !== null && params?.[6] !== undefined)
-                location.updated_by = params[6];
+            const updateMatches = [...sql.matchAll(/(name|position_name|province_city|zone|address|address_line|classification|latitude|longitude|status|updated_by|channels)\s*=\s*\$(\d+)/g)];
+            for (const match of updateMatches) {
+                const field = match[1];
+                const paramIndex = Number(match[2]) - 1;
+                const value = params?.[paramIndex];
+                if (value !== null && value !== undefined) {
+                    location[field] = value;
+                    if (field === 'position_name') {
+                        location.name = value;
+                    }
+                    if (field === 'address') {
+                        location.address_line = value;
+                    }
+                }
+            }
             location.updated_at = new Date().toISOString();
             this.locations.set(locationId, location);
             return { rows: [location], rowCount: 1 };
         }
         // Contents queries
+        if (sql.includes('SELECT MAX(CAST(SUBSTRING(content_code FROM 3) AS INTEGER)) as max_num') && sql.includes('FROM advertising_content')) {
+            let max = 0;
+            for (const content of this.contents.values()) {
+                const code = String(content.content_code ?? '');
+                if (code.startsWith('CT')) {
+                    const parsed = Number.parseInt(code.substring(2), 10);
+                    if (Number.isFinite(parsed)) {
+                        max = Math.max(max, parsed);
+                    }
+                }
+            }
+            return { rows: [{ max_num: max }], rowCount: 1 };
+        }
+        if (sql.includes('INSERT INTO advertising_content')) {
+            const id = String(params?.[0] ?? generateId());
+            const fallbackChannelId = Array.from(this.channels.values())[0]?.id ?? 'CH-1';
+            const content = {
+                id,
+                channel_id: fallbackChannelId,
+                category_id: params?.[4] ?? null,
+                name: params?.[2] ?? '',
+                description: params?.[3] ?? null,
+                start_date: params?.[6] ?? new Date().toISOString().slice(0, 10),
+                end_date: params?.[7] ?? new Date().toISOString().slice(0, 10),
+                image_keys: '[]',
+                created_by: params?.[9] ?? 'system',
+                updated_by: params?.[9] ?? 'system',
+                created_at: params?.[10] ?? new Date().toISOString(),
+                updated_at: params?.[11] ?? new Date().toISOString(),
+                content_code: params?.[1] ?? null,
+                unit: params?.[5] ?? null,
+                status: params?.[8] ?? null,
+                deleted_at: null,
+            };
+            this.contents.set(id, content);
+            return { rows: [content], rowCount: 1 };
+        }
         if (sql.includes('SELECT * FROM advertising_contents WHERE id = $1')) {
             const contentId = params?.[0];
             const content = this.contents.get(contentId);
             return { rows: content ? [content] : [], rowCount: content ? 1 : 0 };
+        }
+        // Legacy advertising_content compatibility (used by older services/routes)
+        if (normalizedSql.includes('select count(*) as count from advertising_content where deleted_at is null')) {
+            const count = this.contents.size;
+            return { rows: [{ count: String(count) }], rowCount: 1 };
+        }
+        if (normalizedSql.includes('select * from advertising_content where deleted_at is null order by created_at desc')) {
+            const rows = Array.from(this.contents.values())
+                .map((c, index) => ({
+                id: c.id,
+                content_code: `CT${String(index + 1).padStart(5, '0')}`,
+                content_name: c.name,
+                description: c.description,
+                category: c.category_id ?? 'GENERAL',
+                unit: 'Week',
+                start_date: c.start_date,
+                end_date: c.end_date,
+                status: new Date(c.end_date) >= new Date() ? 'Còn hạn' : 'Hết hạn',
+                image_keys: c.image_keys,
+                created_by: c.created_by,
+                created_at: c.created_at,
+                updated_at: c.updated_at,
+                deleted_at: null,
+            }))
+                .sort((a, b) => b.created_at.localeCompare(a.created_at));
+            return { rows, rowCount: rows.length };
+        }
+        if (normalizedSql.includes('select * from advertising_content where id = $1 and deleted_at is null')) {
+            const contentId = params?.[0];
+            const rows = Array.from(this.contents.values()).filter((c) => c.id === contentId);
+            const mapped = rows.map((c, index) => ({
+                id: c.id,
+                content_code: `CT${String(index + 1).padStart(5, '0')}`,
+                content_name: c.name,
+                description: c.description,
+                category: c.category_id ?? 'GENERAL',
+                unit: 'Week',
+                start_date: c.start_date,
+                end_date: c.end_date,
+                status: new Date(c.end_date) >= new Date() ? 'Còn hạn' : 'Hết hạn',
+                image_keys: c.image_keys,
+                created_by: c.created_by,
+                created_at: c.created_at,
+                updated_at: c.updated_at,
+                deleted_at: null,
+            }));
+            return { rows: mapped, rowCount: mapped.length };
+        }
+        if (sql.includes('INSERT INTO content_images')) {
+            const image = {
+                id: params?.[0],
+                content_id: params?.[1],
+                image_url: params?.[2],
+                image_key: params?.[3],
+                sequence: params?.[4],
+            };
+            this.contentImages.push(image);
+            return { rows: [image], rowCount: 1 };
+        }
+        if (sql.includes('SELECT * FROM content_images WHERE content_id = $1 ORDER BY sequence ASC')) {
+            const contentId = params?.[0];
+            const rows = this.contentImages
+                .filter((image) => image.content_id === contentId)
+                .sort((left, right) => (left.sequence ?? 0) - (right.sequence ?? 0));
+            return { rows, rowCount: rows.length };
+        }
+        if (sql.includes('DELETE FROM content_images WHERE id = $1')) {
+            const imageId = params?.[0];
+            const before = this.contentImages.length;
+            this.contentImages = this.contentImages.filter((image) => image.id !== imageId);
+            return { rows: [], rowCount: before - this.contentImages.length };
         }
         if (sql.includes('SELECT *') && sql.includes('FROM advertising_contents')) {
             const contents = Array.from(this.contents.values()).map(c => ({
@@ -697,7 +1157,7 @@ class MockDatabase {
             console.log('[MockDB] SELECT contents matched - returning', contents.length);
             return { rows: contents, rowCount: contents.length };
         }
-        if (sql.includes('INSERT INTO advertising_contents')) {
+        if (normalizedSql.includes('insert into advertising_content')) {
             const id = generateId();
             const content = {
                 id,
@@ -718,24 +1178,26 @@ class MockDatabase {
             return { rows: [content], rowCount: 1 };
         }
         if (sql.includes('UPDATE advertising_contents')) {
-            const contentId = params?.[0];
+            const contentId = params?.[params.length - 1];
             const content = this.contents.get(contentId) || Array.from(this.contents.values()).find((item) => item.id === contentId);
             if (!content) {
                 console.log('[MockDB] UPDATE content not found for ID:', contentId, 'Known IDs:', Array.from(this.contents.keys()));
                 return { rows: [], rowCount: 0 };
             }
-            if (params?.[1] !== null && params?.[1] !== undefined)
-                content.name = params[1];
-            if (params?.[2] !== null && params?.[2] !== undefined)
-                content.description = params[2];
-            if (params?.[3] !== null && params?.[3] !== undefined)
-                content.start_date = params[3];
-            if (params?.[4] !== null && params?.[4] !== undefined)
-                content.end_date = params[4];
-            if (params?.[5] !== null && params?.[5] !== undefined)
-                content.image_keys = params[5];
-            if (params?.[6] !== null && params?.[6] !== undefined)
-                content.updated_by = params[6];
+            const updateMatches = [...sql.matchAll(/(name|content_name|description|start_date|end_date|image_keys|updated_by)\s*=\s*\$(\d+)/g)];
+            for (const match of updateMatches) {
+                const field = match[1];
+                const paramIndex = Number(match[2]) - 1;
+                const value = params?.[paramIndex];
+                if (value !== null && value !== undefined) {
+                    if (field === 'content_name') {
+                        content.name = value;
+                    }
+                    else {
+                        content[field] = value;
+                    }
+                }
+            }
             content.updated_at = new Date().toISOString();
             this.contents.set(contentId, content);
             return { rows: [content], rowCount: 1 };

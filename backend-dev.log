@@ -1,0 +1,487 @@
+
+> cms-physical-ads-backend@1.0.0 dev
+> tsx watch src/server.ts
+
+[MockDB] Seeded 7 test accounts
+[MockDB] Seeded 6 channels, 8 categories, 20 locations, 29 physical items, 5 contents
+[DB] Attempting to connect to: postgresql://postgres:postgres@127.0.0.1:5432/cms_physical_ads
+🔌 Testing database connection...
+✅ Backend running on port 4000
+[MockDB Query] SELECT COUNT(*) as count FROM categories WHERE deleted_at IS NULL AND status = $ | Params: 1
+[MockDB Query] SELECT * FROM categories WHERE deleted_at IS NULL AND status = $1 ORDER BY code | Params: 3
+[MockDB] SELECT categories matched - returning 8
+[MockDB Query] SELECT COUNT(*) as count FROM advertising_content WHERE deleted_at IS NULL | Params: 0
+[MockDB Query] SELECT * FROM advertising_content WHERE deleted_at IS NULL ORDER BY create | Params: 2
+[MockDB Query] SELECT COUNT(*) as count FROM locations WHERE deleted_at IS NULL AND status = $1 | Params: 1
+[MockDB Query] SELECT * FROM locations WHERE deleted_at IS NULL AND status = $1 ORDER BY positi | Params: 3
+[MockDB] SELECT locations matched - returning 20
+[MockDB Query] SELECT COUNT(*) as count FROM channels WHERE deleted_at IS NULL | Params: 0
+[MockDB] NO MATCH for query: SELECT COUNT(*) as count FROM channels WHERE deleted_at IS NULL
+[MockDB Query] SELECT * FROM channels WHERE deleted_at IS NULL ORDER BY created_at DESC LIMIT $ | Params: 2
+[MockDB] SELECT channels matched - returning 6
+[MockDB Query] SELECT COUNT(*) as count FROM physical_items WHERE deleted_at IS NULL | Params: 0
+[MockDB Query] SELECT * FROM physical_items WHERE deleted_at IS NULL ORDER BY item_code ASC | Params: 2
+[MockDB Query] SELECT COUNT(*) as count FROM categories WHERE deleted_at IS NULL AND status = $ | Params: 1
+[MockDB Query] SELECT * FROM categories WHERE deleted_at IS NULL AND status = $1 ORDER BY code | Params: 3
+[MockDB] SELECT categories matched - returning 8
+[MockDB Query] SELECT COUNT(*) as count FROM advertising_content WHERE deleted_at IS NULL | Params: 0
+[MockDB Query] SELECT * FROM advertising_content WHERE deleted_at IS NULL ORDER BY create | Params: 2
+[MockDB Query] SELECT COUNT(*) as count FROM locations WHERE deleted_at IS NULL AND status = $1 | Params: 1
+[MockDB Query] SELECT * FROM locations WHERE deleted_at IS NULL AND status = $1 ORDER BY positi | Params: 3
+[MockDB] SELECT locations matched - returning 20
+[MockDB Query] SELECT COUNT(*) as count FROM channels WHERE deleted_at IS NULL | Params: 0
+[MockDB] NO MATCH for query: SELECT COUNT(*) as count FROM channels WHERE deleted_at IS NULL
+[MockDB Query] SELECT * FROM channels WHERE deleted_at IS NULL ORDER BY created_at DESC LIMIT $ | Params: 2
+[MockDB] SELECT channels matched - returning 6
+[MockDB Query] SELECT COUNT(*) as count FROM physical_items WHERE deleted_at IS NULL | Params: 0
+[MockDB Query] SELECT * FROM physical_items WHERE deleted_at IS NULL ORDER BY item_code ASC | Params: 2
+[MockDB Query] SELECT COUNT(*) as count FROM categories WHERE deleted_at IS NULL AND status = $ | Params: 1
+[MockDB Query] SELECT * FROM categories WHERE deleted_at IS NULL AND status = $1 ORDER BY code | Params: 3
+[MockDB] SELECT categories matched - returning 8
+[MockDB Query] SELECT COUNT(*) as count FROM advertising_content WHERE deleted_at IS NULL | Params: 0
+[MockDB Query] SELECT * FROM advertising_content WHERE deleted_at IS NULL ORDER BY create | Params: 2
+[MockDB Query] SELECT COUNT(*) as count FROM locations WHERE deleted_at IS NULL AND status = $1 | Params: 1
+[MockDB Query] SELECT * FROM locations WHERE deleted_at IS NULL AND status = $1 ORDER BY positi | Params: 3
+[MockDB] SELECT locations matched - returning 20
+[MockDB Query] SELECT COUNT(*) as count FROM channels WHERE deleted_at IS NULL | Params: 0
+[MockDB] NO MATCH for query: SELECT COUNT(*) as count FROM channels WHERE deleted_at IS NULL
+[MockDB Query] SELECT * FROM channels WHERE deleted_at IS NULL ORDER BY created_at DESC LIMIT $ | Params: 2
+[MockDB] SELECT channels matched - returning 6
+[MockDB Query] SELECT COUNT(*) as count FROM categories WHERE deleted_at IS NULL AND status = $ | Params: 1
+[MockDB Query] SELECT * FROM categories WHERE deleted_at IS NULL AND status = $1 ORDER BY code | Params: 3
+[MockDB] SELECT categories matched - returning 8
+[MockDB Query] SELECT COUNT(*) as count FROM physical_items WHERE deleted_at IS NULL | Params: 0
+[MockDB Query] SELECT * FROM physical_items WHERE deleted_at IS NULL ORDER BY item_code ASC | Params: 2
+[MockDB Query] SELECT COUNT(*) as count FROM advertising_content WHERE deleted_at IS NULL | Params: 0
+[MockDB Query] SELECT * FROM advertising_content WHERE deleted_at IS NULL ORDER BY create | Params: 2
+[MockDB Query] SELECT COUNT(*) as count FROM locations WHERE deleted_at IS NULL AND status = $1 | Params: 1
+[MockDB Query] SELECT * FROM locations WHERE deleted_at IS NULL AND status = $1 ORDER BY positi | Params: 3
+[MockDB] SELECT locations matched - returning 20
+[MockDB Query] SELECT COUNT(*) as count FROM channels WHERE deleted_at IS NULL | Params: 0
+[MockDB] NO MATCH for query: SELECT COUNT(*) as count FROM channels WHERE deleted_at IS NULL
+[MockDB Query] SELECT * FROM channels WHERE deleted_at IS NULL ORDER BY created_at DESC LIMIT $ | Params: 2
+[MockDB] SELECT channels matched - returning 6
+[MockDB Query] SELECT COUNT(*) as count FROM physical_items WHERE deleted_at IS NULL | Params: 0
+[MockDB Query] SELECT * FROM physical_items WHERE deleted_at IS NULL ORDER BY item_code ASC | Params: 2
+[MockDB Query] SELECT COUNT(*) as count FROM advertising_content WHERE deleted_at IS NULL | Params: 0
+[MockDB Query] SELECT * FROM advertising_content WHERE deleted_at IS NULL ORDER BY create | Params: 2
+[MockDB Query] SELECT COUNT(*) as count FROM advertising_content WHERE deleted_at IS NULL | Params: 0
+[MockDB Query] SELECT * FROM advertising_content WHERE deleted_at IS NULL ORDER BY create | Params: 2
+[MockDB Query] SELECT * FROM advertising_content WHERE id = $1 AND deleted_at IS NULL | Params: 1
+[MockDB Query] SELECT * FROM content_images WHERE content_id = $1 ORDER BY sequence ASC | Params: 1
+[MockDB Query] SELECT * FROM advertising_content WHERE id = $1 AND deleted_at IS NULL | Params: 1
+[MockDB Query] SELECT * FROM content_images WHERE content_id = $1 ORDER BY sequence ASC | Params: 1
+[MockDB Query] SELECT * FROM advertising_content WHERE id = $1 AND deleted_at IS NULL | Params: 1
+[MockDB Query] SELECT * FROM content_images WHERE content_id = $1 ORDER BY sequence ASC | Params: 1
+[MockDB Query] SELECT * FROM advertising_content WHERE id = $1 AND deleted_at IS NULL | Params: 1
+[MockDB Query] SELECT * FROM content_images WHERE content_id = $1 ORDER BY sequence ASC | Params: 1
+[MockDB Query] SELECT * FROM advertising_content WHERE id = $1 AND deleted_at IS NULL | Params: 1
+[MockDB Query] SELECT * FROM content_images WHERE content_id = $1 ORDER BY sequence ASC | Params: 1
+[MockDB Query] SELECT * FROM advertising_content WHERE id = $1 AND deleted_at IS NULL | Params: 1
+[MockDB Query] SELECT * FROM content_images WHERE content_id = $1 ORDER BY sequence ASC | Params: 1
+[MockDB Query] SELECT * FROM advertising_content WHERE id = $1 AND deleted_at IS NULL | Params: 1
+[MockDB Query] SELECT * FROM content_images WHERE content_id = $1 ORDER BY sequence ASC | Params: 1
+[MockDB Query] SELECT * FROM advertising_content WHERE id = $1 AND deleted_at IS NULL | Params: 1
+[MockDB Query] SELECT * FROM content_images WHERE content_id = $1 ORDER BY sequence ASC | Params: 1
+[MockDB Query] SELECT * FROM advertising_content WHERE id = $1 AND deleted_at IS NULL | Params: 1
+[MockDB Query] SELECT * FROM content_images WHERE content_id = $1 ORDER BY sequence ASC | Params: 1
+[MockDB Query] SELECT * FROM advertising_content WHERE id = $1 AND deleted_at IS NULL | Params: 1
+[MockDB Query] SELECT * FROM content_images WHERE content_id = $1 ORDER BY sequence ASC | Params: 1
+[MockDB Query] SELECT COUNT(*) as count FROM categories WHERE deleted_at IS NULL AND status = $ | Params: 1
+[MockDB Query] SELECT * FROM categories WHERE deleted_at IS NULL AND status = $1 ORDER BY code | Params: 3
+[MockDB] SELECT categories matched - returning 8
+[MockDB Query] SELECT COUNT(*) as count FROM advertising_content WHERE deleted_at IS NULL | Params: 0
+[MockDB Query] SELECT * FROM advertising_content WHERE deleted_at IS NULL ORDER BY create | Params: 2
+[MockDB Query] SELECT COUNT(*) as count FROM channels WHERE deleted_at IS NULL | Params: 0
+[MockDB] NO MATCH for query: SELECT COUNT(*) as count FROM channels WHERE deleted_at IS NULL
+[MockDB Query] SELECT * FROM channels WHERE deleted_at IS NULL ORDER BY created_at DESC LIMIT $ | Params: 2
+[MockDB] SELECT channels matched - returning 6
+[MockDB Query] SELECT COUNT(*) as count FROM locations WHERE deleted_at IS NULL AND status = $1 | Params: 1
+[MockDB Query] SELECT * FROM locations WHERE deleted_at IS NULL AND status = $1 ORDER BY positi | Params: 3
+[MockDB] SELECT locations matched - returning 20
+[MockDB Query] SELECT COUNT(*) as count FROM physical_items WHERE deleted_at IS NULL | Params: 0
+[MockDB Query] SELECT * FROM physical_items WHERE deleted_at IS NULL ORDER BY item_code ASC | Params: 2
+[MockDB Query] SELECT COUNT(*) as count FROM categories WHERE deleted_at IS NULL AND status = $ | Params: 1
+[MockDB Query] SELECT * FROM categories WHERE deleted_at IS NULL AND status = $1 ORDER BY code | Params: 3
+[MockDB] SELECT categories matched - returning 8
+[MockDB Query] SELECT COUNT(*) as count FROM advertising_content WHERE deleted_at IS NULL | Params: 0
+[MockDB Query] SELECT * FROM advertising_content WHERE deleted_at IS NULL ORDER BY create | Params: 2
+[MockDB Query] SELECT COUNT(*) as count FROM channels WHERE deleted_at IS NULL | Params: 0
+[MockDB] NO MATCH for query: SELECT COUNT(*) as count FROM channels WHERE deleted_at IS NULL
+[MockDB Query] SELECT * FROM channels WHERE deleted_at IS NULL ORDER BY created_at DESC LIMIT $ | Params: 2
+[MockDB] SELECT channels matched - returning 6
+[MockDB Query] SELECT COUNT(*) as count FROM locations WHERE deleted_at IS NULL AND status = $1 | Params: 1
+[MockDB Query] SELECT * FROM locations WHERE deleted_at IS NULL AND status = $1 ORDER BY positi | Params: 3
+[MockDB] SELECT locations matched - returning 20
+[MockDB Query] SELECT COUNT(*) as count FROM physical_items WHERE deleted_at IS NULL | Params: 0
+[MockDB Query] SELECT * FROM physical_items WHERE deleted_at IS NULL ORDER BY item_code ASC | Params: 2
+[MockDB Query] SELECT COUNT(*) as count FROM categories WHERE deleted_at IS NULL AND status = $ | Params: 1
+[MockDB Query] SELECT * FROM categories WHERE deleted_at IS NULL AND status = $1 ORDER BY code | Params: 3
+[MockDB] SELECT categories matched - returning 8
+[MockDB Query] SELECT COUNT(*) as count FROM categories WHERE deleted_at IS NULL AND status = $ | Params: 1
+[MockDB Query] SELECT * FROM categories WHERE deleted_at IS NULL AND status = $1 ORDER BY code | Params: 3
+[MockDB] SELECT categories matched - returning 8
+[MockDB Query] SELECT COUNT(*) as count FROM advertising_content WHERE deleted_at IS NULL | Params: 0
+[MockDB Query] SELECT * FROM advertising_content WHERE deleted_at IS NULL ORDER BY create | Params: 2
+[MockDB Query] SELECT COUNT(*) as count FROM channels WHERE deleted_at IS NULL | Params: 0
+[MockDB] NO MATCH for query: SELECT COUNT(*) as count FROM channels WHERE deleted_at IS NULL
+[MockDB Query] SELECT * FROM channels WHERE deleted_at IS NULL ORDER BY created_at DESC LIMIT $ | Params: 2
+[MockDB] SELECT channels matched - returning 6
+[MockDB Query] SELECT COUNT(*) as count FROM locations WHERE deleted_at IS NULL AND status = $1 | Params: 1
+[MockDB Query] SELECT * FROM locations WHERE deleted_at IS NULL AND status = $1 ORDER BY positi | Params: 3
+[MockDB] SELECT locations matched - returning 20
+[MockDB Query] SELECT COUNT(*) as count FROM physical_items WHERE deleted_at IS NULL | Params: 0
+[MockDB Query] SELECT * FROM physical_items WHERE deleted_at IS NULL ORDER BY item_code ASC | Params: 2
+[MockDB Query] SELECT COUNT(*) as count FROM advertising_content WHERE deleted_at IS NULL | Params: 0
+[MockDB Query] SELECT * FROM advertising_content WHERE deleted_at IS NULL ORDER BY create | Params: 2
+[MockDB Query] SELECT COUNT(*) as count FROM channels WHERE deleted_at IS NULL | Params: 0
+[MockDB] NO MATCH for query: SELECT COUNT(*) as count FROM channels WHERE deleted_at IS NULL
+[MockDB Query] SELECT * FROM channels WHERE deleted_at IS NULL ORDER BY created_at DESC LIMIT $ | Params: 2
+[MockDB] SELECT channels matched - returning 6
+[MockDB Query] SELECT COUNT(*) as count FROM locations WHERE deleted_at IS NULL AND status = $1 | Params: 1
+[MockDB Query] SELECT * FROM locations WHERE deleted_at IS NULL AND status = $1 ORDER BY positi | Params: 3
+[MockDB] SELECT locations matched - returning 20
+[MockDB Query] SELECT COUNT(*) as count FROM physical_items WHERE deleted_at IS NULL | Params: 0
+[MockDB Query] SELECT * FROM physical_items WHERE deleted_at IS NULL ORDER BY item_code ASC | Params: 2
+[MockDB Query] SELECT COUNT(*) as count FROM categories WHERE deleted_at IS NULL AND status = $ | Params: 1
+[MockDB Query] SELECT * FROM categories WHERE deleted_at IS NULL AND status = $1 ORDER BY code | Params: 3
+[MockDB] SELECT categories matched - returning 8
+[MockDB Query] SELECT COUNT(*) as count FROM advertising_content WHERE deleted_at IS NULL | Params: 0
+[MockDB Query] SELECT * FROM advertising_content WHERE deleted_at IS NULL ORDER BY create | Params: 2
+[MockDB Query] SELECT COUNT(*) as count FROM channels WHERE deleted_at IS NULL | Params: 0
+[MockDB] NO MATCH for query: SELECT COUNT(*) as count FROM channels WHERE deleted_at IS NULL
+[MockDB Query] SELECT * FROM channels WHERE deleted_at IS NULL ORDER BY created_at DESC LIMIT $ | Params: 2
+[MockDB] SELECT channels matched - returning 6
+[MockDB Query] SELECT COUNT(*) as count FROM locations WHERE deleted_at IS NULL AND status = $1 | Params: 1
+[MockDB Query] SELECT * FROM locations WHERE deleted_at IS NULL AND status = $1 ORDER BY positi | Params: 3
+[MockDB] SELECT locations matched - returning 20
+[MockDB Query] SELECT COUNT(*) as count FROM physical_items WHERE deleted_at IS NULL | Params: 0
+[MockDB Query] SELECT * FROM physical_items WHERE deleted_at IS NULL ORDER BY item_code ASC | Params: 2
+[MockDB Query] SELECT COUNT(*) as count FROM categories WHERE deleted_at IS NULL AND status = $ | Params: 1
+[MockDB Query] SELECT * FROM categories WHERE deleted_at IS NULL AND status = $1 ORDER BY code | Params: 3
+[MockDB] SELECT categories matched - returning 8
+[MockDB Query] SELECT COUNT(*) as count FROM advertising_content WHERE deleted_at IS NULL | Params: 0
+[MockDB Query] SELECT * FROM advertising_content WHERE deleted_at IS NULL ORDER BY create | Params: 2
+[MockDB Query] SELECT COUNT(*) as count FROM channels WHERE deleted_at IS NULL | Params: 0
+[MockDB] NO MATCH for query: SELECT COUNT(*) as count FROM channels WHERE deleted_at IS NULL
+[MockDB Query] SELECT * FROM channels WHERE deleted_at IS NULL ORDER BY created_at DESC LIMIT $ | Params: 2
+[MockDB] SELECT channels matched - returning 6
+[MockDB Query] SELECT COUNT(*) as count FROM locations WHERE deleted_at IS NULL AND status = $1 | Params: 1
+[MockDB Query] SELECT * FROM locations WHERE deleted_at IS NULL AND status = $1 ORDER BY positi | Params: 3
+[MockDB] SELECT locations matched - returning 20
+[MockDB Query] SELECT COUNT(*) as count FROM physical_items WHERE deleted_at IS NULL | Params: 0
+[MockDB Query] SELECT * FROM physical_items WHERE deleted_at IS NULL ORDER BY item_code ASC | Params: 2
+[MockDB Query] SELECT COUNT(*) as count FROM advertising_content WHERE deleted_at IS NULL | Params: 0
+[MockDB Query] SELECT * FROM advertising_content WHERE deleted_at IS NULL ORDER BY create | Params: 2
+[MockDB Query] SELECT COUNT(*) as count FROM advertising_content WHERE deleted_at IS NULL | Params: 0
+[MockDB Query] SELECT * FROM advertising_content WHERE deleted_at IS NULL ORDER BY create | Params: 2
+[MockDB Query] SELECT * FROM advertising_content WHERE id = $1 AND deleted_at IS NULL | Params: 1
+[MockDB Query] SELECT * FROM content_images WHERE content_id = $1 ORDER BY sequence ASC | Params: 1
+[MockDB Query] SELECT * FROM advertising_content WHERE id = $1 AND deleted_at IS NULL | Params: 1
+[MockDB Query] SELECT * FROM content_images WHERE content_id = $1 ORDER BY sequence ASC | Params: 1
+[MockDB Query] SELECT * FROM advertising_content WHERE id = $1 AND deleted_at IS NULL | Params: 1
+[MockDB Query] SELECT * FROM content_images WHERE content_id = $1 ORDER BY sequence ASC | Params: 1
+[MockDB Query] SELECT * FROM advertising_content WHERE id = $1 AND deleted_at IS NULL | Params: 1
+[MockDB Query] SELECT * FROM content_images WHERE content_id = $1 ORDER BY sequence ASC | Params: 1
+[MockDB Query] SELECT * FROM advertising_content WHERE id = $1 AND deleted_at IS NULL | Params: 1
+[MockDB Query] SELECT * FROM content_images WHERE content_id = $1 ORDER BY sequence ASC | Params: 1
+[MockDB Query] SELECT * FROM advertising_content WHERE id = $1 AND deleted_at IS NULL | Params: 1
+[MockDB Query] SELECT * FROM content_images WHERE content_id = $1 ORDER BY sequence ASC | Params: 1
+[MockDB Query] SELECT * FROM advertising_content WHERE id = $1 AND deleted_at IS NULL | Params: 1
+[MockDB Query] SELECT * FROM content_images WHERE content_id = $1 ORDER BY sequence ASC | Params: 1
+[MockDB Query] SELECT * FROM advertising_content WHERE id = $1 AND deleted_at IS NULL | Params: 1
+[MockDB Query] SELECT * FROM content_images WHERE content_id = $1 ORDER BY sequence ASC | Params: 1
+[MockDB Query] SELECT * FROM advertising_content WHERE id = $1 AND deleted_at IS NULL | Params: 1
+[MockDB Query] SELECT * FROM content_images WHERE content_id = $1 ORDER BY sequence ASC | Params: 1
+[MockDB Query] SELECT * FROM advertising_content WHERE id = $1 AND deleted_at IS NULL | Params: 1
+[MockDB Query] SELECT * FROM content_images WHERE content_id = $1 ORDER BY sequence ASC | Params: 1
+[MockDB Query] SELECT COUNT(*) as count FROM registrations WHERE deleted_at IS NULL | Params: 0
+[MockDB Query] SELECT * FROM registrations WHERE deleted_at IS NULL ORDER BY created_at DESC | Params: 2
+[MockDB Query] SELECT COUNT(*) as count FROM registrations WHERE deleted_at IS NULL | Params: 0
+[MockDB Query] SELECT * FROM registrations WHERE deleted_at IS NULL ORDER BY created_at DESC | Params: 2
+[MockDB Query] SELECT COUNT(*) as count FROM categories WHERE deleted_at IS NULL AND status = $ | Params: 1
+[MockDB Query] SELECT * FROM categories WHERE deleted_at IS NULL AND status = $1 ORDER BY code | Params: 3
+[MockDB] SELECT categories matched - returning 8
+[MockDB Query] SELECT COUNT(*) as count FROM advertising_content WHERE deleted_at IS NULL | Params: 0
+[MockDB Query] SELECT * FROM advertising_content WHERE deleted_at IS NULL ORDER BY create | Params: 2
+[MockDB Query] SELECT COUNT(*) as count FROM channels WHERE deleted_at IS NULL | Params: 0
+[MockDB] NO MATCH for query: SELECT COUNT(*) as count FROM channels WHERE deleted_at IS NULL
+[MockDB Query] SELECT * FROM channels WHERE deleted_at IS NULL ORDER BY created_at DESC LIMIT $ | Params: 2
+[MockDB] SELECT channels matched - returning 6
+[MockDB Query] SELECT COUNT(*) as count FROM locations WHERE deleted_at IS NULL AND status = $1 | Params: 1
+[MockDB Query] SELECT * FROM locations WHERE deleted_at IS NULL AND status = $1 ORDER BY positi | Params: 3
+[MockDB] SELECT locations matched - returning 20
+[MockDB Query] SELECT COUNT(*) as count FROM categories WHERE deleted_at IS NULL AND status = $ | Params: 1
+[MockDB Query] SELECT * FROM categories WHERE deleted_at IS NULL AND status = $1 ORDER BY code | Params: 3
+[MockDB] SELECT categories matched - returning 8
+[MockDB Query] SELECT COUNT(*) as count FROM physical_items WHERE deleted_at IS NULL | Params: 0
+[MockDB Query] SELECT * FROM physical_items WHERE deleted_at IS NULL ORDER BY item_code ASC | Params: 2
+[MockDB Query] SELECT COUNT(*) as count FROM advertising_content WHERE deleted_at IS NULL | Params: 0
+[MockDB Query] SELECT * FROM advertising_content WHERE deleted_at IS NULL ORDER BY create | Params: 2
+[MockDB Query] SELECT COUNT(*) as count FROM channels WHERE deleted_at IS NULL | Params: 0
+[MockDB] NO MATCH for query: SELECT COUNT(*) as count FROM channels WHERE deleted_at IS NULL
+[MockDB Query] SELECT * FROM channels WHERE deleted_at IS NULL ORDER BY created_at DESC LIMIT $ | Params: 2
+[MockDB] SELECT channels matched - returning 6
+[MockDB Query] SELECT COUNT(*) as count FROM locations WHERE deleted_at IS NULL AND status = $1 | Params: 1
+[MockDB Query] SELECT * FROM locations WHERE deleted_at IS NULL AND status = $1 ORDER BY positi | Params: 3
+[MockDB] SELECT locations matched - returning 20
+[MockDB Query] SELECT COUNT(*) as count FROM physical_items WHERE deleted_at IS NULL | Params: 0
+[MockDB Query] SELECT * FROM physical_items WHERE deleted_at IS NULL ORDER BY item_code ASC | Params: 2
+[MockDB Query] SELECT COUNT(*) as count FROM advertising_content WHERE deleted_at IS NULL | Params: 0
+[MockDB Query] SELECT * FROM advertising_content WHERE deleted_at IS NULL ORDER BY create | Params: 2
+[MockDB Query] SELECT COUNT(*) as count FROM advertising_content WHERE deleted_at IS NULL | Params: 0
+[MockDB Query] SELECT * FROM advertising_content WHERE deleted_at IS NULL ORDER BY create | Params: 2
+[MockDB Query] SELECT * FROM advertising_content WHERE id = $1 AND deleted_at IS NULL | Params: 1
+[MockDB Query] SELECT * FROM content_images WHERE content_id = $1 ORDER BY sequence ASC | Params: 1
+[MockDB Query] SELECT * FROM advertising_content WHERE id = $1 AND deleted_at IS NULL | Params: 1
+[MockDB Query] SELECT * FROM content_images WHERE content_id = $1 ORDER BY sequence ASC | Params: 1
+[MockDB Query] SELECT * FROM advertising_content WHERE id = $1 AND deleted_at IS NULL | Params: 1
+[MockDB Query] SELECT * FROM content_images WHERE content_id = $1 ORDER BY sequence ASC | Params: 1
+[MockDB Query] SELECT * FROM advertising_content WHERE id = $1 AND deleted_at IS NULL | Params: 1
+[MockDB Query] SELECT * FROM content_images WHERE content_id = $1 ORDER BY sequence ASC | Params: 1
+[MockDB Query] SELECT * FROM advertising_content WHERE id = $1 AND deleted_at IS NULL | Params: 1
+[MockDB Query] SELECT * FROM content_images WHERE content_id = $1 ORDER BY sequence ASC | Params: 1
+[MockDB Query] SELECT * FROM advertising_content WHERE id = $1 AND deleted_at IS NULL | Params: 1
+[MockDB Query] SELECT * FROM content_images WHERE content_id = $1 ORDER BY sequence ASC | Params: 1
+[MockDB Query] SELECT * FROM advertising_content WHERE id = $1 AND deleted_at IS NULL | Params: 1
+[MockDB Query] SELECT * FROM content_images WHERE content_id = $1 ORDER BY sequence ASC | Params: 1
+[MockDB Query] SELECT * FROM advertising_content WHERE id = $1 AND deleted_at IS NULL | Params: 1
+[MockDB Query] SELECT * FROM content_images WHERE content_id = $1 ORDER BY sequence ASC | Params: 1
+[MockDB Query] SELECT * FROM advertising_content WHERE id = $1 AND deleted_at IS NULL | Params: 1
+[MockDB Query] SELECT * FROM content_images WHERE content_id = $1 ORDER BY sequence ASC | Params: 1
+[MockDB Query] SELECT * FROM advertising_content WHERE id = $1 AND deleted_at IS NULL | Params: 1
+[MockDB Query] SELECT * FROM content_images WHERE content_id = $1 ORDER BY sequence ASC | Params: 1
+[MockDB Query] SELECT COUNT(*) as count FROM categories WHERE deleted_at IS NULL AND status = $ | Params: 1
+[MockDB Query] SELECT * FROM categories WHERE deleted_at IS NULL AND status = $1 ORDER BY code | Params: 3
+[MockDB] SELECT categories matched - returning 8
+[MockDB Query] SELECT COUNT(*) as count FROM advertising_content WHERE deleted_at IS NULL | Params: 0
+[MockDB Query] SELECT * FROM advertising_content WHERE deleted_at IS NULL ORDER BY create | Params: 2
+[MockDB Query] SELECT COUNT(*) as count FROM locations WHERE deleted_at IS NULL AND status = $1 | Params: 1
+[MockDB Query] SELECT * FROM locations WHERE deleted_at IS NULL AND status = $1 ORDER BY positi | Params: 3
+[MockDB] SELECT locations matched - returning 20
+[MockDB Query] SELECT COUNT(*) as count FROM channels WHERE deleted_at IS NULL | Params: 0
+[MockDB] NO MATCH for query: SELECT COUNT(*) as count FROM channels WHERE deleted_at IS NULL
+[MockDB Query] SELECT * FROM channels WHERE deleted_at IS NULL ORDER BY created_at DESC LIMIT $ | Params: 2
+[MockDB] SELECT channels matched - returning 6
+[MockDB Query] SELECT COUNT(*) as count FROM physical_items WHERE deleted_at IS NULL | Params: 0
+[MockDB Query] SELECT * FROM physical_items WHERE deleted_at IS NULL ORDER BY item_code ASC | Params: 2
+[MockDB Query] SELECT COUNT(*) as count FROM categories WHERE deleted_at IS NULL AND status = $ | Params: 1
+[MockDB Query] SELECT * FROM categories WHERE deleted_at IS NULL AND status = $1 ORDER BY code | Params: 3
+[MockDB] SELECT categories matched - returning 8
+[MockDB Query] SELECT COUNT(*) as count FROM advertising_content WHERE deleted_at IS NULL | Params: 0
+[MockDB Query] SELECT * FROM advertising_content WHERE deleted_at IS NULL ORDER BY create | Params: 2
+[MockDB Query] SELECT COUNT(*) as count FROM locations WHERE deleted_at IS NULL AND status = $1 | Params: 1
+[MockDB Query] SELECT * FROM locations WHERE deleted_at IS NULL AND status = $1 ORDER BY positi | Params: 3
+[MockDB] SELECT locations matched - returning 20
+[MockDB Query] SELECT COUNT(*) as count FROM channels WHERE deleted_at IS NULL | Params: 0
+[MockDB] NO MATCH for query: SELECT COUNT(*) as count FROM channels WHERE deleted_at IS NULL
+[MockDB Query] SELECT * FROM channels WHERE deleted_at IS NULL ORDER BY created_at DESC LIMIT $ | Params: 2
+[MockDB] SELECT channels matched - returning 6
+[MockDB Query] SELECT COUNT(*) as count FROM physical_items WHERE deleted_at IS NULL | Params: 0
+[MockDB Query] SELECT * FROM physical_items WHERE deleted_at IS NULL ORDER BY item_code ASC | Params: 2
+[MockDB Query] SELECT COUNT(*) as count FROM advertising_content WHERE deleted_at IS NULL | Params: 0
+[MockDB Query] SELECT * FROM advertising_content WHERE deleted_at IS NULL ORDER BY create | Params: 2
+[MockDB Query] SELECT COUNT(*) as count FROM advertising_content WHERE deleted_at IS NULL | Params: 0
+[MockDB Query] SELECT * FROM advertising_content WHERE deleted_at IS NULL ORDER BY create | Params: 2
+[MockDB Query] SELECT * FROM advertising_content WHERE id = $1 AND deleted_at IS NULL | Params: 1
+[MockDB Query] SELECT * FROM content_images WHERE content_id = $1 ORDER BY sequence ASC | Params: 1
+[MockDB Query] SELECT * FROM advertising_content WHERE id = $1 AND deleted_at IS NULL | Params: 1
+[MockDB Query] SELECT * FROM content_images WHERE content_id = $1 ORDER BY sequence ASC | Params: 1
+[MockDB Query] SELECT * FROM advertising_content WHERE id = $1 AND deleted_at IS NULL | Params: 1
+[MockDB Query] SELECT * FROM content_images WHERE content_id = $1 ORDER BY sequence ASC | Params: 1
+[MockDB Query] SELECT * FROM advertising_content WHERE id = $1 AND deleted_at IS NULL | Params: 1
+[MockDB Query] SELECT * FROM content_images WHERE content_id = $1 ORDER BY sequence ASC | Params: 1
+[MockDB Query] SELECT * FROM advertising_content WHERE id = $1 AND deleted_at IS NULL | Params: 1
+[MockDB Query] SELECT * FROM content_images WHERE content_id = $1 ORDER BY sequence ASC | Params: 1
+[MockDB Query] SELECT * FROM advertising_content WHERE id = $1 AND deleted_at IS NULL | Params: 1
+[MockDB Query] SELECT * FROM content_images WHERE content_id = $1 ORDER BY sequence ASC | Params: 1
+[MockDB Query] SELECT * FROM advertising_content WHERE id = $1 AND deleted_at IS NULL | Params: 1
+[MockDB Query] SELECT * FROM content_images WHERE content_id = $1 ORDER BY sequence ASC | Params: 1
+[MockDB Query] SELECT * FROM advertising_content WHERE id = $1 AND deleted_at IS NULL | Params: 1
+[MockDB Query] SELECT * FROM content_images WHERE content_id = $1 ORDER BY sequence ASC | Params: 1
+[MockDB Query] SELECT * FROM advertising_content WHERE id = $1 AND deleted_at IS NULL | Params: 1
+[MockDB Query] SELECT * FROM content_images WHERE content_id = $1 ORDER BY sequence ASC | Params: 1
+[MockDB Query] SELECT * FROM advertising_content WHERE id = $1 AND deleted_at IS NULL | Params: 1
+[MockDB Query] SELECT * FROM content_images WHERE content_id = $1 ORDER BY sequence ASC | Params: 1
+[MockDB Query] SELECT COUNT(*) as count FROM locations WHERE deleted_at IS NULL | Params: 0
+[MockDB Query] SELECT * FROM locations WHERE deleted_at IS NULL ORDER BY position_code ASC | Params: 2
+[MockDB] SELECT locations matched - returning 20
+[MockDB Query] SELECT COUNT(*) as count FROM locations WHERE deleted_at IS NULL | Params: 0
+[MockDB Query] SELECT * FROM locations WHERE deleted_at IS NULL ORDER BY position_code ASC | Params: 2
+[MockDB] SELECT locations matched - returning 20
+[MockDB Query] SELECT id, code, name, label, icon, order_position, parent_id, status, created_a | Params: 0
+[MockDB Query] SELECT id, code, name, label, icon, order_position, parent_id, status, created_a | Params: 0
+[MockDB Query] SELECT COUNT(*) as count FROM categories WHERE deleted_at IS NULL | Params: 0
+[MockDB Query] SELECT * FROM categories WHERE deleted_at IS NULL ORDER BY code ASC LIMIT | Params: 2
+[MockDB] SELECT categories matched - returning 8
+[MockDB Query] SELECT COUNT(*) as count FROM categories WHERE deleted_at IS NULL | Params: 0
+[MockDB Query] SELECT * FROM categories WHERE deleted_at IS NULL ORDER BY code ASC LIMIT | Params: 2
+[MockDB] SELECT categories matched - returning 8
+[MockDB Query] SELECT COUNT(*) as count FROM channels WHERE deleted_at IS NULL | Params: 0
+[MockDB] NO MATCH for query: SELECT COUNT(*) as count FROM channels WHERE deleted_at IS NULL
+[MockDB Query] SELECT * FROM channels WHERE deleted_at IS NULL ORDER BY created_at DESC LIMIT $ | Params: 2
+[MockDB] SELECT channels matched - returning 6
+[MockDB Query] SELECT COUNT(*) as count FROM locations WHERE deleted_at IS NULL | Params: 0
+[MockDB Query] SELECT * FROM locations WHERE deleted_at IS NULL ORDER BY position_code ASC | Params: 2
+[MockDB] SELECT locations matched - returning 20
+[MockDB Query] SELECT COUNT(*) as count FROM channels WHERE deleted_at IS NULL | Params: 0
+[MockDB] NO MATCH for query: SELECT COUNT(*) as count FROM channels WHERE deleted_at IS NULL
+[MockDB Query] SELECT * FROM channels WHERE deleted_at IS NULL ORDER BY created_at DESC LIMIT $ | Params: 2
+[MockDB] SELECT channels matched - returning 6
+[MockDB Query] SELECT COUNT(*) as count FROM locations WHERE deleted_at IS NULL | Params: 0
+[MockDB Query] SELECT * FROM locations WHERE deleted_at IS NULL ORDER BY position_code ASC | Params: 2
+[MockDB] SELECT locations matched - returning 20
+[MockDB Query] SELECT COUNT(*) as count FROM physical_items WHERE deleted_at IS NULL | Params: 0
+[MockDB Query] SELECT * FROM physical_items WHERE deleted_at IS NULL ORDER BY item_code ASC | Params: 2
+[MockDB Query] SELECT COUNT(*) as count FROM categories WHERE deleted_at IS NULL | Params: 0
+[MockDB Query] SELECT * FROM categories WHERE deleted_at IS NULL ORDER BY code ASC LIMIT | Params: 2
+[MockDB] SELECT categories matched - returning 8
+[MockDB Query] SELECT COUNT(*) as count FROM locations WHERE deleted_at IS NULL | Params: 0
+[MockDB Query] SELECT * FROM locations WHERE deleted_at IS NULL ORDER BY position_code ASC | Params: 2
+[MockDB] SELECT locations matched - returning 20
+[MockDB Query] SELECT COUNT(*) as count FROM physical_items WHERE deleted_at IS NULL | Params: 0
+[MockDB Query] SELECT * FROM physical_items WHERE deleted_at IS NULL ORDER BY item_code ASC | Params: 2
+[MockDB Query] SELECT COUNT(*) as count FROM categories WHERE deleted_at IS NULL | Params: 0
+[MockDB Query] SELECT * FROM categories WHERE deleted_at IS NULL ORDER BY code ASC LIMIT | Params: 2
+[MockDB] SELECT categories matched - returning 8
+[MockDB Query] SELECT COUNT(*) as count FROM locations WHERE deleted_at IS NULL | Params: 0
+[MockDB Query] SELECT * FROM locations WHERE deleted_at IS NULL ORDER BY position_code ASC | Params: 2
+[MockDB] SELECT locations matched - returning 20
+[MockDB Query] SELECT id, code, name, label, icon, order_position, parent_id, status, created_a | Params: 0
+[MockDB Query] SELECT id, code, name, label, icon, order_position, parent_id, status, created_a | Params: 0
+[MockDB Query] SELECT COUNT(*) as count FROM locations WHERE deleted_at IS NULL | Params: 0
+[MockDB Query] SELECT * FROM locations WHERE deleted_at IS NULL ORDER BY position_code ASC | Params: 2
+[MockDB] SELECT locations matched - returning 20
+[MockDB Query] SELECT COUNT(*) as count FROM locations WHERE deleted_at IS NULL | Params: 0
+[MockDB Query] SELECT * FROM locations WHERE deleted_at IS NULL ORDER BY position_code ASC | Params: 2
+[MockDB] SELECT locations matched - returning 20
+[MockDB Query] SELECT COUNT(*) as count FROM channels WHERE deleted_at IS NULL | Params: 0
+[MockDB] NO MATCH for query: SELECT COUNT(*) as count FROM channels WHERE deleted_at IS NULL
+[MockDB Query] SELECT * FROM channels WHERE deleted_at IS NULL ORDER BY created_at DESC LIMIT $ | Params: 2
+[MockDB] SELECT channels matched - returning 6
+[MockDB Query] SELECT COUNT(*) as count FROM locations WHERE deleted_at IS NULL | Params: 0
+[MockDB Query] SELECT * FROM locations WHERE deleted_at IS NULL ORDER BY position_code ASC | Params: 2
+[MockDB] SELECT locations matched - returning 20
+[MockDB Query] SELECT COUNT(*) as count FROM channels WHERE deleted_at IS NULL | Params: 0
+[MockDB] NO MATCH for query: SELECT COUNT(*) as count FROM channels WHERE deleted_at IS NULL
+[MockDB Query] SELECT * FROM channels WHERE deleted_at IS NULL ORDER BY created_at DESC LIMIT $ | Params: 2
+[MockDB] SELECT channels matched - returning 6
+[MockDB Query] SELECT COUNT(*) as count FROM locations WHERE deleted_at IS NULL | Params: 0
+[MockDB Query] SELECT * FROM locations WHERE deleted_at IS NULL ORDER BY position_code ASC | Params: 2
+[MockDB] SELECT locations matched - returning 20
+[MockDB Query] SELECT COUNT(*) as count FROM physical_items WHERE deleted_at IS NULL | Params: 0
+[MockDB Query] SELECT * FROM physical_items WHERE deleted_at IS NULL ORDER BY item_code ASC | Params: 2
+[MockDB Query] SELECT COUNT(*) as count FROM categories WHERE deleted_at IS NULL | Params: 0
+[MockDB Query] SELECT * FROM categories WHERE deleted_at IS NULL ORDER BY code ASC LIMIT | Params: 2
+[MockDB] SELECT categories matched - returning 8
+[MockDB Query] SELECT COUNT(*) as count FROM locations WHERE deleted_at IS NULL | Params: 0
+[MockDB Query] SELECT * FROM locations WHERE deleted_at IS NULL ORDER BY position_code ASC | Params: 2
+[MockDB] SELECT locations matched - returning 20
+[MockDB Query] SELECT COUNT(*) as count FROM physical_items WHERE deleted_at IS NULL | Params: 0
+[MockDB Query] SELECT * FROM physical_items WHERE deleted_at IS NULL ORDER BY item_code ASC | Params: 2
+[MockDB Query] SELECT COUNT(*) as count FROM categories WHERE deleted_at IS NULL | Params: 0
+[MockDB Query] SELECT * FROM categories WHERE deleted_at IS NULL ORDER BY code ASC LIMIT | Params: 2
+[MockDB] SELECT categories matched - returning 8
+[MockDB Query] SELECT COUNT(*) as count FROM locations WHERE deleted_at IS NULL | Params: 0
+[MockDB Query] SELECT * FROM locations WHERE deleted_at IS NULL ORDER BY position_code ASC | Params: 2
+[MockDB] SELECT locations matched - returning 20
+[MockDB Query] SELECT COUNT(*) as count FROM locations WHERE deleted_at IS NULL | Params: 0
+[MockDB Query] SELECT * FROM locations WHERE deleted_at IS NULL ORDER BY position_code ASC | Params: 2
+[MockDB] SELECT locations matched - returning 20
+[MockDB Query] SELECT COUNT(*) as count FROM locations WHERE deleted_at IS NULL | Params: 0
+[MockDB Query] SELECT * FROM locations WHERE deleted_at IS NULL ORDER BY position_code ASC | Params: 2
+[MockDB] SELECT locations matched - returning 20
+[MockDB Query] SELECT COUNT(*) as count FROM locations WHERE deleted_at IS NULL | Params: 0
+[MockDB Query] SELECT * FROM locations WHERE deleted_at IS NULL ORDER BY position_code ASC | Params: 2
+[MockDB] SELECT locations matched - returning 20
+[MockDB Query] SELECT COUNT(*) as count FROM locations WHERE deleted_at IS NULL | Params: 0
+[MockDB Query] SELECT * FROM locations WHERE deleted_at IS NULL ORDER BY position_code ASC | Params: 2
+[MockDB] SELECT locations matched - returning 20
+[MockDB Query] SELECT COUNT(*) as count FROM advertising_content WHERE deleted_at IS NULL | Params: 0
+[MockDB Query] SELECT * FROM advertising_content WHERE deleted_at IS NULL ORDER BY create | Params: 2
+[MockDB Query] SELECT COUNT(*) as count FROM advertising_content WHERE deleted_at IS NULL | Params: 0
+[MockDB Query] SELECT * FROM advertising_content WHERE deleted_at IS NULL ORDER BY create | Params: 2
+[MockDB Query] SELECT * FROM advertising_content WHERE id = $1 AND deleted_at IS NULL | Params: 1
+[MockDB Query] SELECT * FROM content_images WHERE content_id = $1 ORDER BY sequence ASC | Params: 1
+[MockDB Query] SELECT * FROM advertising_content WHERE id = $1 AND deleted_at IS NULL | Params: 1
+[MockDB Query] SELECT * FROM content_images WHERE content_id = $1 ORDER BY sequence ASC | Params: 1
+[MockDB Query] SELECT * FROM advertising_content WHERE id = $1 AND deleted_at IS NULL | Params: 1
+[MockDB Query] SELECT * FROM content_images WHERE content_id = $1 ORDER BY sequence ASC | Params: 1
+[MockDB Query] SELECT * FROM advertising_content WHERE id = $1 AND deleted_at IS NULL | Params: 1
+[MockDB Query] SELECT * FROM content_images WHERE content_id = $1 ORDER BY sequence ASC | Params: 1
+[MockDB Query] SELECT * FROM advertising_content WHERE id = $1 AND deleted_at IS NULL | Params: 1
+[MockDB Query] SELECT * FROM content_images WHERE content_id = $1 ORDER BY sequence ASC | Params: 1
+[MockDB Query] SELECT * FROM advertising_content WHERE id = $1 AND deleted_at IS NULL | Params: 1
+[MockDB Query] SELECT * FROM content_images WHERE content_id = $1 ORDER BY sequence ASC | Params: 1
+[MockDB Query] SELECT * FROM advertising_content WHERE id = $1 AND deleted_at IS NULL | Params: 1
+[MockDB Query] SELECT * FROM content_images WHERE content_id = $1 ORDER BY sequence ASC | Params: 1
+[MockDB Query] SELECT * FROM advertising_content WHERE id = $1 AND deleted_at IS NULL | Params: 1
+[MockDB Query] SELECT * FROM content_images WHERE content_id = $1 ORDER BY sequence ASC | Params: 1
+[MockDB Query] SELECT * FROM advertising_content WHERE id = $1 AND deleted_at IS NULL | Params: 1
+[MockDB Query] SELECT * FROM content_images WHERE content_id = $1 ORDER BY sequence ASC | Params: 1
+[MockDB Query] SELECT * FROM advertising_content WHERE id = $1 AND deleted_at IS NULL | Params: 1
+[MockDB Query] SELECT * FROM content_images WHERE content_id = $1 ORDER BY sequence ASC | Params: 1
+[MockDB Query] SELECT COUNT(*) as count FROM registrations WHERE deleted_at IS NULL | Params: 0
+[MockDB Query] SELECT * FROM registrations WHERE deleted_at IS NULL ORDER BY created_at DESC | Params: 2
+[MockDB Query] SELECT COUNT(*) as count FROM registrations WHERE deleted_at IS NULL | Params: 0
+[MockDB Query] SELECT * FROM registrations WHERE deleted_at IS NULL ORDER BY created_at DESC | Params: 2
+[MockDB Query] SELECT id, code, name, label, icon, order_position, parent_id, status, created_a | Params: 0
+[MockDB Query] SELECT id, code, name, label, icon, order_position, parent_id, status, created_a | Params: 0
+[MockDB Query] SELECT COUNT(*) as count FROM registrations WHERE deleted_at IS NULL | Params: 0
+[MockDB Query] SELECT * FROM registrations WHERE deleted_at IS NULL ORDER BY created_at DESC | Params: 2
+[MockDB Query] SELECT COUNT(*) as count FROM registrations WHERE deleted_at IS NULL | Params: 0
+[MockDB Query] SELECT * FROM registrations WHERE deleted_at IS NULL ORDER BY created_at DESC | Params: 2
+[MockDB Query] SELECT COUNT(*) as count FROM advertising_content WHERE deleted_at IS NULL | Params: 0
+[MockDB Query] SELECT * FROM advertising_content WHERE deleted_at IS NULL ORDER BY create | Params: 2
+[MockDB Query] SELECT COUNT(*) as count FROM advertising_content WHERE deleted_at IS NULL | Params: 0
+[MockDB Query] SELECT * FROM advertising_content WHERE deleted_at IS NULL ORDER BY create | Params: 2
+[MockDB Query] SELECT * FROM advertising_content WHERE id = $1 AND deleted_at IS NULL | Params: 1
+[MockDB Query] SELECT * FROM content_images WHERE content_id = $1 ORDER BY sequence ASC | Params: 1
+[MockDB Query] SELECT * FROM advertising_content WHERE id = $1 AND deleted_at IS NULL | Params: 1
+[MockDB Query] SELECT * FROM content_images WHERE content_id = $1 ORDER BY sequence ASC | Params: 1
+[MockDB Query] SELECT * FROM advertising_content WHERE id = $1 AND deleted_at IS NULL | Params: 1
+[MockDB Query] SELECT * FROM content_images WHERE content_id = $1 ORDER BY sequence ASC | Params: 1
+[MockDB Query] SELECT * FROM advertising_content WHERE id = $1 AND deleted_at IS NULL | Params: 1
+[MockDB Query] SELECT * FROM content_images WHERE content_id = $1 ORDER BY sequence ASC | Params: 1
+[MockDB Query] SELECT * FROM advertising_content WHERE id = $1 AND deleted_at IS NULL | Params: 1
+[MockDB Query] SELECT * FROM content_images WHERE content_id = $1 ORDER BY sequence ASC | Params: 1
+[MockDB Query] SELECT * FROM advertising_content WHERE id = $1 AND deleted_at IS NULL | Params: 1
+[MockDB Query] SELECT * FROM content_images WHERE content_id = $1 ORDER BY sequence ASC | Params: 1
+[MockDB Query] SELECT * FROM advertising_content WHERE id = $1 AND deleted_at IS NULL | Params: 1
+[MockDB Query] SELECT * FROM content_images WHERE content_id = $1 ORDER BY sequence ASC | Params: 1
+[MockDB Query] SELECT * FROM advertising_content WHERE id = $1 AND deleted_at IS NULL | Params: 1
+[MockDB Query] SELECT * FROM content_images WHERE content_id = $1 ORDER BY sequence ASC | Params: 1
+[MockDB Query] SELECT * FROM advertising_content WHERE id = $1 AND deleted_at IS NULL | Params: 1
+[MockDB Query] SELECT * FROM content_images WHERE content_id = $1 ORDER BY sequence ASC | Params: 1
+[MockDB Query] SELECT * FROM advertising_content WHERE id = $1 AND deleted_at IS NULL | Params: 1
+[MockDB Query] SELECT * FROM content_images WHERE content_id = $1 ORDER BY sequence ASC | Params: 1
+[MockDB Query] SELECT COUNT(*) as count FROM channels WHERE deleted_at IS NULL | Params: 0
+[MockDB] NO MATCH for query: SELECT COUNT(*) as count FROM channels WHERE deleted_at IS NULL
+[MockDB Query] SELECT * FROM channels WHERE deleted_at IS NULL ORDER BY created_at DESC LIMIT $ | Params: 2
+[MockDB] SELECT channels matched - returning 6
+[MockDB Query] SELECT COUNT(*) as count FROM locations WHERE deleted_at IS NULL | Params: 0
+[MockDB Query] SELECT * FROM locations WHERE deleted_at IS NULL ORDER BY position_code ASC | Params: 2
+[MockDB] SELECT locations matched - returning 20
+[MockDB Query] SELECT COUNT(*) as count FROM channels WHERE deleted_at IS NULL | Params: 0
+[MockDB] NO MATCH for query: SELECT COUNT(*) as count FROM channels WHERE deleted_at IS NULL
+[MockDB Query] SELECT * FROM channels WHERE deleted_at IS NULL ORDER BY created_at DESC LIMIT $ | Params: 2
+[MockDB] SELECT channels matched - returning 6
+[MockDB Query] SELECT COUNT(*) as count FROM locations WHERE deleted_at IS NULL | Params: 0
+[MockDB Query] SELECT * FROM locations WHERE deleted_at IS NULL ORDER BY position_code ASC | Params: 2
+[MockDB] SELECT locations matched - returning 20
+[MockDB Query] SELECT COUNT(*) as count FROM physical_items WHERE deleted_at IS NULL | Params: 0
+[MockDB Query] SELECT * FROM physical_items WHERE deleted_at IS NULL ORDER BY item_code ASC | Params: 2
+[MockDB Query] SELECT COUNT(*) as count FROM categories WHERE deleted_at IS NULL | Params: 0
+[MockDB Query] SELECT * FROM categories WHERE deleted_at IS NULL ORDER BY code ASC LIMIT | Params: 2
+[MockDB] SELECT categories matched - returning 8
+[MockDB Query] SELECT COUNT(*) as count FROM locations WHERE deleted_at IS NULL | Params: 0
+[MockDB Query] SELECT * FROM locations WHERE deleted_at IS NULL ORDER BY position_code ASC | Params: 2
+[MockDB] SELECT locations matched - returning 20
+[MockDB Query] SELECT COUNT(*) as count FROM physical_items WHERE deleted_at IS NULL | Params: 0
+[MockDB Query] SELECT * FROM physical_items WHERE deleted_at IS NULL ORDER BY item_code ASC | Params: 2
+[MockDB Query] SELECT COUNT(*) as count FROM categories WHERE deleted_at IS NULL | Params: 0
+[MockDB Query] SELECT * FROM categories WHERE deleted_at IS NULL ORDER BY code ASC LIMIT | Params: 2
+[MockDB] SELECT categories matched - returning 8
+[MockDB Query] SELECT COUNT(*) as count FROM locations WHERE deleted_at IS NULL | Params: 0
+[MockDB Query] SELECT * FROM locations WHERE deleted_at IS NULL ORDER BY position_code ASC | Params: 2
+[MockDB] SELECT locations matched - returning 20

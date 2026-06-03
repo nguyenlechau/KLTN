@@ -5,10 +5,13 @@ import { Table } from '../../components/Table';
 import { Modal } from '../../components/Modal';
 import { Alert } from '../../components/Alert';
 import { Spinner } from '../../components/Spinner';
+import { useRole, canManageMasterData } from '../../hooks/useRole';
 import * as api from '../../api/services';
 import '../../styles/master-list.css';
 
 export function LocationManagementScreen() {
+  const role = useRole();
+  const canWrite = canManageMasterData(role);
   const [locations, setLocations] = useState<api.Location[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
@@ -17,6 +20,7 @@ export function LocationManagementScreen() {
   const [total, setTotal] = useState(0);
   const [limit] = useState(10);
   const [selectedLocation, setSelectedLocation] = useState<api.Location | null>(null);
+  const [editingLocation, setEditingLocation] = useState<api.Location | null>(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState<string | null>(null);
 
@@ -62,29 +66,22 @@ export function LocationManagementScreen() {
     }
   };
 
-  const columns = [
-    { label: 'Code', key: 'position_code', width: '12%' },
-    { label: 'Name', key: 'position_name', width: '20%' },
-    { label: 'Province/City', key: 'province_city', width: '15%' },
-    { label: 'Zone', key: 'zone', width: '12%' },
-    { label: 'Address', key: 'address', width: '25%' },
-    {
-      label: 'Status',
-      key: 'status',
-      width: '10%',
-      render: (v: string) => (
-        <span className={`status-badge status-${v.toLowerCase()}`}>
-          {v === 'ACTIVE' ? '✓ Active' : '✗ Inactive'}
-        </span>
-      ),
-    },
-  ];
-
-  const actions = [
-    { label: 'View', onClick: (row: any) => setSelectedLocation(row) },
-    { label: 'Edit', onClick: (row: any) => setSelectedLocation(row) },
-    { label: 'Delete', onClick: (row: any) => setShowDeleteConfirm(row.id), variant: 'danger' },
-  ];
+  const tableHeaders = ['Code', 'Name', 'Province', 'Channels', 'Address', 'Status', 'Actions'];
+  const tableRows = locations.map((row) => [
+    (row as any).code || (row as any).position_code || '-',
+    (row as any).name || (row as any).position_name || '-',
+    (row as any).province || (row as any).province_city || '-',
+    ((row as any).channels || []).join(', ') || '-',
+    (row as any).address_line || (row as any).address || '-',
+    <span className={`status-badge status-${row.status.toLowerCase()}`}>
+      {row.status === 'ACTIVE' ? '✓ Active' : '✗ Inactive'}
+    </span>,
+    <div style={{ display: 'flex', gap: '0.5rem' }}>
+      <Button variant="secondary" onClick={() => setSelectedLocation(row)}>View</Button>
+      {canWrite && <Button variant="secondary" onClick={() => setEditingLocation(row)}>Edit</Button>}
+      {canWrite && <Button variant="danger" onClick={() => setShowDeleteConfirm((row as any).id)}>Delete</Button>}
+    </div>,
+  ]);
 
   const totalPages = Math.ceil(total / limit);
 
@@ -101,11 +98,13 @@ export function LocationManagementScreen() {
         <Input
           placeholder="Search by name or location code..."
           value={search}
-          onChange={(e) => handleSearch(e.target.value)}
+          onChange={handleSearch}
         />
-        <Button onClick={handleCreate} variant="primary">
-          + Add Location
-        </Button>
+        {canWrite && (
+          <Button onClick={handleCreate} variant="primary">
+            + Add Location
+          </Button>
+        )}
       </div>
 
       {isLoading ? (
@@ -116,7 +115,7 @@ export function LocationManagementScreen() {
         </div>
       ) : (
         <>
-          <Table columns={columns} data={locations} actions={actions} />
+          <Table headers={tableHeaders} rows={tableRows} />
           <div className="pagination">
             <Button
               onClick={() => loadLocations(page - 1, search)}
@@ -138,29 +137,29 @@ export function LocationManagementScreen() {
       {/* Detail Modal */}
       {selectedLocation && (
         <Modal
-          title={`Location Details: ${selectedLocation.position_name}`}
+          title={`Location Details: ${(selectedLocation as any).name || selectedLocation.position_name || 'Unknown'}`}
           onClose={() => setSelectedLocation(null)}
         >
           <div className="detail-content">
             <div className="detail-row">
               <label>Location Code:</label>
-              <span>{selectedLocation.position_code}</span>
+              <span>{(selectedLocation as any).code || selectedLocation.position_code}</span>
             </div>
             <div className="detail-row">
               <label>Location Name:</label>
-              <span>{selectedLocation.position_name}</span>
+              <span>{(selectedLocation as any).name || selectedLocation.position_name}</span>
             </div>
             <div className="detail-row">
-              <label>Province/City:</label>
-              <span>{selectedLocation.province_city}</span>
+              <label>Province:</label>
+              <span>{(selectedLocation as any).province || selectedLocation.province_city || '-'}</span>
             </div>
             <div className="detail-row">
-              <label>Zone:</label>
-              <span>{selectedLocation.zone}</span>
+              <label>Channels:</label>
+              <span>{((selectedLocation as any).channels || []).join(', ') || '-'}</span>
             </div>
             <div className="detail-row">
               <label>Address:</label>
-              <span>{selectedLocation.address}</span>
+              <span>{(selectedLocation as any).address_line || selectedLocation.address || '-'}</span>
             </div>
             <div className="detail-row">
               <label>Status:</label>
@@ -217,6 +216,17 @@ export function LocationManagementScreen() {
           }}
         />
       )}
+
+      {editingLocation && (
+        <LocationCreateModal
+          location={editingLocation}
+          onClose={() => setEditingLocation(null)}
+          onSuccess={() => {
+            setEditingLocation(null);
+            loadLocations(page, search);
+          }}
+        />
+      )}
     </div>
   );
 }
@@ -231,44 +241,55 @@ function LocationCreateModal({
   onSuccess: () => void;
 }) {
   const [form, setForm] = useState({
-    position_code: location?.position_code || '',
-    position_name: location?.position_name || '',
-    province_city: location?.province_city || '',
+    position_code: location?.position_code || (location as any)?.code || '',
+    position_name: location?.position_name || (location as any)?.name || '',
+    province_city: location?.province_city || (location as any)?.province || '',
     zone: location?.zone || '',
-    address: location?.address || '',
+    address: location?.address || (location as any)?.address_line || '',
     status: location?.status || 'ACTIVE',
   });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [channels, setChannels] = useState<any[]>([]);
-  const [selectedChannel, setSelectedChannel] = useState(location?.channel_id || '');
+  const [selectedChannels, setSelectedChannels] = useState<string[]>(
+    (location as any)?.channels || (location?.channel_id ? [location.channel_id] : [])
+  );
 
   useEffect(() => {
-    // Load channels - TODO: create API endpoint
-    setChannels([
-      { id: '1', name: 'Indoor' },
-      { id: '2', name: 'Outdoor' },
-    ]);
+    const loadChannels = async () => {
+      try {
+        const response = await api.getChannelList();
+        if (response.ok) {
+          setChannels(response.data || []);
+        }
+      } catch {
+        setChannels([]);
+      }
+    };
+    loadChannels();
   }, []);
 
   const handleSubmit = async () => {
     setError('');
-    if (!form.position_code || !form.position_name || !form.province_city || !form.zone || !form.address || !selectedChannel) {
-      setError('Please fill in all required fields');
-      return;
+    if (!location?.id) {
+      if (!form.position_code || !form.position_name || !form.province_city || !form.zone || !form.address || selectedChannels.length === 0) {
+        setError('Please fill in all required fields');
+        return;
+      }
     }
 
     setIsLoading(true);
     try {
       if (location?.id) {
-        await api.updateLocation(location.id, {
+        const payload: any = {
           ...form,
-          channel_id: selectedChannel,
-        });
+          channels: selectedChannels,
+        };
+        await api.updateLocation(location.id, payload);
       } else {
         await api.createLocation({
           ...form,
-          channel_id: selectedChannel,
+          channel_id: selectedChannels[0] || '',
           created_by: 'current_user',
         });
       }
@@ -289,28 +310,36 @@ function LocationCreateModal({
         {error && <Alert type="error" message={error} />}
 
         <div className="form-group">
-          <label>Channel *</label>
-          <select
-            value={selectedChannel}
-            onChange={(e) => setSelectedChannel(e.target.value)}
-            className="form-select"
-          >
-            <option value="">-- Select Channel --</option>
-            {channels.map((c) => (
-              <option key={c.id} value={c.id}>
-                {c.name}
-              </option>
-            ))}
-          </select>
+          <label>Channels *</label>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', paddingTop: '0.25rem' }}>
+            {channels.map((c) => {
+              const code = c.code || c.id;
+              const checked = selectedChannels.includes(code);
+              return (
+                <label key={c.id} style={{ display: 'flex', alignItems: 'center', gap: '0.375rem', cursor: 'pointer' }}>
+                  <input
+                    type="checkbox"
+                    checked={checked}
+                    onChange={(e) => {
+                      setSelectedChannels((prev) =>
+                        e.target.checked ? [...prev, code] : prev.filter((v) => v !== code)
+                      );
+                    }}
+                  />
+                  {c.code ? `${c.code} - ${c.name}` : c.name}
+                </label>
+              );
+            })}
+          </div>
         </div>
 
         <div className="form-group">
           <label>Location Code *</label>
           <Input
             value={form.position_code}
-            onChange={(e) => setForm({ ...form, position_code: e.target.value })}
+            onChange={(value) => setForm({ ...form, position_code: value })}
             placeholder="e.g. LOC"
-            maxLength="3"
+            maxLength={3}
             disabled={!!location}
           />
         </div>
@@ -319,7 +348,7 @@ function LocationCreateModal({
           <label>Location Name *</label>
           <Input
             value={form.position_name}
-            onChange={(e) => setForm({ ...form, position_name: e.target.value })}
+            onChange={(value) => setForm({ ...form, position_name: value })}
             placeholder="Enter location name"
           />
         </div>
@@ -329,7 +358,7 @@ function LocationCreateModal({
             <label>Province/City *</label>
             <Input
               value={form.province_city}
-              onChange={(e) => setForm({ ...form, province_city: e.target.value })}
+              onChange={(value) => setForm({ ...form, province_city: value })}
               placeholder="e.g. Ho Chi Minh City"
             />
           </div>
@@ -337,7 +366,7 @@ function LocationCreateModal({
             <label>Zone *</label>
             <Input
               value={form.zone}
-              onChange={(e) => setForm({ ...form, zone: e.target.value })}
+              onChange={(value) => setForm({ ...form, zone: value })}
               placeholder="e.g. District 1"
             />
           </div>
@@ -347,7 +376,7 @@ function LocationCreateModal({
           <label>Address *</label>
           <Input
             value={form.address}
-            onChange={(e) => setForm({ ...form, address: e.target.value })}
+            onChange={(value) => setForm({ ...form, address: value })}
             placeholder="Enter full address"
           />
         </div>

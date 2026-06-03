@@ -88,7 +88,7 @@ export const AuditTrailViewer: React.FC<AuditTrailViewerProps> = ({ entityType, 
    */
   const formatTime = (timestamp: string): string => {
     const date = new Date(timestamp);
-    return date.toLocaleString('vi-VN', {
+    return date.toLocaleString('en-US', {
       year: 'numeric',
       month: '2-digit',
       day: '2-digit',

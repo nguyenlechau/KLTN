@@ -7,7 +7,8 @@ import { CategoryManagementScreen } from './screens/master/CategoryManagementScr
 import { LocationManagementScreen } from './screens/master/LocationManagementScreen';
 import { PhysicalItemsScreen } from './screens/master/PhysicalItemsScreen';
 import { ChannelsScreen } from './screens/master/ChannelsScreen';
-import { RegistrationListScreen } from './screens/registrations/RegistrationListScreen';
+import { MenuScreen } from './screens/master/MenuScreen';
+import { RegistrationCreateScreen, RegistrationListScreen } from './screens/registrations/RegistrationListScreen';
 import { RegistrationDetailScreen } from './screens/registrations/RegistrationDetailScreen';
 import { DeploymentAcceptanceScreen } from './screens/registrations/DeploymentAcceptanceScreen';
 import { AuthPage } from './screens/AuthPage';
@@ -24,6 +25,7 @@ export function App() {
         
         {/* Registration Management */}
         <Route path="registrations" element={<RegistrationListScreen />} />
+        <Route path="registrations/new" element={<RegistrationCreateScreen />} />
         <Route path="registrations/:id" element={<RegistrationDetailScreen />} />
         <Route path="registrations/:id/deployment" element={<DeploymentAcceptanceScreen />} />
         
@@ -33,6 +35,7 @@ export function App() {
         <Route path="master/locations" element={<LocationManagementScreen />} />
         <Route path="master/items" element={<PhysicalItemsScreen />} />
         <Route path="master/channels" element={<ChannelsScreen />} />
+        <Route path="master/menus" element={<MenuScreen />} />
         
         {/* User Management */}
         <Route path="admin/users" element={<UsersScreen />} />

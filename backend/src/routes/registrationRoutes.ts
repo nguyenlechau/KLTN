@@ -110,7 +110,11 @@ router.put('/registrations/:id', async (req: AuthenticatedRequest, res: Response
     const updated = await registrationService.updateRegistration(req.params.id, req.body);
     res.json({ ok: true, data: updated });
   } catch (error) {
-    res.status(500).json({ ok: false, error: (error as Error).message });
+    const message = (error as Error).message;
+    if (message === 'Registration not found') {
+      return res.status(404).json({ ok: false, error: 'Registration not found' });
+    }
+    res.status(500).json({ ok: false, error: message });
   }
 });
 
@@ -282,7 +286,11 @@ router.post('/registrations/:id/transition', async (req: AuthenticatedRequest, r
 
     res.json({ ok: true, data: transition });
   } catch (error) {
-    res.status(500).json({ ok: false, error: (error as Error).message });
+    const message = (error as Error).message;
+    if (message === 'Registration not found') {
+      return res.status(404).json({ ok: false, error: 'Registration not found' });
+    }
+    res.status(500).json({ ok: false, error: message });
   }
 });
 

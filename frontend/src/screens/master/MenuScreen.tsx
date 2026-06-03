@@ -5,6 +5,7 @@ import { Button } from '../../components/Button';
 import { Alert } from '../../components/Alert';
 import { Spinner } from '../../components/Spinner';
 import { EditableGridView, GridColumn } from '../../components/EditableGridView';
+import '../../styles/master-list.css';
 import '../../styles/screen.css';
 
 interface MenuItem {
@@ -177,7 +178,7 @@ export function MenuScreen() {
       width: '12%',
       render: (value: string) => (
         <span title={value}>
-          {value ? `${value} ${value}` : '—'}
+          {value || '—'}
         </span>
       ),
     },
@@ -221,7 +222,12 @@ export function MenuScreen() {
 
   return (
     <div className="screen">
-      <h2>📋 Menu Management</h2>
+      <div className="screen-header">
+        <div className="screen-header-text">
+          <h1>Menu Management</h1>
+          <p className="screen-subtitle">Manage navigation menu items inline</p>
+        </div>
+      </div>
 
       {error && <Alert type="error" onClose={() => setError('')}>{error}</Alert>}
       {success && <Alert type="success" onClose={() => setSuccess('')}>{success}</Alert>}
@@ -246,9 +252,9 @@ export function MenuScreen() {
               showActions={true}
               actionWidth="60px"
             />
-            <div style={{ marginTop: '1rem', padding: '1rem', backgroundColor: '#f8f9fa', borderRadius: '0.5rem' }}>
-              <p style={{ margin: 0, fontSize: '0.9rem', color: '#666' }}>
-                <strong>💡 Tips:</strong> Click any cell to edit inline • Press Enter to save • Press Esc to cancel •
+            <div className="card-section" style={{ marginTop: '1rem' }}>
+              <p style={{ margin: 0, fontSize: 'var(--text-sm)', color: 'var(--gray-500)' }}>
+                <strong>Tips:</strong> Click any cell to edit inline • Press Enter to save • Press Esc to cancel •
                 Sort by clicking column headers • Click delete icon to remove menu items
               </p>
             </div>

@@ -105,7 +105,7 @@ export async function evaluateGuardConditions(
     // Guard: ALL_ITEMS_ACTIONABLE
     const itemsCheck = await registrationService.validateAllItemsActionable(registrationId);
     if (!itemsCheck.valid) {
-      errors.push(`${itemsCheck.inactiveCount} vật phẩm không khả dụng (phải là ACTIVE)`);
+      errors.push(`${itemsCheck.inactiveCount} item(s) are not available (must be ACTIVE)`);
     }
   }
 
@@ -115,11 +115,11 @@ export async function evaluateGuardConditions(
     if (!details) throw new Error('Registration not found');
 
     if (details.content.length === 0) {
-      errors.push('Phải chọn ít nhất một nội dung quảng cáo');
+      errors.push('At least one advertising content must be selected');
     }
 
     if (details.items.length === 0) {
-      errors.push('Phải chọn ít nhất một vị trí/hạng mục');
+      errors.push('At least one location/category must be selected');
     }
   }
 
@@ -230,43 +230,43 @@ export interface StateInfo {
 
 export function getStateInfo(state: string): StateInfo {
   const stateLabels: Record<string, string> = {
-    DRAFT: 'Nháp',
-    SUPERVISOR_REVIEW: 'Phê duyệt giám sát',
-    CBNV_REVISION: 'Chỉnh sửa',
-    BRAND_ACCEPTANCE: 'Chấp nhận thương hiệu',
-    BRAND_MANAGER_APPROVAL: 'Phê duyệt quản lý thương hiệu',
-    APPROVED: 'Đã phê duyệt',
-    DEPLOYMENT_PREP: 'Chuẩn bị triển khai',
-    FINAL_ACCEPTANCE: 'Xác nhận cuối cùng',
-    COMPLETED: 'Hoàn thành',
-    CANCELLED: 'Hủy bỏ',
+    DRAFT: 'Draft',
+    SUPERVISOR_REVIEW: 'Supervisor Review',
+    CBNV_REVISION: 'Revision Required',
+    BRAND_ACCEPTANCE: 'Brand Acceptance',
+    BRAND_MANAGER_APPROVAL: 'Brand Manager Approval',
+    APPROVED: 'Approved',
+    DEPLOYMENT_PREP: 'Deployment Preparation',
+    FINAL_ACCEPTANCE: 'Final Acceptance',
+    COMPLETED: 'Completed',
+    CANCELLED: 'Cancelled',
   };
 
   const stateDescriptions: Record<string, string> = {
-    DRAFT: 'Đơn đang được soạn thảo',
-    SUPERVISOR_REVIEW: 'Chờ phê duyệt từ giám sát',
-    CBNV_REVISION: 'Đơn cần chỉnh sửa lại',
-    BRAND_ACCEPTANCE: 'Chờ xác nhận từ thương hiệu',
-    BRAND_MANAGER_APPROVAL: 'Chờ phê duyệt từ quản lý thương hiệu',
-    APPROVED: 'Đã được phê duyệt, sẵn sàng triển khai',
-    DEPLOYMENT_PREP: 'Đang chuẩn bị triển khai',
-    FINAL_ACCEPTANCE: 'Chờ xác nhận cuối cùng',
-    COMPLETED: 'Triển khai hoàn thành',
-    CANCELLED: 'Đơn đã bị hủy',
+    DRAFT: 'Registration is being drafted',
+    SUPERVISOR_REVIEW: 'Awaiting supervisor review',
+    CBNV_REVISION: 'Registration needs revision',
+    BRAND_ACCEPTANCE: 'Awaiting brand acceptance',
+    BRAND_MANAGER_APPROVAL: 'Awaiting brand manager approval',
+    APPROVED: 'Approved and ready for deployment',
+    DEPLOYMENT_PREP: 'Preparing for deployment',
+    FINAL_ACCEPTANCE: 'Awaiting final acceptance',
+    COMPLETED: 'Deployment completed',
+    CANCELLED: 'Registration has been cancelled',
   };
 
   const transitions = getAvailableTransitions(state);
   const transitionLabels: Record<string, string> = {
-    DRAFT: 'Soạn thảo',
-    SUPERVISOR_REVIEW: 'Gửi phê duyệt',
-    CBNV_REVISION: 'Yêu cầu chỉnh sửa',
-    BRAND_ACCEPTANCE: 'Gửi cho thương hiệu',
-    BRAND_MANAGER_APPROVAL: 'Gửi quản lý thương hiệu',
-    APPROVED: 'Phê duyệt',
-    DEPLOYMENT_PREP: 'Chuẩn bị triển khai',
-    FINAL_ACCEPTANCE: 'Xác nhận cuối cùng',
-    COMPLETED: 'Hoàn thành',
-    CANCELLED: 'Hủy bỏ',
+    DRAFT: 'Draft',
+    SUPERVISOR_REVIEW: 'Submit for Supervisor Review',
+    CBNV_REVISION: 'Request Revision',
+    BRAND_ACCEPTANCE: 'Send to Brand',
+    BRAND_MANAGER_APPROVAL: 'Send to Brand Manager',
+    APPROVED: 'Approve',
+    DEPLOYMENT_PREP: 'Prepare for Deployment',
+    FINAL_ACCEPTANCE: 'Final Acceptance',
+    COMPLETED: 'Mark Completed',
+    CANCELLED: 'Cancel',
   };
 
   const roles = STATE_MACHINE[state as keyof typeof STATE_MACHINE]?.roles || [];

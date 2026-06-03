@@ -1,9 +1,9 @@
-import { ReactNode, CSSProperties } from 'react';
+import { ReactNode, CSSProperties, MouseEvent } from 'react';
 import './button.css';
 
 interface ButtonProps {
   children: ReactNode;
-  onClick?: () => void;
+  onClick?: (e: MouseEvent<HTMLButtonElement>) => void;
   type?: 'button' | 'submit' | 'reset';
   variant?: 'primary' | 'secondary' | 'danger' | 'success' | 'info' | 'warning';
   disabled?: boolean;

@@ -34,6 +34,7 @@ export interface Content {
   start_date: string;
   end_date: string;
   status: string;
+  description?: string;
   images?: ContentImage[];
 }
 
@@ -46,13 +47,27 @@ export interface ContentImage {
 
 export interface Location {
   id: string;
-  position_code: string;
-  channel_id: string;
-  position_name: string;
-  province_city: string;
-  zone: string;
-  address: string;
+  code: string;
+  name: string;
+  province?: string;
+  sub_district?: string;
+  classification?: string;
+  channels?: string[];
+  csm_name?: string;
+  csm_email?: string;
+  csm_phone?: string;
+  address_line?: string;
+  latitude?: number | null;
+  longitude?: number | null;
+  note?: string;
   status: string;
+  // Legacy fields kept for backward compatibility
+  position_code?: string;
+  position_name?: string;
+  channel_id?: string;
+  province_city?: string;
+  zone?: string;
+  address?: string;
 }
 
 export interface Category {
@@ -65,6 +80,15 @@ export interface Category {
   status: string;
 }
 
+export interface Channel {
+  id: string;
+  code: string;
+  name: string;
+  description?: string;
+  status: string;
+  location_id?: string;
+}
+
 export interface PhysicalItem {
   id: string;
   item_code: string;
@@ -72,6 +96,12 @@ export interface PhysicalItem {
   location_id: string;
   category_id: string;
   channel_id: string;
+  seq_no?: number;
+  width?: number;
+  length?: number;
+  unit_price?: number;
+  description?: string;
+  image_key?: string;
   status: string;
 }
 
@@ -86,6 +116,9 @@ export interface Registration {
   budget_total: number;
   total_amount: number;
   workflow_state: string;
+  department_id?: string;
+  start_date?: string;
+  end_date?: string;
   created_at: string;
   updated_at: string;
 }
@@ -262,6 +295,14 @@ export async function deleteCategory(id: string): Promise<{ ok: boolean }> {
 }
 
 // ============================================================
+// CHANNEL API
+// ============================================================
+
+export async function getChannelList(): Promise<{ ok: boolean; data: Channel[] }> {
+  return apiFetch('/v1/channels');
+}
+
+// ============================================================
 // ITEM API
 // ============================================================
 
@@ -270,7 +311,8 @@ export async function getItemList(
   offset = 0,
   search?: string,
   categoryId?: string,
-  locationId?: string
+  locationId?: string,
+  status?: string
 ): Promise<{ ok: boolean; data: PhysicalItem[]; pagination: any }> {
   const params = new URLSearchParams();
   params.append('limit', String(limit));
@@ -278,6 +320,7 @@ export async function getItemList(
   if (search) params.append('search', search);
   if (categoryId) params.append('categoryId', categoryId);
   if (locationId) params.append('locationId', locationId);
+  if (status) params.append('status', status);
 
   return apiFetch(`/v1/items?${params}`);
 }

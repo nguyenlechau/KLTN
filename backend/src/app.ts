@@ -4,6 +4,7 @@ import { authenticate } from './middleware/auth.js';
 import masterDataRoutes from './routes/masterDataRoutes.js';
 import registrationRoutes from './routes/registrationRoutes.js';
 import authRoutes from './routes/authRoutes.js';
+import { menuRouter } from './modules/menu/router.js';
 
 export const app = express();
 
@@ -23,6 +24,7 @@ app.use('/api/auth', authRoutes);
 // Protected routes (with authentication)
 app.use('/api/v1', authenticate, masterDataRoutes);
 app.use('/api/v1', authenticate, registrationRoutes);
+app.use('/api/v1/master/menus', authenticate, menuRouter);
 
 // Error handling
 app.use((error: unknown, _req: express.Request, res: express.Response, _next: express.NextFunction) => {

@@ -10,40 +10,40 @@ const pool = new Pool({
 
 const TEST_ACCOUNTS = [
   {
-    email: 'requester@example.com',
-    fullName: 'Requester User',
+    email: 'inputter@example.com',
+    fullName: 'Branch Inputter',
     password: 'password',
-    role: 'REQUESTER',
+    role: 'INPUTTER',
   },
   {
-    email: 'central_requester@example.com',
-    fullName: 'Central Requester',
+    email: 'inputter-ho@example.com',
+    fullName: 'HO Inputter',
     password: 'password',
-    role: 'CENTRAL_REQUESTER',
+    role: 'INPUTTER_HO',
   },
   {
-    email: 'supervisor@example.com',
-    fullName: 'Supervisor User',
+    email: 'approver@example.com',
+    fullName: 'Branch Approver',
     password: 'password',
-    role: 'SUPERVISOR',
+    role: 'APPROVER',
   },
   {
-    email: 'central_supervisor@example.com',
-    fullName: 'Central Supervisor',
+    email: 'approver-ho@example.com',
+    fullName: 'HO Approver',
     password: 'password',
-    role: 'CENTRAL_SUPERVISOR',
+    role: 'APPROVER_HO',
   },
   {
-    email: 'specialist@example.com',
-    fullName: 'Operations Specialist',
+    email: 'brand@example.com',
+    fullName: 'Brand Team',
     password: 'password',
-    role: 'OPERATIONS_SPECIALIST',
+    role: 'BRAND',
   },
   {
-    email: 'manager@example.com',
-    fullName: 'Operations Manager',
+    email: 'brand-manager@example.com',
+    fullName: 'Brand Manager',
     password: 'password',
-    role: 'OPERATIONS_MANAGER',
+    role: 'BRAND_MANAGER',
   },
 ];
 
@@ -56,12 +56,12 @@ async function seedTestAccounts() {
     // First, ensure roles exist
     const rolesData = [
       { code: 'ADMIN', name: 'Administrator' },
-      { code: 'REQUESTER', name: 'Requester' },
-      { code: 'CENTRAL_REQUESTER', name: 'Central Requester' },
-      { code: 'SUPERVISOR', name: 'Supervisor' },
-      { code: 'CENTRAL_SUPERVISOR', name: 'Central Supervisor' },
-      { code: 'OPERATIONS_SPECIALIST', name: 'Operations Specialist' },
-      { code: 'OPERATIONS_MANAGER', name: 'Operations Manager' },
+      { code: 'INPUTTER', name: 'Branch Inputter' },
+      { code: 'INPUTTER_HO', name: 'HO Inputter' },
+      { code: 'APPROVER', name: 'Branch Approver' },
+      { code: 'APPROVER_HO', name: 'HO Approver' },
+      { code: 'BRAND', name: 'Brand Team' },
+      { code: 'BRAND_MANAGER', name: 'Brand Manager' },
     ];
 
     console.log('Ensuring roles exist...');

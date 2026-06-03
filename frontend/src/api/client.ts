@@ -4,12 +4,18 @@ export async function apiFetch<T>(
 ): Promise<T> {
   const token = localStorage.getItem('access_token');
   
-  // Use /api/auth for auth routes, /api/v1 for everything else
-  const baseUrl = path.startsWith('/auth')
-    ? 'http://localhost:4000/api'
-    : 'http://localhost:4000/api/v1';
-  
-  const response = await fetch(`${baseUrl}${path}`, {
+  // Build URL:
+  // - If caller provided a path starting with /auth or /v1, attach to /api directly
+  // - Otherwise attach to /api/v1
+  const apiHost = 'http://localhost:4000';
+  let finalUrl: string;
+  if (path.startsWith('/auth') || path.startsWith('/v1')) {
+    finalUrl = `${apiHost}/api${path}`;
+  } else {
+    finalUrl = `${apiHost}/api/v1${path}`;
+  }
+
+  const response = await fetch(finalUrl, {
     ...init,
     headers: {
       'Content-Type': 'application/json',

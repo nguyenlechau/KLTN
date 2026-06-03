@@ -13,10 +13,11 @@ export interface PhysicalItem {
   location_id: string;
   category_id: string;
   channel_id: string;
-  width_m?: number;
-  length_m?: number;
+  seq_no?: number;
+  width?: number;
+  length?: number;
+  unit_price?: number;
   description?: string;
-  image_url?: string;
   image_key?: string;
   status: string;
   created_by: string;
@@ -28,14 +29,11 @@ export interface PhysicalItem {
  * Generate next sequence number for position + category
  */
 async function getNextSequence(locationId: string, categoryId: string): Promise<number> {
-  const result = await queryOne<{ max_seq: string }>(
-    `SELECT MAX(CAST(SUBSTRING(item_code FROM POSITION('.' IN item_code) + 3) AS INTEGER)) as max_seq
-     FROM physical_items 
-     WHERE location_id = $1 AND category_id = $2 AND deleted_at IS NULL`,
-    [locationId, categoryId]
+  const result = await queryOne<{ max_seq: number }>(
+    `SELECT COALESCE(MAX(seq_no), 0)::int AS max_seq FROM physical_items WHERE category_id = $1 AND location_id = $2`,
+    [categoryId, locationId]
   );
-  
-  return (result?.max_seq ? parseInt(result.max_seq) : 0) + 1;
+  return (result?.max_seq ?? 0) + 1;
 }
 
 /**
@@ -67,10 +65,11 @@ async function createSingleItem(
     location_id: string;
     category_id: string;
     channel_id: string;
-    width_m?: number;
-    length_m?: number;
+    seq_no: number;
+    width?: number;
+    length?: number;
+    unit_price?: number;
     description?: string;
-    image_url?: string;
     image_key?: string;
     created_by: string;
   }
@@ -79,14 +78,15 @@ async function createSingleItem(
   const now = new Date().toISOString();
 
   await query(
-    `INSERT INTO physical_items 
-     (id, item_code, item_name, location_id, category_id, channel_id, width_m, length_m, description, image_url, image_key, status, created_by, created_at, updated_at)
-     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)`,
+    `INSERT INTO physical_items(id, channel_id, category_id, location_id, seq_no, item_code, item_name, width, length, unit_price, image_key, description, status, created_by, updated_by, created_at, updated_at)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $14, $15, $15)`,
     [
-      id, data.item_code, data.item_name, data.location_id, data.category_id, data.channel_id,
-      data.width_m || null, data.length_m || null, data.description || null,
-      data.image_url || null, data.image_key || null, 'ACTIVE',
-      data.created_by, now, now
+      id, data.channel_id, data.category_id, data.location_id, data.seq_no,
+      data.item_code, data.item_name,
+      data.width ?? 0, data.length ?? 0,
+      data.unit_price ?? 0,
+      data.image_key ?? null, data.description ?? null,
+      'ACTIVE', data.created_by, now
     ]
   );
 
@@ -97,10 +97,11 @@ async function createSingleItem(
     location_id: data.location_id,
     category_id: data.category_id,
     channel_id: data.channel_id,
-    width_m: data.width_m,
-    length_m: data.length_m,
+    seq_no: data.seq_no,
+    width: data.width,
+    length: data.length,
+    unit_price: data.unit_price,
     description: data.description,
-    image_url: data.image_url,
     image_key: data.image_key,
     status: 'ACTIVE',
     created_by: data.created_by,
@@ -117,10 +118,10 @@ export async function batchCreateItems(
     location_id: string;
     category_id: string;
     channel_id: string;
-    width_m?: number;
-    length_m?: number;
+    width?: number;
+    length?: number;
+    unit_price?: number;
     description?: string;
-    image_url?: string;
     image_key?: string;
   }[],
   createdBy: string,
@@ -148,6 +149,7 @@ export async function batchCreateItems(
         ...item,
         item_code: code,
         item_name: name,
+        seq_no: sequenceNum,
         created_by: createdBy,
       });
 
@@ -229,7 +231,7 @@ export async function updateItem(
   const values: any[] = [];
   let paramCount = 1;
 
-  const editableFields = ['width_m', 'length_m', 'description', 'image_url', 'image_key', 'status'];
+  const editableFields = ['width', 'length', 'unit_price', 'description', 'image_key', 'status'];
 
   for (const field of editableFields) {
     if (field in data && data[field as keyof PhysicalItem] !== undefined) {

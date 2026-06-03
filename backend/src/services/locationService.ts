@@ -125,7 +125,7 @@ export async function updateLocation(
     'position_name', 'province_city', 'zone', 'address', 'classification',
     'longitude', 'latitude', 'representative_1_name', 'representative_1_email',
     'representative_1_phone', 'representative_2_name', 'representative_2_email',
-    'representative_2_phone', 'status', 'note'
+    'representative_2_phone', 'status', 'note', 'channels'
   ];
 
   for (const field of editableFields) {

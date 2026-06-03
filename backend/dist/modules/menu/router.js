@@ -1,9 +1,8 @@
 import { Router } from 'express';
 import { db } from '../../db/pool.js';
-import { requirePermission } from '../../middleware/auth.js';
 export const menuRouter = Router();
 // GET all menus
-menuRouter.get('/', requirePermission('audit.view'), async (req, res) => {
+menuRouter.get('/', async (req, res) => {
     try {
         const result = await db.query(`SELECT id, code, name, label, icon, order_position, parent_id, status, created_at, updated_at 
        FROM menus 
@@ -16,7 +15,7 @@ menuRouter.get('/', requirePermission('audit.view'), async (req, res) => {
     }
 });
 // GET menu by ID
-menuRouter.get('/:id', requirePermission('audit.view'), async (req, res) => {
+menuRouter.get('/:id', async (req, res) => {
     try {
         const result = await db.query('SELECT * FROM menus WHERE id = $1', [req.params.id]);
         if (result.rows.length === 0) {
@@ -30,7 +29,7 @@ menuRouter.get('/:id', requirePermission('audit.view'), async (req, res) => {
     }
 });
 // POST create menu
-menuRouter.post('/', requirePermission('audit.view'), async (req, res) => {
+menuRouter.post('/', async (req, res) => {
     try {
         const { code, name, label, icon, order_position, parent_id, status } = req.body;
         // Validate required fields
@@ -53,7 +52,7 @@ menuRouter.post('/', requirePermission('audit.view'), async (req, res) => {
     }
 });
 // PATCH update menu
-menuRouter.patch('/:id', requirePermission('audit.view'), async (req, res) => {
+menuRouter.patch('/:id', async (req, res) => {
     try {
         const { code, name, label, icon, order_position, parent_id, status } = req.body;
         // Check if menu exists
@@ -112,7 +111,7 @@ menuRouter.patch('/:id', requirePermission('audit.view'), async (req, res) => {
     }
 });
 // DELETE menu
-menuRouter.delete('/:id', requirePermission('audit.view'), async (req, res) => {
+menuRouter.delete('/:id', async (req, res) => {
     try {
         // Check if menu exists
         const existing = await db.query('SELECT * FROM menus WHERE id = $1', [req.params.id]);

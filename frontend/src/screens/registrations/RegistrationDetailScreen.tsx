@@ -4,7 +4,7 @@ import { Button } from '../../components/Button';
 import { Input } from '../../components/Input';
 import { Modal } from '../../components/Modal';
 import { Alert } from '../../components/Alert';
-import { Spinner } from '../../components/Spinner';
+import { LoadingOverlay } from '../../components/Spinner';
 import * as api from '../../api/services';
 import '../../styles/registration-detail.css';
 
@@ -46,7 +46,7 @@ export function RegistrationDetailScreen() {
     loadRegistration();
   }, [id]);
 
-  if (isLoading) return <Spinner />;
+  if (isLoading) return <LoadingOverlay text="Loading registration…" />;
   if (error) return <Alert type="error" message={error} />;
   if (!registration) return <Alert type="error" message="Registration not found" />;
 
@@ -54,7 +54,7 @@ export function RegistrationDetailScreen() {
     const labels: Record<string, string> = {
       DRAFT: 'Draft',
       SUPERVISOR_REVIEW: 'Supervisor Review',
-      CBNV_REVISION: 'Revision',
+      CBNV_REVISION: 'Requester Revision',
       BRAND_ACCEPTANCE: 'Brand Acceptance',
       BRAND_MANAGER_APPROVAL: 'Brand Manager Approval',
       APPROVED: 'Approved',
@@ -66,8 +66,10 @@ export function RegistrationDetailScreen() {
     return labels[state] || state;
   };
 
-  const remainingBudget = registration.registration.budget_total - registration.registration.total_amount;
-  const budgetPercentage = (registration.registration.total_amount / registration.registration.budget_total) * 100;
+  const budgetTotal = Number(registration.registration.budget_total || 0);
+  const totalAmount = Number(registration.registration.total_amount || 0);
+  const remainingBudget = budgetTotal - totalAmount;
+  const budgetPercentage = budgetTotal > 0 ? (totalAmount / budgetTotal) * 100 : 0;
 
   return (
     <div className="registration-detail-container">
@@ -215,11 +217,11 @@ function RegistrationInfoTab({
         <div className="budget-summary">
           <div className="budget-item">
             <label>Total Budget</label>
-            <span className="amount">{registration.budget_total.toLocaleString()} ₫</span>
+            <span className="amount">{Number(registration.budget_total || 0).toLocaleString()} ₫</span>
           </div>
           <div className="budget-item">
             <label>Used</label>
-            <span className="amount">{registration.total_amount.toLocaleString()} ₫</span>
+            <span className="amount">{Number(registration.total_amount || 0).toLocaleString()} ₫</span>
           </div>
           <div className="budget-item">
             <label>Remaining</label>
@@ -271,7 +273,7 @@ function ContentTab({ registrationId, content, onRefresh }: any) {
               </div>
               <div className="content-meta">
                 <span>{item.quantity} pcs</span>
-                <span>{new Date(item.start_date).toLocaleDateString()} - {new Date(item.end_date).toLocaleDateString()}</span>
+                <span>{item.start_date ? new Date(item.start_date).toLocaleDateString() : '—'} - {item.end_date ? new Date(item.end_date).toLocaleDateString() : '—'}</span>
               </div>
             </div>
           ))}
@@ -312,14 +314,21 @@ function AddContentModal({ registrationId, onClose, onSuccess }: any) {
 
   useEffect(() => {
     api.getContentList(100).then(r => {
-      if (r.ok) setContents(r.data || []);
+      if (r.ok) {
+        const allContents = r.data || [];
+        const activeContents = allContents.filter((entry: any) => {
+          const status = String(entry.status || '').toLowerCase();
+          return status.includes('active');
+        });
+        setContents(activeContents.length > 0 ? activeContents : allContents);
+      }
     });
   }, []);
 
   const handleSubmit = async () => {
     setError('');
     if (!form.content_id || !form.quantity) {
-      setError('Vui lòng điền đầy đủ thông tin');
+      setError('Please fill in all required fields');
       return;
     }
 
@@ -367,7 +376,7 @@ function AddContentModal({ registrationId, onClose, onSuccess }: any) {
             <Input
               type="number"
               value={form.quantity}
-              onChange={(e) => setForm({ ...form, quantity: e.target.value })}
+              onChange={(value) => setForm({ ...form, quantity: value })}
               min="1"
             />
           </div>
@@ -379,7 +388,7 @@ function AddContentModal({ registrationId, onClose, onSuccess }: any) {
             <Input
               type="date"
               value={form.start_date}
-              onChange={(e) => setForm({ ...form, start_date: e.target.value })}
+              onChange={(value) => setForm({ ...form, start_date: value })}
             />
           </div>
           <div className="form-group">
@@ -387,7 +396,7 @@ function AddContentModal({ registrationId, onClose, onSuccess }: any) {
             <Input
               type="date"
               value={form.end_date}
-              onChange={(e) => setForm({ ...form, end_date: e.target.value })}
+              onChange={(value) => setForm({ ...form, end_date: value })}
             />
           </div>
         </div>
@@ -412,7 +421,7 @@ function AddContentModal({ registrationId, onClose, onSuccess }: any) {
 function ItemsTab({ registrationId, items, onRefresh }: any) {
   const [showAddModal, setShowAddModal] = useState(false);
 
-  const totalAmount = items.reduce((sum: number, item: any) => sum + item.total_amount, 0);
+  const totalAmount = items.reduce((sum: number, item: any) => sum + (Number(item.total_amount) || 0), 0);
 
   return (
     <div className="tab-pane">
@@ -429,9 +438,9 @@ function ItemsTab({ registrationId, items, onRefresh }: any) {
             {items.map((item: any) => (
               <div key={item.id} className="item-row">
                 <div className="item-info">
-                  <div className="item-name">{item.item_id}</div>
+                  <div className="item-name">{item.item_name || item.item_id || item.id}</div>
                   <div className="item-details">
-                    Quantity: {item.quantity} × {item.unit_price.toLocaleString()} ₫ = {item.total_amount.toLocaleString()} ₫
+                    Quantity: {item.quantity} × {Number(item.unit_price || 0).toLocaleString()} ₫ = {Number(item.total_amount || 0).toLocaleString()} ₫
                   </div>
                 </div>
                 <button 
@@ -472,21 +481,57 @@ function ItemsTab({ registrationId, items, onRefresh }: any) {
 
 function AddItemModal({ registrationId, onClose, onSuccess }: any) {
   const [items, setItems] = useState<any[]>([]);
-  const [selectedItem, setSelectedItem] = useState<any>(null);
+  const [categories, setCategories] = useState<any[]>([]);
+  const [locations, setLocations] = useState<any[]>([]);
+  const [selectedChannelId, setSelectedChannelId] = useState('');
+  const [selectedCategoryId, setSelectedCategoryId] = useState('');
+  const [selectedLocationId, setSelectedLocationId] = useState('');
+  const [selectedItemId, setSelectedItemId] = useState('');
   const [quantity, setQuantity] = useState('1');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
 
   useEffect(() => {
-    api.getItemList(100).then(r => {
-      if (r.ok) setItems(r.data || []);
+    Promise.all([
+      api.getItemList(200, 0),
+      api.getCategoryList(200, 0, undefined, undefined, 'ACTIVE'),
+      api.getLocationList(500, 0, undefined, undefined, 'ACTIVE'),
+    ]).then(([itemRes, categoryRes, locationRes]) => {
+      if (itemRes.ok) {
+        setItems((itemRes.data || []).filter((entry: any) => String(entry.status || '').toUpperCase() === 'ACTIVE'));
+      }
+      if (categoryRes.ok) {
+        setCategories((categoryRes.data || []).filter((entry: any) => String(entry.status || '').toUpperCase() === 'ACTIVE'));
+      }
+      if (locationRes.ok) {
+        setLocations((locationRes.data || []).filter((entry: any) => String(entry.status || '').toUpperCase() === 'ACTIVE'));
+      }
     });
   }, []);
 
+  const channelOptions = Array.from(new Set(items.map((entry: any) => String(entry.channel_id || '')).filter(Boolean))).map((id) => {
+    const location = locations.find((entry: any) => String(entry.channel_id || '') === id);
+    const locationCode = location?.position_code || location?.code;
+    return {
+      id,
+      label: locationCode ? `${locationCode} (${id})` : `Channel ${id}`,
+    };
+  });
+
+  const itemsByChannel = items.filter((entry: any) => !selectedChannelId || String(entry.channel_id) === selectedChannelId);
+  const categoryIds = new Set(itemsByChannel.map((entry: any) => String(entry.category_id)));
+  const availableCategories = categories.filter((entry: any) => categoryIds.has(String(entry.id)));
+  const itemsByCategory = itemsByChannel.filter((entry: any) => !selectedCategoryId || String(entry.category_id) === selectedCategoryId);
+  const locationIds = new Set(itemsByCategory.map((entry: any) => String(entry.location_id)));
+  const availableLocations = locations.filter((entry: any) => locationIds.has(String(entry.id)));
+  const availableItems = itemsByCategory.filter((entry: any) => !selectedLocationId || String(entry.location_id) === selectedLocationId);
+
+  const selectedItem = availableItems.find((entry: any) => String(entry.id) === selectedItemId);
+
   const handleSubmit = async () => {
     setError('');
-    if (!selectedItem || !quantity) {
-      setError('Please select an item and enter quantity');
+    if (!selectedChannelId || !selectedCategoryId || !selectedLocationId || !selectedItem || !quantity) {
+      setError('Please select channel, category, location, POSM item and enter quantity');
       return;
     }
 
@@ -512,16 +557,77 @@ function AddItemModal({ registrationId, onClose, onSuccess }: any) {
         {error && <Alert type="error" message={error} />}
 
         <div className="form-group">
-          <label>Select item *</label>
+          <label>Channel *</label>
           <select
+            value={selectedChannelId}
             onChange={(e) => {
-              const selected = items.find(i => i.id === e.target.value);
-              setSelectedItem(selected);
+              setSelectedChannelId(e.target.value);
+              setSelectedCategoryId('');
+              setSelectedLocationId('');
+              setSelectedItemId('');
             }}
             className="form-select"
           >
-            <option value="">-- Select --</option>
-            {items.map((i) => (
+            <option value="">-- Select channel --</option>
+            {channelOptions.map((entry) => (
+              <option key={entry.id} value={entry.id}>
+                {entry.label}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div className="form-group">
+          <label>Category *</label>
+          <select
+            value={selectedCategoryId}
+            onChange={(e) => {
+              setSelectedCategoryId(e.target.value);
+              setSelectedLocationId('');
+              setSelectedItemId('');
+            }}
+            className="form-select"
+            disabled={!selectedChannelId}
+          >
+            <option value="">-- Select category --</option>
+            {availableCategories.map((entry: any) => (
+              <option key={entry.id} value={entry.id}>
+                {entry.name}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div className="form-group">
+          <label>Location *</label>
+          <select
+            value={selectedLocationId}
+            onChange={(e) => {
+              setSelectedLocationId(e.target.value);
+              setSelectedItemId('');
+            }}
+            className="form-select"
+            disabled={!selectedCategoryId}
+          >
+            <option value="">-- Select location --</option>
+            {availableLocations.map((entry: any) => (
+              <option key={entry.id} value={entry.id}>
+                {entry.position_name || entry.name || entry.position_code || entry.code}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div className="form-group">
+          <label>POSM Item *</label>
+          <select
+            value={selectedItemId}
+            onChange={(e) => setSelectedItemId(e.target.value)}
+            className="form-select"
+            disabled={!selectedLocationId}
+          >
+            <option value="">-- Select POSM --</option>
+            {availableItems.map((i: any) => (
               <option key={i.id} value={i.id}>
                 {i.item_name} ({i.item_code})
               </option>
@@ -534,7 +640,7 @@ function AddItemModal({ registrationId, onClose, onSuccess }: any) {
           <Input
             type="number"
             value={quantity}
-            onChange={(e) => setQuantity(e.target.value)}
+            onChange={(value) => setQuantity(value)}
             min="1"
           />
         </div>

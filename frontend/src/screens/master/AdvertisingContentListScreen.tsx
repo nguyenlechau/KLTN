@@ -3,11 +3,14 @@ import { Button } from '../../components/Button';
 import { Input } from '../../components/Input';
 import { Modal } from '../../components/Modal';
 import { Alert } from '../../components/Alert';
-import { Spinner } from '../../components/Spinner';
+import { LoadingOverlay } from '../../components/Spinner';
+import { useRole, canManageMasterData } from '../../hooks/useRole';
 import * as api from '../../api/services';
 import '../../styles/master-list.css';
 
 export function AdvertisingContentListScreen() {
+  const role = useRole();
+  const canWrite = canManageMasterData(role);
   const [contents, setContents] = useState<api.Content[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
@@ -17,7 +20,26 @@ export function AdvertisingContentListScreen() {
   const [limit] = useState(10);
   const [selectedContent, setSelectedContent] = useState<api.Content | null>(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState<api.Content | null>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState<string | null>(null);
+
+  const getPrimaryImage = (content: api.Content): string | null => {
+    if (content.images && content.images.length > 0 && content.images[0].image_url) {
+      return content.images[0].image_url;
+    }
+    const rawKeys = (content as any).image_keys;
+    if (typeof rawKeys === 'string') {
+      try {
+        const parsed = JSON.parse(rawKeys);
+        if (Array.isArray(parsed) && parsed.length > 0 && typeof parsed[0] === 'string' && /^https?:\/\//.test(parsed[0])) {
+          return parsed[0];
+        }
+      } catch {
+        // Ignore invalid legacy image_keys format.
+      }
+    }
+    return null;
+  };
 
   const loadContents = async (pageNum = 1, searchTerm = '') => {
     setIsLoading(true);
@@ -25,52 +47,40 @@ export function AdvertisingContentListScreen() {
     try {
       const offset = (pageNum - 1) * limit;
       const response = await api.getContentList(limit, offset, searchTerm || undefined);
-      if (response.ok && response.data && response.data.length > 0) {
-        setContents(response.data);
+
+      if (response.ok && response.data) {
+        const enriched = await Promise.all(
+          response.data.map(async (item) => {
+            try {
+              const detailResponse = await api.getContentById(item.id);
+              if (detailResponse.ok && detailResponse.data) {
+                return {
+                  ...item,
+                  images: detailResponse.data.images || item.images || [],
+                } as api.Content;
+              }
+            } catch {
+              // Keep list item when detail endpoint fails.
+            }
+            return item;
+          })
+        );
+
+        setContents(enriched);
         setTotal(response.pagination?.total || 0);
         setPage(pageNum);
-        return;
+      } else {
+        setContents([]);
+        setTotal(0);
+        setPage(pageNum);
       }
     } catch (err: any) {
-      // fallthrough to mock data
+      setError(err.message || 'Failed to load content');
+      setContents([]);
+      setTotal(0);
     } finally {
-      // handled below
+      setIsLoading(false);
     }
-    // mock data
-    const mock: api.Content[] = [
-      {
-        id: 'c1',
-        content_code: 'CNT-001',
-        content_name: 'Billboard Creative A',
-        description: 'Creative set for summer launch',
-        category: 'LED Screen',
-        unit: 'Week',
-        start_date: new Date().toISOString(),
-        end_date: new Date(new Date().setMonth(new Date().getMonth()+1)).toISOString(),
-        status: 'Active',
-        created_by: 'admin',
-        created_at: new Date().toISOString(),
-        images: [],
-      },
-      {
-        id: 'c2',
-        content_code: 'CNT-002',
-        content_name: 'Lightbox Promo B',
-        description: '',
-        category: 'Light Box',
-        unit: 'Week',
-        start_date: new Date().toISOString(),
-        end_date: new Date(new Date().setMonth(new Date().getMonth()+2)).toISOString(),
-        status: 'Expired',
-        created_by: 'admin',
-        created_at: new Date().toISOString(),
-        images: [],
-      },
-    ];
-    setContents(mock);
-    setTotal(mock.length);
-    setPage(1);
-    setIsLoading(false);
   };
 
   useEffect(() => {
@@ -89,9 +99,14 @@ export function AdvertisingContentListScreen() {
 
   const handleDelete = async (id: string) => {
     try {
-      await api.deleteContent(id);
+      const response = await api.deleteContent(id);
+      if (!response.ok) {
+        throw new Error('Failed to delete content');
+      }
+
+      setContents((prev) => prev.filter((item) => item.id !== id));
       setShowDeleteConfirm(null);
-      loadContents(page, search);
+      await loadContents(page, search);
     } catch (err: any) {
       setError(err.message || 'Failed to delete content');
     }
@@ -147,20 +162,24 @@ export function AdvertisingContentListScreen() {
           <Input
             placeholder="Search by name or code..."
             value={search}
-            onChange={(e) => handleSearch(e.target.value)}
+            onChange={handleSearch}
             className="search-input"
           />
         </div>
-        <Button onClick={handleCreate} variant="primary" className="btn-create">
-          + Create New Content
-        </Button>
+        {canWrite && (
+          <Button onClick={handleCreate} variant="primary" className="btn-create">
+            + Create New Content
+          </Button>
+        )}
       </div>
 
       {isLoading ? (
-        <Spinner />
+        <LoadingOverlay text="Loading content…" />
       ) : contents.length === 0 ? (
         <div className="empty-state">
-          <p>No content found</p>
+          <div className="empty-state-icon">🖼️</div>
+          <h3>No content found</h3>
+          <p>{search ? 'Try a different search term.' : 'Create your first advertising content item.'}</p>
         </div>
       ) : (
         <>
@@ -168,37 +187,54 @@ export function AdvertisingContentListScreen() {
             <table className="data-table">
               <thead>
                 <tr>
+                  <th style={{width: '8%'}}>Photo</th>
                   <th style={{width: '12%'}}>Code</th>
-                  <th style={{width: '35%'}}>Name</th>
-                  <th style={{width: '15%'}}>Category</th>
+                  <th style={{width: '28%'}}>Name</th>
+                  <th style={{width: '13%'}}>Category</th>
                   <th style={{width: '8%'}}>Unit</th>
                   <th style={{width: '10%'}}>Start</th>
                   <th style={{width: '10%'}}>End</th>
                   <th style={{width: '10%'}}>Status</th>
-                  <th style={{width: '10%'}}>Actions</th>
+                  <th style={{width: '11%'}}>Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {contents.map((c) => (
                   <tr key={c.id} className="table-row">
+                    <td>
+                      {getPrimaryImage(c) ? (
+                        <img
+                          src={getPrimaryImage(c) as string}
+                          alt={c.content_name}
+                          className="thumb"
+                        />
+                      ) : (
+                        <div className="thumb-placeholder">—</div>
+                      )}
+                    </td>
                     <td>{c.content_code}</td>
                     <td>
-                      <div style={{fontWeight: 500}}>{c.content_name}</div>
-                      <div style={{fontSize: '0.85rem', color: '#666'}}>{c.description}</div>
+                      <div>
+                        <div className="cell-primary">{c.content_name}</div>
+                        <div className="cell-secondary">{c.description}</div>
+                      </div>
                     </td>
                     <td>{c.category}</td>
                     <td>{c.unit}</td>
                     <td>{c.start_date ? new Date(c.start_date).toLocaleDateString('en-US') : '—'}</td>
                     <td>{c.end_date ? new Date(c.end_date).toLocaleDateString('en-US') : '—'}</td>
                     <td>
-                      <span className="status-badge" style={{backgroundColor: c.status === 'Active' ? '#10b981' : '#ef4444'}}>
+                      <span className={`status-badge status-${(c.status||'').toUpperCase()}`}>
                         {c.status}
                       </span>
                     </td>
                     <td>
-                      <Button onClick={() => setSelectedContent(c)} variant="secondary">View</Button>
-                      <Button onClick={() => handleClone(c.id)} variant="secondary" style={{marginLeft: '0.5rem'}}>Clone</Button>
-                      <Button onClick={() => setShowDeleteConfirm(c.id)} variant="danger" style={{marginLeft: '0.5rem'}}>Delete</Button>
+                      <div className="row-actions">
+                        <Button onClick={() => setSelectedContent(c)} variant="secondary" className="btn-sm">View</Button>
+                        {canWrite && <Button onClick={() => setShowEditModal(c)} variant="secondary" className="btn-sm">Edit</Button>}
+                        {canWrite && <Button onClick={() => handleClone(c.id)} variant="secondary" className="btn-sm">Clone</Button>}
+                        {canWrite && <Button onClick={() => setShowDeleteConfirm(c.id)} variant="danger" className="btn-sm">Delete</Button>}
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -275,6 +311,10 @@ export function AdvertisingContentListScreen() {
               </div>
             )}
 
+            {(!selectedContent.images || selectedContent.images.length === 0) && (
+              <div style={{ color: '#777', marginTop: '0.5rem' }}>No photo attached</div>
+            )}
+
             <div className="modal-actions">
               <Button
                 onClick={() => setSelectedContent(null)}
@@ -323,6 +363,18 @@ export function AdvertisingContentListScreen() {
           }}
         />
       )}
+
+      {/* Edit Modal */}
+      {showEditModal && (
+        <AdvertisingContentCreateModal
+          content={showEditModal}
+          onClose={() => setShowEditModal(null)}
+          onSuccess={() => {
+            setShowEditModal(null);
+            loadContents(page, search);
+          }}
+        />
+      )}
     </div>
   );
 }
@@ -344,11 +396,19 @@ function AdvertisingContentCreateModal({
     content_name: content?.content_name || '',
     category: content?.category || '',
     unit: content?.unit || '',
-    start_date: content?.start_date || '',
-    end_date: content?.end_date || '',
+    start_date: content?.start_date ? content.start_date.slice(0, 10) : '',
+    end_date: content?.end_date ? content.end_date.slice(0, 10) : '',
+    key_visual_url: content?.images?.[0]?.image_url || '',
   });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  const [categories, setCategories] = useState<api.Category[]>([]);
+
+  useEffect(() => {
+    api.getCategoryList().then((res) => {
+      if (res.ok) setCategories(res.data || []);
+    }).catch(() => {});
+  }, []);
 
   const handleSubmit = async () => {
     setError('');
@@ -362,7 +422,10 @@ function AdvertisingContentCreateModal({
       if (content?.id) {
         await api.updateContent(content.id, form);
       } else {
-        await api.createContent(form);
+        const created = await api.createContent(form);
+        if (form.key_visual_url && created.ok && created.data?.id) {
+          await api.addContentImage(created.data.id, form.key_visual_url, undefined);
+        }
       }
       onSuccess();
     } catch (err: any) {
@@ -384,7 +447,7 @@ function AdvertisingContentCreateModal({
           <label>Content Name *</label>
           <Input
             value={form.content_name}
-            onChange={(e) => setForm({ ...form, content_name: e.target.value })}
+            onChange={(value) => setForm({ ...form, content_name: value })}
             placeholder="Enter content name"
           />
         </div>
@@ -392,20 +455,34 @@ function AdvertisingContentCreateModal({
         <div className="form-row">
           <div className="form-group">
             <label>Category *</label>
-            <Input
+            <select
               value={form.category}
               onChange={(e) => setForm({ ...form, category: e.target.value })}
-              placeholder="e.g., LED Screen"
-            />
+              className="form-select"
+            >
+              <option value="">-- Select Category --</option>
+              {categories.map((c) => (
+                <option key={c.id} value={c.code}>{c.code} - {c.name}</option>
+              ))}
+            </select>
           </div>
           <div className="form-group">
             <label>Unit *</label>
             <Input
               value={form.unit}
-              onChange={(e) => setForm({ ...form, unit: e.target.value })}
+              onChange={(value) => setForm({ ...form, unit: value })}
               placeholder="e.g., Week"
             />
           </div>
+        </div>
+
+        <div className="form-group">
+          <label>Key Visual URL</label>
+          <Input
+            value={form.key_visual_url}
+            onChange={(value) => setForm({ ...form, key_visual_url: value })}
+            placeholder="https://example.com/creative.jpg"
+          />
         </div>
 
         <div className="form-row">
@@ -414,7 +491,7 @@ function AdvertisingContentCreateModal({
             <Input
               type="date"
               value={form.start_date}
-              onChange={(e) => setForm({ ...form, start_date: e.target.value })}
+              onChange={(value) => setForm({ ...form, start_date: value })}
             />
           </div>
           <div className="form-group">
@@ -422,7 +499,7 @@ function AdvertisingContentCreateModal({
             <Input
               type="date"
               value={form.end_date}
-              onChange={(e) => setForm({ ...form, end_date: e.target.value })}
+              onChange={(value) => setForm({ ...form, end_date: value })}
             />
           </div>
         </div>

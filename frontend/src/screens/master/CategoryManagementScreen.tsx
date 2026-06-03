@@ -5,10 +5,13 @@ import { Table } from '../../components/Table';
 import { Modal } from '../../components/Modal';
 import { Alert } from '../../components/Alert';
 import { Spinner } from '../../components/Spinner';
+import { useRole, canManageMasterData } from '../../hooks/useRole';
 import * as api from '../../api/services';
 import '../../styles/master-list.css';
 
 export function CategoryManagementScreen() {
+  const role = useRole();
+  const canWrite = canManageMasterData(role);
   const [categories, setCategories] = useState<api.Category[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
@@ -17,6 +20,7 @@ export function CategoryManagementScreen() {
   const [total, setTotal] = useState(0);
   const [limit] = useState(10);
   const [selectedCategory, setSelectedCategory] = useState<api.Category | null>(null);
+  const [editingCategory, setEditingCategory] = useState<api.Category | null>(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState<string | null>(null);
 
@@ -62,29 +66,22 @@ export function CategoryManagementScreen() {
     }
   };
 
-  const columns = [
-    { label: 'Code', key: 'code', width: '10%' },
-    { label: 'Name', key: 'name', width: '20%' },
-    { label: 'Format', key: 'format', width: '15%' },
-    { label: 'Price', key: 'unit_price', width: '15%', render: (v: number) => `$${v.toFixed(2)}` },
-    { label: 'Unit', key: 'unit_of_measure', width: '12%' },
-    {
-      label: 'Status',
-      key: 'status',
-      width: '10%',
-      render: (v: string) => (
-        <span className={`status-badge status-${v.toLowerCase()}`}>
-          {v === 'ACTIVE' ? '✓ Active' : '✗ Inactive'}
-        </span>
-      ),
-    },
-  ];
-
-  const actions = [
-    { label: 'View', onClick: (row: any) => setSelectedCategory(row) },
-    { label: 'Edit', onClick: (row: any) => setSelectedCategory(row) },
-    { label: 'Delete', onClick: (row: any) => setShowDeleteConfirm(row.id), variant: 'danger' },
-  ];
+  const tableHeaders = ['Code', 'Name', 'Format', 'Price', 'Unit', 'Status', 'Actions'];
+  const tableRows = categories.map((row) => [
+    row.code,
+    row.name,
+    (row as any).format || '-',
+    `${Number((row as any).unit_price || 0).toLocaleString('en-US')} VND`,
+    (row as any).unit_of_measure || '-',
+    <span className={`status-badge status-${row.status.toLowerCase()}`}>
+      {row.status === 'ACTIVE' ? '✓ Active' : '✗ Inactive'}
+    </span>,
+    <div style={{ display: 'flex', gap: '0.5rem' }}>
+      <Button variant="secondary" onClick={() => setSelectedCategory(row)}>View</Button>
+      {canWrite && <Button variant="secondary" onClick={() => setEditingCategory(row)}>Edit</Button>}
+      {canWrite && <Button variant="danger" onClick={() => setShowDeleteConfirm(row.id)}>Delete</Button>}
+    </div>,
+  ]);
 
   const totalPages = Math.ceil(total / limit);
 
@@ -101,11 +98,13 @@ export function CategoryManagementScreen() {
         <Input
           placeholder="Search by name or category code..."
           value={search}
-          onChange={(e) => handleSearch(e.target.value)}
+          onChange={handleSearch}
         />
-        <Button onClick={handleCreate} variant="primary">
-          + Add Category
-        </Button>
+        {canWrite && (
+          <Button onClick={handleCreate} variant="primary">
+            + Add Category
+          </Button>
+        )}
       </div>
 
       {isLoading ? (
@@ -116,7 +115,7 @@ export function CategoryManagementScreen() {
         </div>
       ) : (
         <>
-          <Table columns={columns} data={categories} actions={actions} />
+          <Table headers={tableHeaders} rows={tableRows} />
           <div className="pagination">
             <Button
               onClick={() => loadCategories(page - 1, search)}
@@ -156,7 +155,7 @@ export function CategoryManagementScreen() {
             </div>
             <div className="detail-row">
               <label>Price:</label>
-              <span>${selectedCategory.unit_price.toFixed(2)}</span>
+              <span>{Number(selectedCategory.unit_price || 0).toLocaleString('en-US')} VND</span>
             </div>
             <div className="detail-row">
               <label>Unit of Measure:</label>
@@ -217,6 +216,17 @@ export function CategoryManagementScreen() {
           }}
         />
       )}
+
+      {editingCategory && (
+        <CategoryCreateModal
+          category={editingCategory}
+          onClose={() => setEditingCategory(null)}
+          onSuccess={() => {
+            setEditingCategory(null);
+            loadCategories(page, search);
+          }}
+        />
+      )}
     </div>
   );
 }
@@ -234,7 +244,7 @@ function CategoryCreateModal({
     code: category?.code || '',
     name: category?.name || '',
     format: category?.format || '',
-    unit_price: category?.unit_price.toString() || '',
+    unit_price: category?.unit_price?.toString() || '',
     unit_of_measure: category?.unit_of_measure || '',
     status: category?.status || 'ACTIVE',
   });
@@ -250,17 +260,24 @@ function CategoryCreateModal({
 
     setIsLoading(true);
     try {
+      const parsedUnitPrice = Number(form.unit_price);
+      if (!Number.isFinite(parsedUnitPrice)) {
+        throw new Error('Price must be a valid number');
+      }
+
+      const payload = {
+        code: form.code.trim(),
+        name: form.name.trim(),
+        format: form.format.trim(),
+        unit_price: parsedUnitPrice,
+        unit_of_measure: form.unit_of_measure,
+        status: form.status,
+      };
+
       if (category?.id) {
-        await api.updateCategory(category.id, {
-          ...form,
-          unit_price: parseFloat(form.unit_price),
-        });
+        await api.updateCategory(category.id, payload);
       } else {
-        await api.createCategory({
-          ...form,
-          unit_price: parseFloat(form.unit_price),
-          created_by: 'current_user',
-        });
+        await api.createCategory(payload);
       }
       onSuccess();
     } catch (err: any) {
@@ -283,9 +300,9 @@ function CategoryCreateModal({
             <label>Category Code *</label>
             <Input
               value={form.code}
-              onChange={(e) => setForm({ ...form, code: e.target.value })}
+              onChange={(value) => setForm({ ...form, code: value })}
               placeholder="e.g. LS"
-              maxLength="2"
+              maxLength={2}
               disabled={!!category}
             />
           </div>
@@ -293,9 +310,8 @@ function CategoryCreateModal({
             <label>Category Name *</label>
             <Input
               value={form.name}
-              onChange={(e) => setForm({ ...form, name: e.target.value })}
+              onChange={(value) => setForm({ ...form, name: value })}
               placeholder="e.g. LED Screen"
-              disabled={!!category}
             />
           </div>
         </div>
@@ -304,7 +320,7 @@ function CategoryCreateModal({
           <label>Format *</label>
           <Input
             value={form.format}
-            onChange={(e) => setForm({ ...form, format: e.target.value })}
+            onChange={(value) => setForm({ ...form, format: value })}
             placeholder="e.g. Static Image"
           />
         </div>
@@ -315,7 +331,7 @@ function CategoryCreateModal({
             <Input
               type="number"
               value={form.unit_price}
-              onChange={(e) => setForm({ ...form, unit_price: e.target.value })}
+              onChange={(value) => setForm({ ...form, unit_price: value })}
               placeholder="Enter price"
             />
           </div>

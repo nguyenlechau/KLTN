@@ -91,7 +91,7 @@ masterRouter.delete('/channels/:id', requirePermission('channel.delete'), async 
 });
 // ============ CATEGORIES ============
 masterRouter.get('/categories', requirePermission('category.view'), async (_req, res) => {
-    const result = await db.query('SELECT id, code, name, description, unit_price, status FROM categories ORDER BY code ASC');
+    const result = await db.query('SELECT * FROM categories ORDER BY code ASC');
     res.json(result.rows);
 });
 masterRouter.post('/categories', requirePermission('category.create'), async (req, res) => {
@@ -156,7 +156,7 @@ masterRouter.delete('/categories/:id', requirePermission('category.delete'), asy
 });
 // ============ LOCATIONS ============
 masterRouter.get('/locations', requirePermission('location.view'), async (_req, res) => {
-    const result = await db.query('SELECT id, code, name, address_line, latitude, longitude, status FROM locations ORDER BY code ASC');
+    const result = await db.query('SELECT * FROM locations ORDER BY code ASC');
     res.json(result.rows);
 });
 masterRouter.post('/locations', requirePermission('location.create'), async (req, res) => {

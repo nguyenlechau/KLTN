@@ -1,122 +1,221 @@
-/* Registration Detail Screen */
+/* ─────────────────── Registration Detail ─────────────────── */
 
 .registration-detail-container {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 20px;
-  background: #f5f5f5;
 }
 
+/* ─── Detail Header ─── */
 .detail-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 20px;
-  background: white;
-  border-radius: 6px;
-  margin-bottom: 20px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  padding: 1.25rem 1.5rem;
+  background: #ffffff;
+  border-radius: var(--radius-lg);
+  margin-bottom: 1.25rem;
+  border: 1px solid var(--gray-200);
+  box-shadow: var(--shadow-sm);
+  gap: 1rem;
+  flex-wrap: wrap;
 }
 
 .header-left {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 1rem;
   flex: 1;
+  min-width: 0;
 }
 
 .back-button {
-  padding: 8px 12px;
-  background: #f0f0f0;
-  border: 1px solid #ddd;
-  border-radius: 4px;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.5rem 0.875rem;
+  background: var(--gray-100);
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius);
   cursor: pointer;
-  font-size: 14px;
+  font-size: var(--text-sm);
   font-weight: 600;
-  transition: all 0.2s;
+  color: var(--gray-600);
+  transition: var(--transition-fast);
+  font-family: inherit;
+  flex-shrink: 0;
 }
 
 .back-button:hover {
-  background: #e0e0e0;
+  background: var(--gray-200);
+  color: var(--gray-800);
+}
+
+.header-info {
+  min-width: 0;
 }
 
 .header-info h1 {
-  margin: 0 0 4px 0;
-  font-size: 22px;
-  font-weight: 600;
-  color: #333;
+  margin: 0 0 0.25rem 0;
+  font-size: var(--text-xl);
+  font-weight: 700;
+  color: var(--gray-900);
+  letter-spacing: -0.02em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .registration-code {
   margin: 0;
-  font-size: 12px;
-  color: #999;
+  font-size: var(--text-xs);
+  color: var(--gray-400);
+  font-weight: 500;
+  letter-spacing: 0.03em;
 }
 
 .header-right {
   display: flex;
-  gap: 12px;
+  gap: 0.75rem;
+  align-items: center;
+  flex-shrink: 0;
 }
 
+/* ─── State Badges ─── */
 .state-badge {
-  padding: 8px 16px;
-  border-radius: 20px;
-  font-size: 13px;
-  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  padding: 0.375rem 0.875rem;
+  border-radius: var(--radius-full);
+  font-size: var(--text-xs);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
   white-space: nowrap;
 }
 
-/* Tabs */
+.workflow-draft             { background: #fef9c3; color: #854d0e; }
+.workflow-supervisor-review { background: #dbeafe; color: #1e40af; }
+.workflow-cbnv-revision     { background: var(--danger-light); color: var(--danger-dark); }
+.workflow-brand-acceptance  { background: #ede9fe; color: #5b21b6; }
+.workflow-brand-manager-approval { background: #e0e7ff; color: #3730a3; }
+.workflow-approved          { background: var(--success-light); color: var(--success-dark); }
+.workflow-deployment-prep   { background: #fef3c7; color: #92400e; }
+.workflow-final-acceptance  { background: #ccfbf1; color: #065f46; }
+.workflow-completed         { background: var(--success-light); color: var(--success-dark); }
+.workflow-cancelled         { background: var(--danger-light); color: var(--danger-dark); }
+
+/* ─── Tabs ─── */
 .tabs {
   display: flex;
   gap: 0;
-  margin-bottom: 20px;
-  border-bottom: 2px solid #ddd;
-  background: white;
-  border-radius: 6px 6px 0 0;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  margin-bottom: 0;
+  background: #ffffff;
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  border: 1px solid var(--gray-200);
+  border-bottom: none;
+  overflow-x: auto;
+  box-shadow: var(--shadow-xs);
 }
 
 .tab {
-  padding: 16px 20px;
+  padding: 0.875rem 1.25rem;
   background: transparent;
   border: none;
-  border-bottom: 3px solid transparent;
+  border-bottom: 2px solid transparent;
   cursor: pointer;
-  font-size: 14px;
+  font-size: var(--text-sm);
   font-weight: 500;
-  color: #666;
-  transition: all 0.2s;
+  color: var(--gray-500);
+  transition: var(--transition-fast);
   white-space: nowrap;
+  font-family: inherit;
+  flex-shrink: 0;
 }
 
 .tab:hover {
-  color: #333;
+  color: var(--gray-800);
+  background: var(--gray-50);
 }
 
 .tab.active {
-  color: #007bff;
-  border-bottom-color: #007bff;
+  color: var(--primary);
+  border-bottom-color: var(--primary);
+  font-weight: 600;
+  background: var(--primary-light);
 }
 
 .tab-content {
-  padding: 20px;
+  padding: 1.5rem;
   background: white;
-  border-radius: 0 0 6px 6px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+  border: 1px solid var(--gray-200);
+  box-shadow: var(--shadow-sm);
+  margin-bottom: 1.25rem;
 }
 
 .tab-pane {
-  animation: fadeIn 0.2s;
+  animation: fadeSlideIn 0.15s ease-out;
 }
 
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
+@keyframes fadeSlideIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ─── Info Grid ─── */
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 1rem;
+}
+
+.info-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 0.875rem 1rem;
+  background: var(--gray-50);
+  border-radius: var(--radius);
+  border: 1px solid var(--gray-100);
+}
+
+.info-item label {
+  font-size: var(--text-xs);
+  font-weight: 600;
+  color: var(--gray-500);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.info-item span {
+  font-size: var(--text-sm);
+  color: var(--gray-800);
+  font-weight: 500;
+  word-break: break-word;
+}
+
+/* ─── Budget Progress ─── */
+.budget-bar-container {
+  margin-top: 0.5rem;
+  height: 6px;
+  background: var(--gray-200);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+}
+
+.budget-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--primary-mid), var(--primary));
+  border-radius: var(--radius-full);
+  transition: width 0.5s ease;
+}
+
+/* ─── Detail Footer ─── */
+.detail-footer {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: flex-end;
+  padding: 1rem 0;
 }
 
 /* Info Tab */

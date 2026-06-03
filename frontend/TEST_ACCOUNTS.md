@@ -16,93 +16,84 @@ Simply log in using any of the accounts below:
 **Access:** Use this to go to **Menu → Admin → Users** to create/edit/delete users
 
 ---
-## 1️⃣ REQUESTER
-**Email:** requester@example.com  
+
+## 1️⃣ INPUTTER (Branch)
+**Email:** inputter@example.com  
 **Password:** password  
-**Permissions:** Create content, register campaigns, submit for review  
-**Use Case:** Campaign creators submitting new campaigns
+**Permissions:** Create/edit content, create/submit registrations, view master data  
+**Use Case:** Branch-level staff who creates and submits campaign registration forms  
+**Workflow step:** Creates Draft → submits to CBQL approval
 
 ---
 
-## 2️⃣ CENTRAL_REQUESTER
-**Email:** central-requester@example.com  
+## 2️⃣ INPUTTER_HO (Head Office)
+**Email:** inputter-ho@example.com  
 **Password:** password  
-**Permissions:** Same as REQUESTER (central coordination)  
-**Use Case:** Central office campaign coordinators
+**Permissions:** Same as INPUTTER (head-office scope)  
+**Use Case:** Head-office staff who creates and submits campaign registrations  
+**Note:** If creator is INPUTTER_HO (role BRAND or HO), supervisor step may be skipped
 
 ---
 
-## 3️⃣ SUPERVISOR
-**Email:** supervisor@example.com  
+## 3️⃣ APPROVER (Branch Management / CBQL)
+**Email:** approver@example.com  
 **Password:** password  
-**Permissions:** Review campaigns, view audit logs  
-**Use Case:** Local supervisors reviewing submitted campaigns
+**Permissions:** Review and approve registrations from branch inputters, view audit logs  
+**Use Case:** Branch management approving submitted drafts (Step 2: CBQL Phê duyệt)  
+**Workflow step:** Approves Draft → moves to Brand Intake, or sends back for revision
 
 ---
 
-## 4️⃣ CENTRAL_SUPERVISOR
-**Email:** central-supervisor@example.com  
+## 4️⃣ APPROVER_HO (HO Management)
+**Email:** approver-ho@example.com  
 **Password:** password  
-**Permissions:** Same as SUPERVISOR (central review authority)  
-**Use Case:** Central office review team
+**Permissions:** Same as APPROVER (head-office scope)  
+**Use Case:** HO management approving HO-submitted registrations
 
 ---
 
-## 5️⃣ OPERATIONS_SPECIALIST
-**Email:** operations-specialist@example.com  
+## 5️⃣ BRAND (Brand Team)
+**Email:** brand@example.com  
 **Password:** password  
-**Permissions:** Create physical items, accept campaigns for deployment  
-**Use Case:** Field operations specialists preparing deployments
+**Permissions:** Full master data management (channels, locations, categories, items, content) + brand intake step for registrations  
+**Use Case:** Brand team who manages all master data AND handles the brand intake step in the registration workflow  
+**Workflow step:** Handles Step 3 (P.Thương hiệu tiếp nhận) — can edit items, content, and approve to Brand Manager
 
 ---
 
-## 6️⃣ OPERATIONS_MANAGER
-**Email:** operations-manager@example.com  
+## 6️⃣ BRAND_MANAGER (Brand Manager)
+**Email:** brand-manager@example.com  
 **Password:** password  
-**Permissions:** Approve campaigns, complete deployments  
-**Use Case:** Operations management for final campaign approvals
+**Permissions:** View-only for master data + final registration approval (locks pricing)  
+**Use Case:** Brand manager who gives the final sign-off before campaign is approved  
+**Workflow step:** Handles Step 4 (Trưởng phòng thương hiệu phê duyệt) — locks unit price and total amount
 
 ---
 
-## Testing Workflow
+## Workflow Summary
 
-### Step 0: ADMIN - User Management (Optional)
-- Log in with admin@example.com / password
-- Navigate to **Admin → Users** (👥 Users link in sidebar)
-- Create new users with different roles
-- Edit user details (email, name, role, status)
-- Delete users and verify they're soft-deleted
-
-### Step 1: REQUESTER
-- Log in with requester@example.com / password
-- Create a new campaign in "📋 New Campaign"
-- Create content and select items
-
-### Step 2: SUPERVISOR
-- Log in with supervisor@example.com / password
-- Navigate to "📊 Campaigns" to review submitted campaigns
-- Approve or request revisions
-
-### Step 3: OPERATIONS_SPECIALIST
-- Log in with operations-specialist@example.com / password
-- View approved campaigns
-- Create physical items in "🔨 Create Items"
-
-### Step 4: OPERATIONS_MANAGER
-- Log in with operations-manager@example.com / password
-- Approve final campaign details
-- Mark campaigns as complete
+| Step | State | Handled by |
+|------|-------|-----------|
+| 1 | DRAFT | INPUTTER / INPUTTER_HO |
+| 2 | SUPERVISOR_REVIEW | APPROVER / APPROVER_HO |
+| 3 | BRAND_ACCEPTANCE | BRAND |
+| 4 | BRAND_MANAGER_APPROVAL | BRAND_MANAGER |
+| 5 | APPROVED | BRAND |
+| 6 | ACCEPTANCE | BRAND |
+| 7 | ACCEPTANCE_REVIEW | BRAND_MANAGER |
+| — | COMPLETED | system |
 
 ---
 
 ## Permission Matrix
 
-| Role | Permissions |
-|------|------------|
-| **REQUESTER** | channel.view, category.view, location.view, content.view, content.create, content.update, content.clone, physical_item.view, registration.view, registration.create, registration.update, registration.submit |
-| **CENTRAL_REQUESTER** | Same as REQUESTER |
-| **SUPERVISOR** | channel.view, category.view, location.view, content.view, physical_item.view, registration.view, registration.review, audit.view |
-| **CENTRAL_SUPERVISOR** | Same as SUPERVISOR |
-| **OPERATIONS_SPECIALIST** | channel.view, category.view, location.view, content.view, physical_item.view, physical_item.create, physical_item.update, registration.view, registration.review, registration.accept, audit.view |
-| **OPERATIONS_MANAGER** | channel.view, category.view, location.view, content.view, physical_item.view, registration.view, registration.approve, registration.complete, audit.view |
+| Role | Master Data (Channels/Locations/Categories/Items/Content) | Registrations |
+|------|------|------|
+| **ADMIN** | Create, Edit, View | All workflow steps |
+| **INPUTTER** | View only | Create, Edit own drafts, Submit |
+| **INPUTTER_HO** | View only | Create, Edit own drafts, Submit |
+| **APPROVER** | View only | Review/approve at Step 2 |
+| **APPROVER_HO** | View only | Review/approve at Step 2 |
+| **BRAND** | **Create + Edit + View** | Brand intake (Step 3), Acceptance (Steps 5–6) |
+| **BRAND_MANAGER** | View only | Brand manager approval (Step 4), Acceptance review (Step 7) |
 

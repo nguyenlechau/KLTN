@@ -15,7 +15,7 @@ export interface AdvertisingContent {
   unit: string;
   start_date: string;
   end_date: string;
-  status: 'Còn hạn' | 'Hết hạn';
+  status: 'Active' | 'Expired';
   created_by: string;
   created_at: string;
   updated_at: string;
@@ -45,12 +45,12 @@ async function generateContentCode(): Promise<string> {
 /**
  * Calculate status based on dates
  */
-function calculateStatus(endDate: string): 'Còn hạn' | 'Hết hạn' {
+function calculateStatus(endDate: string): 'Active' | 'Expired' {
   const end = new Date(endDate);
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   end.setHours(0, 0, 0, 0);
-  return today <= end ? 'Còn hạn' : 'Hết hạn';
+  return today <= end ? 'Active' : 'Expired';
 }
 
 export async function createContent(
@@ -195,10 +195,9 @@ export async function updateContent(
 }
 
 export async function deleteContent(id: string): Promise<void> {
-  const now = new Date().toISOString();
   await query(
-    `UPDATE advertising_content SET deleted_at = $1 WHERE id = $2`,
-    [now, id]
+    `DELETE FROM advertising_content WHERE id = $1`,
+    [id]
   );
 }
 
@@ -244,7 +243,7 @@ export async function cloneContent(
   if (!original) throw new Error('Content not found');
 
   const newContent = await createContent({
-    content_name: original.content_name,
+    content_name: `${original.content_name} (copy)`,
     description: original.description,
     category: original.category,
     unit: original.unit,
