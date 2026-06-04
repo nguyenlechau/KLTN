@@ -1,279 +1,79 @@
-# 🚀 KLTN System - Start Guide
+# Start Guide & Test Accounts
 
-## System Overview
+## 1. Setup & Run
 
-Complete full-stack advertising management system with:
-- 8 production-ready screens
-- 40+ API endpoints
-- 11-table PostgreSQL database
-- 100% TypeScript
-- Responsive mobile-friendly UI
+### Option A — Local (manual)
 
-## ⚡ Quick Start (3 Steps)
+**Prerequisites:** Node.js 18+, PostgreSQL running on port 5432
 
-### 1️⃣ Setup Database
 ```bash
+# 1. Setup database
 cd backend
-bash setup-db.sh
-```
-✅ Creates `kltn_db` database
-✅ Applies all migrations
-✅ Seeds test data
+bash setup-db.sh        # creates DB, applies all migrations, seeds test data
 
-### 2️⃣ Start Backend
-```bash
-cd backend
+# 2. Start backend (http://localhost:4000)
+npm run dev
+
+# 3. Start frontend (http://localhost:5173)
+cd ../frontend
 npm run dev
 ```
-✅ Runs on http://localhost:4000
-✅ Auto-reload on file changes
-✅ Connected to PostgreSQL
 
-### 3️⃣ Start Frontend
+### Option B — Docker
+
 ```bash
-cd frontend
-npm run dev
+docker-compose up --build
 ```
-✅ Runs on http://localhost:5173
-✅ Auto-reload on file changes
-✅ Ready for use
 
-## 🔐 Login Information
+Backend → http://localhost:4000  
+Frontend → http://localhost:5173 (run separately with `npm run dev` in `/frontend`)
 
-**Email:** `admin@kltn.com`
-**Password:** `password123`
+---
 
-Other test accounts:
-- `john@kltn.com`
-- `jane@kltn.com`
-- `manager@kltn.com`
+## 2. Test Accounts
 
-## 📱 Available Screens
+All passwords are `password`.
 
-### 1. Registrations
-- **List** - View all registrations with state filtering
-- **Detail** - Manage content, items, workflow, budget
-- **Deployment** - Photo upload and final acceptance
+| Role | Email | What they can do |
+|------|-------|-----------------|
+| **ADMIN** | admin@example.com | Full access — user management, system config |
+| **INPUTTER** | inputter@example.com | Create/submit registrations (branch) |
+| **INPUTTER_HO** | inputter-ho@example.com | Create/submit registrations (head office) |
+| **APPROVER** | approver@example.com | Approve registrations from branch inputters |
+| **APPROVER_HO** | approver-ho@example.com | Approve registrations from HO inputters |
+| **BRAND** | brand@example.com | Master data management + brand intake step |
+| **BRAND_MANAGER** | brand-manager@example.com | Final approval, locks pricing |
 
-### 2. Master Data
-- **Content** - List, create, clone, image gallery
-- **Locations** - CRUD with channel assignment
-- **Categories** - CRUD with pricing
-- **Items** - CRUD with batch creation
+---
 
-### 3. Admin
-- **Users** - User management (existing)
-
-## 🎯 Common Workflows
+## 3. Common Workflows
 
 ### Create a Registration
-1. Click "Registrations" → "Tạo đơn" button
-2. Fill in campaign name, brand, budget
-3. Click "Tạo đơn"
-4. Now click on it to go to detail screen
+1. Log in as `inputter@example.com`
+2. Go to **Registrations** → click **Tạo đơn**
+3. Fill in campaign name, brand, budget → **Tạo đơn**
+4. Click the registration to open detail
 
-### Add Content to Registration
-1. Open registration detail
-2. Go to "Nội dung" tab
-3. Click "+ Thêm nội dung"
-4. Select content, quantity, dates
-5. Click "Thêm"
+### Approve a Registration (full chain)
+1. Inputter submits → state becomes `SUPERVISOR_REVIEW`
+2. Log in as `approver@example.com` → approve
+3. Log in as `brand@example.com` → handle brand intake
+4. Log in as `brand-manager@example.com` → final approval
 
-### Add Items to Registration
-1. Open registration detail
-2. Go to "Vị trí/Hạng mục" tab
-3. Click "+ Thêm vị trí/hạng mục"
-4. Select item and quantity
-5. Click "Thêm"
+### Manage Master Data
+Log in as `brand@example.com` → go to **Master Data** (Content, Locations, Categories, Items)
 
-### Change Workflow State
-1. Open registration detail
-2. Go to "Quy trình" tab
-3. Select next state from dropdown
-4. Add optional notes
-5. Click "Chuyển trạng thái"
+---
 
-### Create Batch Items
-1. Go to Master Data → Vị trí quảng cáo
-2. Click "+ Thêm hàng loạt"
-3. Select category and location
-4. Enter number of items
-5. Fill in each item name
-6. Click "Thêm X vị trí"
+## 4. Available Screens
 
-### Complete Deployment
-1. Open registration detail (in FINAL_ACCEPTANCE state)
-2. Click "Triển khai" button
-3. Fill deployment date and location
-4. Upload photos (drag & drop or browse)
-5. Check all checklist items
-6. Click "Hoàn tất triển khai"
-
-## 🔧 Configuration
-
-### Backend Environment (.env)
-```
-DATABASE_URL=postgres://postgres:postgres@localhost:5432/kltn_db
-JWT_SECRET=kltn-dev-secret-change-in-production
-JWT_EXPIRY=24h
-NODE_ENV=development
-PORT=4000
-```
-
-### Frontend Configuration
-- API Base: http://localhost:4000/api
-- Vite Port: 5173
-- Auto-reload: Enabled
-- Proxy: Configured
-
-## 🐛 Troubleshooting
-
-### Database Won't Connect
-```bash
-# Check PostgreSQL is running
-sudo systemctl status postgresql
-
-# Or for Mac
-brew services list
-
-# Test connection
-psql -h localhost -U postgres
-```
-
-### Backend Won't Start
-```bash
-# Check port 4000 is free
-lsof -i :4000
-
-# Check dependencies
-npm install
-
-# Clear cache
-rm -rf node_modules
-npm install
-```
-
-### Frontend Won't Start
-```bash
-# Check port 5173 is free
-lsof -i :5173
-
-# Clear cache
-rm -rf node_modules
-npm install
-
-# Clear vite cache
-rm -rf .vite
-```
-
-### API Calls Failing
-1. Check backend is running (http://localhost:4000)
-2. Check token in localStorage (DevTools → Application)
-3. Check browser console for errors
-4. Check backend terminal for error logs
-
-## 📊 API Testing
-
-### Quick API Test
-```bash
-# Login
-curl -X POST http://localhost:4000/api/auth/login \
-  -H "Content-Type: application/json" \
-  -d '{"email":"admin@kltn.com","password":"password123"}'
-
-# Get token from response
-# List categories
-curl -X GET http://localhost:4000/api/v1/categories \
-  -H "Authorization: Bearer YOUR_TOKEN"
-```
-
-## 📚 Documentation
-
-- **Database Setup** → See [DATABASE_SETUP_GUIDE.md](./DATABASE_SETUP_GUIDE.md)
-- **Backend API** → See [BACKEND_SETUP_COMPLETE.md](./BACKEND_SETUP_COMPLETE.md)
-- **Build Complete** → See [BUILD_COMPLETE.md](./BUILD_COMPLETE.md)
-- **Implementation** → See [IMPLEMENTATION_COMPLETE.md](./IMPLEMENTATION_COMPLETE.md)
-
-## ✨ Key Features
-
-✅ **Budget Tracking** - Real-time budget calculation and validation
-✅ **Workflow States** - 10-state machine with guard conditions
-✅ **Hierarchical Items** - Channel → Category → Location → Item selection
-✅ **Photo Upload** - Deployment acceptance with image gallery
-✅ **Batch Operations** - Create multiple items at once
-✅ **Price Updates** - Category price changes auto-calculate registrations
-✅ **Responsive Design** - Works on mobile, tablet, desktop
-✅ **Type Safety** - 100% TypeScript coverage
-
-## 🎓 Architecture
-
-### Backend
-- **Services** - Business logic (6 services)
-- **Routes** - API endpoints (3 route files)
-- **Middleware** - Authentication
-- **DB** - PostgreSQL with 11 tables
-
-### Frontend
-- **Screens** - Complete pages (8 screens)
-- **Components** - Reusable UI elements
-- **Styles** - Responsive CSS
-- **API Client** - Type-safe services layer
-
-### Database
-- **Soft Delete** - Delete timestamp
-- **Cascading** - Delete cascades
-- **Relationships** - Proper foreign keys
-- **Indexing** - Performance optimized
-
-## 🔐 Security Notes
-
-⚠️ **Development Only:**
-- Passwords not hashed (demo: all use "password123")
-- JWT secret should be changed in production
-- File uploads use mock storage
-- CORS enabled for localhost only
-- No rate limiting implemented
-
-⚠️ **Production Ready:**
-- Add password hashing (bcrypt)
-- Change JWT secret
-- Configure file upload to S3
-- Add CORS whitelist
-- Add rate limiting
-- Add request logging
-- Add audit trails
-
-## 📞 Support
-
-1. Check logs in terminal (backend or frontend)
-2. Check browser DevTools (Frontend → Console)
-3. Check browser DevTools (Frontend → Network)
-4. Review error messages in UI (Alert components)
-5. Check PostgreSQL logs
-
-## 🎉 Next Steps
-
-After starting the system:
-1. Login with test account
-2. Create a registration
-3. Add content to it
-4. Add items to it
-5. Go through workflow states
-6. Upload deployment photos
-7. Complete deployment
-
-## 📝 Notes
-
-- All data is stored in PostgreSQL (not cleared on restart)
-- Token expires in 24 hours (test: use new login)
-- Photos stored locally in development
-- API responses in Vietnamese
-- Timestamps in UTC
-
-## ✅ Ready to Use!
-
-Your complete KLTN advertising management system is now ready to run. Follow the Quick Start steps above to get started.
-
-**Status:** 🚀 PRODUCTION READY
-**Last Updated:** May 24, 2026
-**Support:** Check documentation files above
+| Screen | Path | Access |
+|--------|------|--------|
+| Registrations list | /registrations | All roles |
+| Registration detail | /registrations/:id | All roles |
+| Content | /master/content | BRAND+ |
+| Locations | /master/locations | BRAND+ |
+| Categories | /master/categories | BRAND+ |
+| Items | /master/items | BRAND+ |
+| Menus | /master/menus | ADMIN |
+| Users | /admin/users | ADMIN |
